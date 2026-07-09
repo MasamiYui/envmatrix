@@ -1,0 +1,71 @@
+import SwiftUI
+
+public struct DetailView: View {
+    let selection: NavigationItem?
+
+    public init(selection: NavigationItem?) {
+        self.selection = selection
+    }
+
+    public var body: some View {
+        NavigationStack {
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch selection {
+        case .dashboard:
+            DashboardView()
+        case .devEnv(let kind):
+            RuntimeDetailView(kind: kind)
+                .id(kind)
+        case .aiSkills:
+            SkillsView()
+        case .aiCLI:
+            CLIConfigView()
+        case .aiMCP:
+            MCPServersView()
+        case .settings:
+            SettingsView()
+        case .none:
+            WelcomeView()
+        }
+    }
+}
+
+struct PlaceholderView: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.system(size: 48))
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.largeTitle.bold())
+            Text("This section is under construction.")
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .navigationTitle(title)
+    }
+}
+
+struct WelcomeView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 56))
+                .foregroundStyle(.tint)
+            Text("Welcome to EnvMatrix")
+                .font(.largeTitle.bold())
+            Text("Select an item from the sidebar to get started.")
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+    }
+}
