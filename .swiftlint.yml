@@ -1,0 +1,25 @@
+disabled_rules:
+  - trailing_whitespace
+  - todo
+  - line_length
+  - identifier_name
+  - type_body_length
+  - function_body_length
+  - file_length
+  - cyclomatic_complexity
+  - large_tuple
+  - nesting
+
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - explicit_init
+  - redundant_nil_coalescing
+
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - .trae

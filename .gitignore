@@ -2,3 +2,14 @@
 DerivedData/
 *.xcodeproj/
 .swiftpm/
+
+# macOS
+.DS_Store
+
+# Release artifacts
+*.zip
+*.zip.sha256
+EnvMatrix.app/
+
+# Coverage
+coverage-summary.txt
