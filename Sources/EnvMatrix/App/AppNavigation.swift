@@ -40,6 +40,12 @@ public enum NavigationItem: Hashable, Identifiable {
             case .java: return "j.square"
             case .go: return "g.square"
             case .rust: return "r.square"
+            case .ruby: return "diamond.fill"
+            case .php: return "chevron.left.forwardslash.chevron.right"
+            case .deno: return "pawprint.fill"
+            case .bun: return "leaf.fill"
+            case .dotnet: return "n.circle.fill"
+            case .erlang: return "antenna.radiowaves.left.and.right"
             }
         case .aiSkills: return "sparkles"
         case .aiCLI: return "terminal"
@@ -67,7 +73,13 @@ public extension NavigationItem {
                 .devEnv(.python),
                 .devEnv(.java),
                 .devEnv(.go),
-                .devEnv(.rust)
+                .devEnv(.rust),
+                .devEnv(.ruby),
+                .devEnv(.php),
+                .devEnv(.deno),
+                .devEnv(.bun),
+                .devEnv(.dotnet),
+                .devEnv(.erlang)
             ]),
             (title: "AI Environments", items: [.aiSkills, .aiCLI, .aiMCP]),
             (title: "System", items: [.settings])

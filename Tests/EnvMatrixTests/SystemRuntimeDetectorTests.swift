@@ -52,6 +52,51 @@ final class SystemRuntimeDetectorTests: XCTestCase {
         )
     }
 
+    func testParseRubyVersion() {
+        XCTAssertEqual(
+            detector.parseVersion(
+                "ruby 3.3.0p0 (2023-12-25 revision xxx) [arm64-darwin23]\n",
+                kind: .ruby
+            ),
+            "3.3.0"
+        )
+    }
+
+    func testParsePhpVersion() {
+        XCTAssertEqual(
+            detector.parseVersion("PHP 8.3.0 (cli) (built: Jan 01 2024)\n", kind: .php),
+            "8.3.0"
+        )
+    }
+
+    func testParseDenoVersion() {
+        XCTAssertEqual(
+            detector.parseVersion(
+                "deno 1.40.0 (release, aarch64-apple-darwin)\n",
+                kind: .deno
+            ),
+            "1.40.0"
+        )
+    }
+
+    func testParseBunVersion() {
+        XCTAssertEqual(detector.parseVersion("1.0.20\n", kind: .bun), "1.0.20")
+    }
+
+    func testParseDotnetVersion() {
+        XCTAssertEqual(detector.parseVersion("8.0.100\n", kind: .dotnet), "8.0.100")
+    }
+
+    func testParseErlangVersion() {
+        XCTAssertEqual(
+            detector.parseVersion(
+                "Erlang (SMP,ASYNC_THREADS) (BEAM) emulator version 14.2.1\n",
+                kind: .erlang
+            ),
+            "14.2.1"
+        )
+    }
+
     func testParseEmptyReturnsNil() {
         XCTAssertNil(detector.parseVersion("\n", kind: .node))
     }

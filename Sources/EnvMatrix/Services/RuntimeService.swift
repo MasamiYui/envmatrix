@@ -63,6 +63,12 @@ public final class DefaultRuntimeService: NSObject, RuntimeService {
             defaults[.java] = JavaProvider()
             defaults[.go] = GoProvider()
             defaults[.rust] = RustProvider()
+            defaults[.ruby] = RubyProvider()
+            defaults[.php] = PhpProvider()
+            defaults[.deno] = DenoProvider()
+            defaults[.bun] = BunProvider()
+            defaults[.dotnet] = DotnetProvider()
+            defaults[.erlang] = ErlangProvider()
             self.providers = defaults
         }
         super.init()
@@ -304,6 +310,22 @@ public final class DefaultRuntimeService: NSObject, RuntimeService {
         if p.contains("/.pyenv/versions/") {
             let handle = root.lastPathComponent
             return "pyenv uninstall \(handle)"
+        }
+        if p.contains("/.rbenv/versions/") {
+            let handle = root.lastPathComponent
+            return "rbenv uninstall \(handle)"
+        }
+        if p.contains("/.rvm/rubies/") {
+            let handle = root.lastPathComponent
+            return "rvm remove \(handle)"
+        }
+        if p.contains("/.phpenv/versions/") {
+            let handle = root.lastPathComponent
+            return "phpenv uninstall \(handle)"
+        }
+        if p.contains("/.kerl/installations/") {
+            let handle = root.lastPathComponent
+            return "kerl delete installation \(handle)"
         }
         if p.hasPrefix("/opt/homebrew/") || p.hasPrefix("/usr/local/Cellar/") {
             return "brew uninstall \(version.kind.rawValue)"

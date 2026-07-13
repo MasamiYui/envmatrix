@@ -70,6 +70,12 @@ public struct DashboardView: View {
         case .java: return "j.square"
         case .go: return "g.square"
         case .rust: return "r.square"
+        case .ruby: return "diamond.fill"
+        case .php: return "chevron.left.forwardslash.chevron.right"
+        case .deno: return "pawprint.fill"
+        case .bun: return "leaf.fill"
+        case .dotnet: return "n.circle.fill"
+        case .erlang: return "antenna.radiowaves.left.and.right"
         }
     }
 

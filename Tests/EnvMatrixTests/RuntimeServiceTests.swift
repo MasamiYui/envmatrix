@@ -86,4 +86,55 @@ final class RuntimeServiceTests: XCTestCase {
         let rv = RuntimeVersion(kind: .node, version: "99.99.99")
         XCTAssertThrowsError(try service.uninstall(version: rv))
     }
+
+    func testUninstallRbenvRubyHintsCommand() {
+        let installPath = URL(fileURLWithPath: "/Users/x/.rbenv/versions/3.3.0")
+        let rv = RuntimeVersion(
+            kind: .ruby,
+            version: "3.3.0",
+            installPath: installPath,
+            isSystem: true
+        )
+        XCTAssertThrowsError(try service.uninstall(version: rv)) { error in
+            guard case let RuntimeServiceError.permissionDenied(_, suggestion) = error else {
+                XCTFail("Expected permissionDenied, got \(error)")
+                return
+            }
+            XCTAssertEqual(suggestion, "rbenv uninstall 3.3.0")
+        }
+    }
+
+    func testUninstallPhpenvHintsCommand() {
+        let installPath = URL(fileURLWithPath: "/Users/x/.phpenv/versions/8.3.0")
+        let rv = RuntimeVersion(
+            kind: .php,
+            version: "8.3.0",
+            installPath: installPath,
+            isSystem: true
+        )
+        XCTAssertThrowsError(try service.uninstall(version: rv)) { error in
+            guard case let RuntimeServiceError.permissionDenied(_, suggestion) = error else {
+                XCTFail("Expected permissionDenied, got \(error)")
+                return
+            }
+            XCTAssertEqual(suggestion, "phpenv uninstall 8.3.0")
+        }
+    }
+
+    func testUninstallKerlErlangHintsCommand() {
+        let installPath = URL(fileURLWithPath: "/Users/x/.kerl/installations/26.2.1")
+        let rv = RuntimeVersion(
+            kind: .erlang,
+            version: "26.2.1",
+            installPath: installPath,
+            isSystem: true
+        )
+        XCTAssertThrowsError(try service.uninstall(version: rv)) { error in
+            guard case let RuntimeServiceError.permissionDenied(_, suggestion) = error else {
+                XCTFail("Expected permissionDenied, got \(error)")
+                return
+            }
+            XCTAssertEqual(suggestion, "kerl delete installation 26.2.1")
+        }
+    }
 }

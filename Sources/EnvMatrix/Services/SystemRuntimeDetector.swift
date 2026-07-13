@@ -105,6 +105,18 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
             dirs.append(contentsOf: expandGlob("\(home.path)/.pyenv/versions/*/bin"))
         case .rust:
             break
+        case .ruby:
+            break
+        case .php:
+            break
+        case .deno:
+            break
+        case .bun:
+            break
+        case .dotnet:
+            break
+        case .erlang:
+            break
         }
 
         // Dedupe preserving order
@@ -190,6 +202,12 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
         case .java: return ["-version"]
         case .go: return ["version"]
         case .rust: return ["--version"]
+        case .ruby: return ["--version"]
+        case .php: return ["--version"]
+        case .deno: return ["--version"]
+        case .bun: return ["--version"]
+        case .dotnet: return ["--version"]
+        case .erlang: return ["--version"]
         }
     }
 
@@ -218,6 +236,31 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
         case .rust:
             // "rustc 1.75.0 (...)"
             return firstMatch(in: trimmed, pattern: #"rustc\s+(\d+(?:\.\d+){1,2})"#, group: 1)
+        case .ruby:
+            // "ruby 3.3.0p0 (2023-12-25 revision xxx) [arm64-darwin23]"
+            return firstMatch(in: trimmed, pattern: #"ruby\s+(\d+\.\d+\.\d+)"#, group: 1)
+        case .php:
+            // "PHP 8.3.0 (cli) (built: ...)"
+            return firstMatch(in: trimmed, pattern: #"PHP\s+(\d+\.\d+\.\d+)"#, group: 1)
+        case .deno:
+            // "deno 1.40.0 (release, aarch64-apple-darwin)"
+            return firstMatch(in: trimmed, pattern: #"deno\s+(\d+\.\d+\.\d+)"#, group: 1)
+        case .bun:
+            // "1.0.20"
+            return firstMatch(in: trimmed, pattern: #"^(\d+\.\d+\.\d+)"#, group: 1)
+        case .dotnet:
+            // "8.0.100"
+            return firstMatch(in: trimmed, pattern: #"^(\d+\.\d+\.\d+)"#, group: 1)
+        case .erlang:
+            // "Erlang (SMP,ASYNC_THREADS) (BEAM) emulator version 14.2.1"
+            if let m = firstMatch(
+                in: trimmed,
+                pattern: #"emulator version\s+(\d+(?:\.\d+){1,2})"#,
+                group: 1
+            ) {
+                return m
+            }
+            return firstMatch(in: trimmed, pattern: #"(\d+(?:\.\d+){1,2})"#, group: 1)
         }
     }
 

@@ -33,7 +33,7 @@ public struct PythonProvider: VersionProvider {
 
     internal static func decode(data: Data, arch: String) throws -> [RuntimeVersion] {
         do {
-            let releases = try JSONDecoder().decode([GHRelease].self, from: data)
+            let releases = try JSONDecoder().decode([PythonGHRelease].self, from: data)
             var results: [RuntimeVersion] = []
             let pattern = "cpython-"
             let suffix = "\(arch)-apple-darwin-install_only.tar.gz"
@@ -79,13 +79,13 @@ public struct PythonProvider: VersionProvider {
     }
 }
 
-struct GHRelease: Decodable {
+struct PythonGHRelease: Decodable {
     let tag_name: String?
     let published_at: String?
-    let assets: [GHAsset]
+    let assets: [PythonGHAsset]
 }
 
-struct GHAsset: Decodable {
+struct PythonGHAsset: Decodable {
     let name: String
     let browser_download_url: String
 }
