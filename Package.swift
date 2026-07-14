@@ -9,7 +9,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "EnvMatrix",
-            path: "Sources/EnvMatrix"
+            path: "Sources/EnvMatrix",
+            resources: [
+                .copy("Resources/AppIcon.icns")
+            ]
         ),
         .testTarget(
             name: "EnvMatrixTests",

@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EnvMatrix · App Icon Picker</title>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --panel: #12151c;
+      --panel-2: #1a1f2b;
+      --border: #262c3a;
+      --text: #eef1f7;
+      --muted: #97a0b3;
+      --accent: #6ea8ff;
+      --accent-strong: #4c8dff;
+      --good: #4ade80;
+      --warn: #fbbf24;
+      --danger: #f87171;
+      --radius: 22px;
+      --shadow: 0 10px 40px rgba(0,0,0,.4);
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+              "Helvetica Neue", "PingFang SC", "Hiragino Sans GB",
+              "Microsoft YaHei", sans-serif;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f7fb;
+        --panel: #ffffff;
+        --panel-2: #f0f3f9;
+        --border: #e3e7ef;
+        --text: #1a1f2b;
+        --muted: #58627a;
+        --shadow: 0 8px 30px rgba(20,30,60,.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      padding: 48px 24px 96px;
+    }
+    header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-size: 30px;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(110,168,255,.12);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+    }
+    .card.selected {
+      border-color: var(--good);
+      box-shadow: 0 0 0 3px rgba(74,222,128,.18), var(--shadow);
+    }
+    .card .letter {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(8px);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      z-index: 2;
+    }
+    .preview {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)) ,
+                  var(--panel-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview img {
+      width: 78%;
+      height: 78%;
+      object-fit: cover;
+      border-radius: 24%;
+      box-shadow: 0 12px 28px rgba(0,0,0,.35);
+      background: #222;
+    }
+    .body {
+      padding: 18px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.55;
+      min-height: 3.1em;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    button {
+      font-family: var(--font);
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: transform .12s ease, background .18s ease;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary {
+      flex: 1;
+      background: var(--accent-strong);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--accent); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+
+    /* Comparison table */
+    .compare {
+      max-width: 1200px;
+      margin: 56px auto 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .compare h2 {
+      margin: 0;
+      padding: 20px 24px;
+      font-size: 17px;
+      border-bottom: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    thead th {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      background: var(--panel-2);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    .stars { color: var(--warn); letter-spacing: 1px; }
+
+    /* Selection summary bar */
+    .bar {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 16px 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+      max-width: calc(100vw - 32px);
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .bar.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+    .bar .who {
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .bar .instr {
+      color: var(--muted);
+      font-size: 12px;
+      max-width: 380px;
+      line-height: 1.5;
+    }
+    .bar .copy-cmd {
+      background: var(--panel-2);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .bar .copy-cmd:hover { color: var(--text); border-color: var(--accent); }
+
+    footer {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="badge">● App Icon Picker · EnvMatrix</div>
+      <h1>选一款你最喜欢的图标</h1>
+      <p>
+        下面是 4 套针对 macOS 原生应用设计的候选方案，均遵循 Apple Human
+        Interface Guidelines（squircle 轮廓、正面对称、无落地阴影）。
+        点击"选它"，页面底部会告诉你如何把选择反馈给我，我会立即为你落地成
+        <code>EnvMatrix.icns</code> 并接入项目。
+      </p>
+    </div>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <section class="compare">
+    <h2>快速对比</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>A · Matrix Grid</th>
+          <th>B · Cube Prism</th>
+          <th>C · Terminal Chevron</th>
+          <th>D · Constellation E</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>概念契合度</td>
+          <td class="stars">★★★★★</td>
+          <td class="stars">★★★★</td>
+          <td class="stars">★★★</td>
+          <td class="stars">★★★★</td>
+        </tr>
+        <tr>
+          <td>远距离辨识</td>
+          <td class="stars">★★★★</td>
+          <td class="stars">★★★</td>
+          <td class="stars">★★★★★</td>
+          <td class="stars">★★★</td>
+        </tr>
+        <tr>
+          <td>macOS Sonoma 气质</td>
+          <td class="stars">★★★★</td>
+          <td class="stars">★★★★★</td>
+          <td class="stars">★★★★</td>
+          <td class="stars">★★★★</td>
+        </tr>
+        <tr>
+          <td>品牌延展性</td>
+          <td class="stars">★★★</td>
+          <td class="stars">★★★</td>
+          <td class="stars">★★★</td>
+          <td class="stars">★★★★★</td>
+        </tr>
+        <tr>
+          <td>制作难度</td>
+          <td>低</td>
+          <td>高</td>
+          <td>极低</td>
+          <td>中</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    仅本地预览，不会上传任何数据。选定后请直接把编号（A / B / C / D）告诉我。
+  </footer>
+
+  <div class="bar" id="bar">
+    <div>
+      <div class="who">你选了：<span id="chosen">—</span></div>
+      <div class="instr">
+        请回到对话窗口告诉我选择结果，我会立即落地为
+        <code>EnvMatrix.icns</code> 并接入项目。
+      </div>
+    </div>
+    <button class="copy-cmd" id="copyBtn">复制选择</button>
+  </div>
+
+  <script>
+    const IMG = (prompt) =>
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=" +
+      encodeURIComponent(prompt) +
+      "&image_size=square";
+
+    const OPTIONS = [
+      {
+        id: "A",
+        title: "Matrix Grid · 矩阵色块",
+        desc: "3×3 圆角格子代表 runtimes，中央格子高亮象征当前激活版本。撞色明快，把产品核心动作画进图标。",
+        tags: ["Flat", "多色", "高信息量"],
+        prompt:
+          "macOS app icon squircle shape, flat design, 3x3 grid of rounded color tiles representing programming language runtimes, center tile glowing with a soft highlight like an active selection, balanced primary colors node-green python-blue swift-orange rust-red, subtle inner shadow, clean white background inside the squircle, crisp edges, Apple Human Interface Guidelines, high resolution, centered, no text",
+      },
+      {
+        id: "B",
+        title: "Cube Prism · 棱镜立方",
+        desc: "悬浮 3D 玻璃立方 + 底部发射座，一束光穿过。visionOS 质感，深空蓝背景，最像专业开发者工具。",
+        tags: ["3D", "visionOS 风", "专业感"],
+        prompt:
+          "macOS app icon squircle shape, premium 3D glass isometric cube floating above a circular dock, visionOS style frosted glass refracting a soft light beam, three visible faces subtly hint at developer icons like terminal chevron, snake curve, gopher silhouette, deep navy to cyan gradient background, specular highlights, crisp clean geometry, Apple Human Interface Guidelines, highly detailed, centered, no text",
+      },
+      {
+        id: "C",
+        title: "Terminal Chevron · 终端箭头切换",
+        desc: "巨大的 \">_\" 终端提示符 + 右上角环形切换箭头。SF Symbols 风格，纯扁平，抗浅深色壁纸能力最强。",
+        tags: ["极简", "高辨识", "SF Symbols"],
+        prompt:
+          "macOS app icon squircle shape, minimalist flat design, bold white terminal chevron prompt symbol greater-than-underscore on a solid indigo gradient background, small circular swap arrows badge at top right corner in warm orange, thick rounded SF Symbols style strokes, high contrast, works on light and dark wallpapers, Apple Human Interface Guidelines, centered, no text",
+      },
+      {
+        id: "D",
+        title: "Constellation E · 星座字母 E",
+        desc: "11 个发光节点连线构成字母 E，正好对应 M2.1 后支持的 11 门 runtime。品牌感强，可直接复用到官网 logo。",
+        tags: ["品牌", "线性", "夜空"],
+        prompt:
+          "macOS app icon squircle shape, elegant constellation forming the letter E, eleven glowing dots connected by thin luminous lines like a dependency graph, cool blue to violet gradient background, subtle star dust particles, soft bloom on each node, geometric precision, premium developer tool aesthetic, Apple Human Interface Guidelines, centered, crisp edges, no text",
+      },
+    ];
+
+    const grid = document.getElementById("grid");
+    const bar = document.getElementById("bar");
+    const chosenEl = document.getElementById("chosen");
+    const copyBtn = document.getElementById("copyBtn");
+
+    let selected = null;
+
+    OPTIONS.forEach((opt) => {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.dataset.id = opt.id;
+
+      card.innerHTML = `
+        <div class="letter">${opt.id}</div>
+        <div class="preview">
+          <img loading="lazy" alt="${opt.title}" src="${IMG(opt.prompt)}" />
+        </div>
+        <div class="body">
+          <h3 class="title">${opt.title}</h3>
+          <p class="subtitle">${opt.desc}</p>
+          <div class="tags">
+            ${opt.tags.map((t) => `<span class="tag">${t}</span>`).join("")}
+          </div>
+          <div class="actions">
+            <button class="btn-primary" data-action="pick">选它</button>
+            <button class="btn-ghost" data-action="zoom">放大预览</button>
+          </div>
+        </div>
+      `;
+
+      card.querySelector('[data-action="pick"]').addEventListener("click", () => {
+        selected = opt;
+        document.querySelectorAll(".card").forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
+        chosenEl.textContent = `${opt.id} · ${opt.title}`;
+        bar.classList.add("visible");
+      });
+
+      card.querySelector('[data-action="zoom"]').addEventListener("click", () => {
+        const img = card.querySelector("img");
+        window.open(img.src, "_blank");
+      });
+
+      grid.appendChild(card);
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      if (!selected) return;
+      const text = `我选了方案 ${selected.id} · ${selected.title}，请把它做成 EnvMatrix.icns 并接入项目。`;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "已复制 ✓";
+        setTimeout(() => (copyBtn.textContent = "复制选择"), 1600);
+      } catch (e) {
+        copyBtn.textContent = "复制失败";
+        setTimeout(() => (copyBtn.textContent = "复制选择"), 1600);
+      }
+    });
+  </script>
+</body>
+</html>

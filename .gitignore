@@ -13,3 +13,9 @@ EnvMatrix.app/
 
 # Coverage
 coverage-summary.txt
+
+# Icon build intermediates (regeneratable from AppIcon-final.png)
+tools/icon-picker/generated/AppIcon-1024.png
+tools/icon-picker/generated/AppIcon-1024.raw.png
+tools/icon-picker/generated/AppIcon-cropped.png
+tools/icon-picker/generated/AppIcon.iconset/
