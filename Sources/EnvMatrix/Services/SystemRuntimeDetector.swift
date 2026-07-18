@@ -8,15 +8,18 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
     private let fileManager: FileManager
     private let home: URL
     private let envmatrixRoot: URL
+    private let shellPathResolver: ShellPathResolver
 
     public init(
         fileManager: FileManager = .default,
         home: URL = URL(fileURLWithPath: NSHomeDirectory()),
-        envmatrixRoot: URL = FileSystem.envmatrixRoot
+        envmatrixRoot: URL = FileSystem.envmatrixRoot,
+        shellPathResolver: ShellPathResolver = DefaultShellPathResolver()
     ) {
         self.fileManager = fileManager
         self.home = home
         self.envmatrixRoot = envmatrixRoot
+        self.shellPathResolver = shellPathResolver
     }
 
     // MARK: - Detect
@@ -71,10 +74,20 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
     private func candidateBinDirs(for kind: RuntimeKind) -> [URL] {
         var dirs: [URL] = []
 
+        // 0) Highest priority: directories parsed from the user's real login-shell PATH.
+        //    This single mechanism transparently covers asdf / mise / rtx / volta /
+        //    fnm / nvm / Homebrew keg-only formulae and any custom install prefixes
+        //    the user has added to their shell rc files, without hardcoding.
+        dirs.append(contentsOf: shellPathResolver.resolvePathDirs())
+
         // Common system bin dirs
         for p in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"] {
             dirs.append(URL(fileURLWithPath: p))
         }
+
+        // Homebrew versioned / keg-only formulae, e.g. /opt/homebrew/opt/node@22/bin
+        dirs.append(contentsOf: expandGlob("/opt/homebrew/opt/*/bin"))
+        dirs.append(contentsOf: expandGlob("/usr/local/opt/*/bin"))
 
         // asdf shims (all kinds)
         dirs.append(home.appendingPathComponent(".asdf/shims"))
@@ -86,6 +99,9 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
         switch kind {
         case .node:
             dirs.append(contentsOf: expandGlob("\(home.path)/.nvm/versions/node/*/bin"))
+            dirs.append(contentsOf: expandGlob("\(home.path)/.volta/tools/image/node/*/bin"))
+            dirs.append(contentsOf: expandGlob("\(home.path)/.fnm/node-versions/*/installation/bin"))
+            dirs.append(contentsOf: expandGlob("\(home.path)/Library/pnpm"))
         case .java:
             dirs.append(contentsOf: expandGlob("\(home.path)/.jenv/versions/*/bin"))
             dirs.append(contentsOf: expandGlob("\(home.path)/.sdkman/candidates/java/*/bin"))
@@ -101,8 +117,19 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
             )
         case .go:
             dirs.append(contentsOf: expandGlob("\(home.path)/.goenv/versions/*/bin"))
+            // Official Go installer (pkg) default install path
+            dirs.append(URL(fileURLWithPath: "/usr/local/go/bin"))
+            // Manual multi-version installs like /usr/local/go1.22/bin
+            dirs.append(contentsOf: expandGlob("/usr/local/go*/bin"))
+            dirs.append(contentsOf: expandGlob("/opt/go*/bin"))
+            dirs.append(contentsOf: expandGlob("\(home.path)/sdk/go*/bin"))
         case .python:
             dirs.append(contentsOf: expandGlob("\(home.path)/.pyenv/versions/*/bin"))
+            dirs.append(
+                contentsOf: expandGlob(
+                    "/Library/Frameworks/Python.framework/Versions/*/bin"
+                )
+            )
         case .rust:
             break
         case .ruby:
@@ -110,13 +137,14 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
         case .php:
             break
         case .deno:
-            break
+            dirs.append(home.appendingPathComponent(".deno/bin"))
         case .bun:
-            break
+            dirs.append(home.appendingPathComponent(".bun/bin"))
         case .dotnet:
-            break
+            dirs.append(URL(fileURLWithPath: "/usr/local/share/dotnet"))
+            dirs.append(home.appendingPathComponent(".dotnet"))
         case .erlang:
-            break
+            dirs.append(contentsOf: expandGlob("\(home.path)/.kerl/installations/*/bin"))
         }
 
         // Dedupe preserving order
