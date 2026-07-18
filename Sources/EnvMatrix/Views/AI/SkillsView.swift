@@ -22,7 +22,6 @@ public struct SkillsView: View {
             }
         }
         .navigationTitle(L("skills.title"))
-        .id(localization.language)
         .task { vm.refresh() }
     }
 

@@ -15,8 +15,13 @@ public protocol ShellPathResolver {
 public final class DefaultShellPathResolver: ShellPathResolver {
     private let fileManager: FileManager
     private let timeout: TimeInterval
-    private let cacheLock = NSLock()
-    private var cached: [URL]?
+
+    // Process-wide cache. Rationale: SwiftUI recreates DashboardViewModel and
+    // its whole service chain on every navigation, so an instance-level cache
+    // gets discarded and forces a 1.5s login-shell fork every time. Sharing
+    // across every DefaultShellPathResolver instance eliminates that cost.
+    private static let cacheLock = NSLock()
+    private static var cached: [URL]?
 
     public init(
         fileManager: FileManager = .default,
@@ -27,19 +32,28 @@ public final class DefaultShellPathResolver: ShellPathResolver {
     }
 
     public func resolvePathDirs() -> [URL] {
-        cacheLock.lock()
-        if let cached = cached {
-            cacheLock.unlock()
+        Self.cacheLock.lock()
+        if let cached = Self.cached {
+            Self.cacheLock.unlock()
             return cached
         }
-        cacheLock.unlock()
+        Self.cacheLock.unlock()
 
         let resolved = computePathDirs()
 
-        cacheLock.lock()
-        cached = resolved
-        cacheLock.unlock()
+        Self.cacheLock.lock()
+        Self.cached = resolved
+        Self.cacheLock.unlock()
         return resolved
+    }
+
+    /// Drops the process-wide cache so the next call re-reads shell PATH.
+    /// Exposed so RuntimeService.invalidateSystemCaches() can flush both
+    /// layers together.
+    public static func invalidateCache() {
+        cacheLock.lock()
+        cached = nil
+        cacheLock.unlock()
     }
 
     private func computePathDirs() -> [URL] {

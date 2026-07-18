@@ -21,20 +21,32 @@ public final class RuntimeViewModel: ObservableObject {
         self.service = service
     }
 
-    public func refreshInstalled() {
-        do {
-            let list = try service.listInstalled(kind: kind)
-            self.installed = list
-            let active = service.currentActive(kind: kind)
-            self.activeVersion = active
-            // "Managed" means the currently active version exists in installed[] as a non-system entry.
-            if let active = active {
-                self.isManagedActive = list.contains { !$0.isSystem && $0.version == active }
-            } else {
-                self.isManagedActive = false
-            }
-        } catch {
-            self.errorMessage = error.localizedDescription
+    public func refreshInstalled() async {
+        let svc = service
+        let k = kind
+        // Move the subprocess-heavy scan off the MainActor so the UI stays
+        // responsive while we enumerate managed versions and probe active
+        // binaries (each involves fork + waitUntilExit inside the detector).
+        let result: (list: [RuntimeVersion], active: String?)? = await Task
+            .detached(priority: .userInitiated) { () -> (list: [RuntimeVersion], active: String?)? in
+                do {
+                    let list = try svc.listInstalled(kind: k)
+                    let active = svc.currentActive(kind: k)
+                    return (list, active)
+                } catch {
+                    return nil
+                }
+            }.value
+        guard let result = result else {
+            self.errorMessage = "Failed to list installed versions"
+            return
+        }
+        self.installed = result.list
+        self.activeVersion = result.active
+        if let active = result.active {
+            self.isManagedActive = result.list.contains { !$0.isSystem && $0.version == active }
+        } else {
+            self.isManagedActive = false
         }
     }
 
@@ -62,25 +74,25 @@ public final class RuntimeViewModel: ObservableObject {
                 }
             }
             installProgress[version.id] = 1.0
-            refreshInstalled()
+            await refreshInstalled()
         } catch {
             self.errorMessage = error.localizedDescription
         }
     }
 
-    public func activate(_ version: RuntimeVersion) {
+    public func activate(_ version: RuntimeVersion) async {
         do {
             try service.activate(version: version)
-            refreshInstalled()
+            await refreshInstalled()
         } catch {
             self.errorMessage = error.localizedDescription
         }
     }
 
-    public func uninstall(_ version: RuntimeVersion) {
+    public func uninstall(_ version: RuntimeVersion) async {
         do {
             try service.uninstall(version: version)
-            refreshInstalled()
+            await refreshInstalled()
         } catch {
             self.errorMessage = error.localizedDescription
         }

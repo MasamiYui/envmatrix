@@ -26,9 +26,8 @@ public struct DashboardView: View {
         }
         .background(backgroundLayer.ignoresSafeArea())
         .navigationTitle(L("dashboard.title"))
-        .id(localization.language)
         .task { await viewModel.refresh() }
-        .refreshable { await viewModel.refresh() }
+        .refreshable { await viewModel.hardRefresh() }
     }
 
     // MARK: - Header
@@ -45,7 +44,7 @@ public struct DashboardView: View {
                 }
                 Spacer()
                 Button {
-                    Task { await viewModel.refresh() }
+                    Task { await viewModel.hardRefresh() }
                 } label: {
                     Label(L("dashboard.refresh"), systemImage: "arrow.clockwise")
                 }

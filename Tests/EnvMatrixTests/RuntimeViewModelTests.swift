@@ -51,6 +51,10 @@ final class RuntimeViewModelTests: XCTestCase {
         func currentActive(kind: RuntimeKind) -> String? {
             return activeVersionValue
         }
+
+        func invalidateSystemCaches() {
+            // Mock: no-op.
+        }
     }
 
     // MARK: - Helpers
@@ -97,33 +101,33 @@ final class RuntimeViewModelTests: XCTestCase {
         XCTAssertTrue(vm.installed.contains(where: { $0.version == "20.0.0" }))
     }
 
-    func testActivateUpdatesActiveVersion() throws {
+    func testActivateUpdatesActiveVersion() async throws {
         let mock = MockRuntimeService()
         let v = makeVersion("18.17.0")
         mock.installedList = [v]
         let vm = RuntimeViewModel(kind: .node, service: mock)
 
-        vm.refreshInstalled()
+        await vm.refreshInstalled()
         XCTAssertNil(vm.activeVersion)
 
-        vm.activate(v)
+        await vm.activate(v)
 
         XCTAssertEqual(vm.activeVersion, "18.17.0")
         XCTAssertTrue(vm.installed.contains(where: { $0.version == "18.17.0" }))
     }
 
-    func testUninstallRemovesVersionAndClearsActive() throws {
+    func testUninstallRemovesVersionAndClearsActive() async throws {
         let mock = MockRuntimeService()
         let v = makeVersion("18.17.0")
         mock.installedList = [v]
         mock.activeVersionValue = v.version
         let vm = RuntimeViewModel(kind: .node, service: mock)
 
-        vm.refreshInstalled()
+        await vm.refreshInstalled()
         XCTAssertEqual(vm.activeVersion, "18.17.0")
         XCTAssertEqual(vm.installed.count, 1)
 
-        vm.uninstall(v)
+        await vm.uninstall(v)
 
         XCTAssertFalse(vm.installed.contains(where: { $0.version == "18.17.0" }))
         XCTAssertNil(vm.activeVersion)

@@ -24,7 +24,6 @@ public struct MCPServersView: View {
             }
         }
         .navigationTitle(L("mcp.title"))
-        .id(localization.language)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {

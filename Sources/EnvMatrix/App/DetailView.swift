@@ -13,7 +13,6 @@ public struct DetailView: View {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .id(localization.language)
     }
 
     @ViewBuilder

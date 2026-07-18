@@ -15,7 +15,6 @@ public struct CLIConfigView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle(L("cli.title"))
-        .id(localization.language)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {

@@ -19,7 +19,6 @@ public struct SettingsView: View {
         }
         .frame(minWidth: 560, minHeight: 460)
         .padding()
-        .id(localization.language)
     }
 }
 

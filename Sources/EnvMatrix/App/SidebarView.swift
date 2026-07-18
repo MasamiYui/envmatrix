@@ -20,7 +20,6 @@ public struct SidebarView: View {
                 }
             }
         }
-        .id(localization.language)
         .listStyle(.sidebar)
         .frame(minWidth: 220)
     }

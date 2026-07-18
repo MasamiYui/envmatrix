@@ -37,6 +37,10 @@ public protocol RuntimeService {
     func activate(version: RuntimeVersion) throws
     func uninstall(version: RuntimeVersion) throws
     func currentActive(kind: RuntimeKind) -> String?
+    /// Drops any in-memory caches held by the underlying system runtime
+    /// detector. Callers should invoke this when the user explicitly asks
+    /// for a fresh scan (e.g. tapping the refresh button).
+    func invalidateSystemCaches()
 }
 
 public final class DefaultRuntimeService: NSObject, RuntimeService {
@@ -356,12 +360,21 @@ public final class DefaultRuntimeService: NSObject, RuntimeService {
                 return String(components[idx + 1])
             }
         }
-        // 2) Fallback to the version currently resolved on the user's PATH.
+        // 2) Fallback: use the detector's fast path, which only forks a single
+        //    child process for the binary resolved on the user's PATH (instead
+        //    of enumerating every candidate directory).
         if let detector = systemDetector,
-           let first = detector.detect(kind: kind).first {
-            return first.version
+           let active = detector.detectActive(kind: kind) {
+            return active.version
         }
         return nil
+    }
+
+    // MARK: - Caches
+
+    public func invalidateSystemCaches() {
+        systemDetector?.invalidate()
+        DefaultShellPathResolver.invalidateCache()
     }
 }
 

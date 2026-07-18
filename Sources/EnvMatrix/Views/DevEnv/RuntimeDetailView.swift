@@ -43,9 +43,8 @@ public struct RuntimeDetailView: View {
             }
         }
         .navigationTitle(kind.displayName)
-        .id(localization.language)
         .task {
-            viewModel.refreshInstalled()
+            await viewModel.refreshInstalled()
             await viewModel.loadAvailable()
         }
     }
@@ -75,7 +74,7 @@ public struct RuntimeDetailView: View {
             Button(L("runtime.refresh")) {
                 Task {
                     await viewModel.loadAvailable()
-                    viewModel.refreshInstalled()
+                    await viewModel.refreshInstalled()
                 }
             }
         }

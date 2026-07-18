@@ -30,7 +30,7 @@ public struct InstalledListView: View {
             presenting: confirmUninstall
         ) { v in
             Button(L("runtime.uninstall"), role: .destructive) {
-                vm.uninstall(v)
+                Task { await vm.uninstall(v) }
                 confirmUninstall = nil
             }
             if v.isSystem, let path = v.installPath?.path {
@@ -98,7 +98,7 @@ public struct InstalledListView: View {
             }
             Spacer()
             Button(L("runtime.setActive")) {
-                vm.activate(version)
+                Task { await vm.activate(version) }
             }
             .disabled(vm.activeVersion == version.version)
 

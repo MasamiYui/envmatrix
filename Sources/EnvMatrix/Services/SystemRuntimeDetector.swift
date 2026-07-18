@@ -2,6 +2,12 @@ import Foundation
 
 public protocol SystemRuntimeDetector {
     func detect(kind: RuntimeKind) -> [RuntimeVersion]
+    /// Fast path: returns the version currently resolved on the user's PATH,
+    /// without enumerating every candidate directory. Cheap enough to call
+    /// from the dashboard for every kind.
+    func detectActive(kind: RuntimeKind) -> RuntimeVersion?
+    /// Clears in-memory caches. Called from the refresh button.
+    func invalidate()
 }
 
 public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
@@ -9,6 +15,17 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
     private let home: URL
     private let envmatrixRoot: URL
     private let shellPathResolver: ShellPathResolver
+
+    // MARK: Caches (process-wide, shared across every instance)
+    // Rationale: SwiftUI recreates DashboardViewModel — and therefore the
+    // RuntimeService / detector chain — every time the user switches back to
+    // the dashboard. Using instance-level caches would blow away every result
+    // on every navigation and force us to fork ~50 subprocesses again. By
+    // hoisting the caches to `static`, cache hits survive view rebuilds.
+    private static let cacheLock = NSLock()
+    private static var detectCache: [RuntimeKind: [RuntimeVersion]] = [:]
+    private static var activeCache: [RuntimeKind: RuntimeVersion?] = [:]
+    private static var candidateBinDirsCache: [RuntimeKind: [URL]] = [:]
 
     public init(
         fileManager: FileManager = .default,
@@ -22,9 +39,66 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
         self.shellPathResolver = shellPathResolver
     }
 
-    // MARK: - Detect
+    public func invalidate() {
+        Self.cacheLock.lock()
+        Self.detectCache.removeAll(keepingCapacity: true)
+        Self.activeCache.removeAll(keepingCapacity: true)
+        Self.candidateBinDirsCache.removeAll(keepingCapacity: true)
+        Self.cacheLock.unlock()
+    }
+
+    // MARK: - detectActive (fast path)
+
+    /// Only fork ONE child process (the first `binaryName` found on PATH),
+    /// instead of enumerating every candidate directory. Used by the dashboard.
+    public func detectActive(kind: RuntimeKind) -> RuntimeVersion? {
+        Self.cacheLock.lock()
+        if let cached = Self.activeCache[kind] {
+            Self.cacheLock.unlock()
+            return cached
+        }
+        Self.cacheLock.unlock()
+
+        let binaryName = kind.binaryName
+        let managedPrefix = envmatrixRoot
+            .appendingPathComponent("versions", isDirectory: true)
+            .path
+
+        // PATH-based lookup: use the same shell PATH as detect() but stop at first hit.
+        var found: RuntimeVersion? = nil
+        for dir in shellPathResolver.resolvePathDirs() {
+            let candidate = dir.appendingPathComponent(binaryName)
+            guard isExecutableFile(at: candidate) else { continue }
+            let resolvedPath = resolveSymlink(at: candidate).path
+            if resolvedPath.hasPrefix(managedPrefix) { continue }
+            guard let raw = runVersionCommand(candidate.path, args: versionArgs(for: kind)),
+                  let parsed = parseVersion(raw, kind: kind) else { continue }
+            let installPath = dir.deletingLastPathComponent()
+            found = RuntimeVersion(
+                kind: kind,
+                version: parsed,
+                installPath: installPath,
+                isSystem: true
+            )
+            break
+        }
+
+        Self.cacheLock.lock()
+        Self.activeCache[kind] = found
+        Self.cacheLock.unlock()
+        return found
+    }
+
+    // MARK: - Detect (full enumeration)
 
     public func detect(kind: RuntimeKind) -> [RuntimeVersion] {
+        Self.cacheLock.lock()
+        if let cached = Self.detectCache[kind] {
+            Self.cacheLock.unlock()
+            return cached
+        }
+        Self.cacheLock.unlock()
+
         let binaryName = kind.binaryName
         let searchDirs = candidateBinDirs(for: kind)
         let versionArgs = versionArgs(for: kind)
@@ -66,12 +140,31 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
             )
         }
 
+        Self.cacheLock.lock()
+        Self.detectCache[kind] = results
+        Self.cacheLock.unlock()
         return results
     }
 
     // MARK: - Candidate directories
 
     private func candidateBinDirs(for kind: RuntimeKind) -> [URL] {
+        Self.cacheLock.lock()
+        if let cached = Self.candidateBinDirsCache[kind] {
+            Self.cacheLock.unlock()
+            return cached
+        }
+        Self.cacheLock.unlock()
+
+        let computed = computeCandidateBinDirs(for: kind)
+
+        Self.cacheLock.lock()
+        Self.candidateBinDirsCache[kind] = computed
+        Self.cacheLock.unlock()
+        return computed
+    }
+
+    private func computeCandidateBinDirs(for kind: RuntimeKind) -> [URL] {
         var dirs: [URL] = []
 
         // 0) Highest priority: directories parsed from the user's real login-shell PATH.
