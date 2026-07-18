@@ -10,10 +10,10 @@ public struct AvailableListView: View {
     public var body: some View {
         Group {
             if vm.isLoadingAvailable {
-                ProgressView("Loading versions...")
+                ProgressView(L("runtime.loading"))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if vm.available.isEmpty {
-                Text("No available versions.")
+                Text(L("runtime.noAvailable"))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -48,11 +48,11 @@ public struct AvailableListView: View {
             ProgressView(value: vm.installProgress[v.id] ?? 0)
                 .frame(width: 120)
         } else if vm.installed.contains(where: { $0.version == v.version }) {
-            Text("Installed")
+            Text(L("runtime.installedLabel"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } else {
-            Button("Install") {
+            Button(L("runtime.install")) {
                 Task { await vm.install(v) }
             }
         }

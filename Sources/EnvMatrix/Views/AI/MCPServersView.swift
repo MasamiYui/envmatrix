@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct MCPServersView: View {
     @StateObject private var vm = MCPViewModel()
+    @EnvironmentObject private var localization: LocalizationManager
 
     public init() {}
 
@@ -22,28 +23,30 @@ public struct MCPServersView: View {
                 errorBanner(msg)
             }
         }
-        .navigationTitle("MCP Servers")
+        .navigationTitle(L("mcp.title"))
+        .id(localization.language)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     vm.startAdd()
                 } label: {
-                    Label("Add", systemImage: "plus")
+                    Label(L("mcp.add"), systemImage: "plus")
                 }
             }
         }
         .task { vm.refresh() }
         .sheet(isPresented: $vm.isPresentingEditor) {
             MCPServerEditorSheet(vm: vm)
+                .environmentObject(localization)
         }
     }
 
     private var header: some View {
         HStack {
-            Text("MCP Servers")
+            Text(L("mcp.title"))
                 .font(.title.bold())
             Spacer()
-            Button("Refresh") { vm.refresh() }
+            Button(L("mcp.refresh")) { vm.refresh() }
         }
         .padding()
     }
@@ -53,9 +56,9 @@ public struct MCPServersView: View {
             Image(systemName: "bolt.horizontal")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
-            Text("No MCP Servers")
+            Text(L("mcp.empty.title"))
                 .font(.title2.bold())
-            Text("Click Add to configure a new server.")
+            Text(L("mcp.empty.subtitle"))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -71,7 +74,7 @@ public struct MCPServersView: View {
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                Text("\(server.args.count) arg\(server.args.count == 1 ? "" : "s")")
+                Text(String(format: L(server.args.count == 1 ? "mcp.argCount.one" : "mcp.argCount.many"), server.args.count))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -79,13 +82,13 @@ public struct MCPServersView: View {
         }
         .padding(.vertical, 4)
         .contextMenu {
-            Button("Edit") { vm.startEdit(server) }
+            Button(L("mcp.edit")) { vm.startEdit(server) }
             Divider()
-            Button("Delete", role: .destructive) { vm.delete(server) }
+            Button(L("mcp.delete"), role: .destructive) { vm.delete(server) }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button("Delete", role: .destructive) { vm.delete(server) }
-            Button("Edit") { vm.startEdit(server) }
+            Button(L("mcp.delete"), role: .destructive) { vm.delete(server) }
+            Button(L("mcp.edit")) { vm.startEdit(server) }
         }
     }
 

@@ -20,7 +20,7 @@ public struct InstalledListView: View {
             }
         }
         .alert(
-            "Uninstall \(confirmUninstall?.version ?? "")?",
+            String(format: L("runtime.uninstallTitle"), confirmUninstall?.version ?? ""),
             isPresented: Binding(
                 get: { confirmUninstall != nil },
                 set: { newValue in
@@ -29,27 +29,24 @@ public struct InstalledListView: View {
             ),
             presenting: confirmUninstall
         ) { v in
-            Button("Uninstall", role: .destructive) {
+            Button(L("runtime.uninstall"), role: .destructive) {
                 vm.uninstall(v)
                 confirmUninstall = nil
             }
             if v.isSystem, let path = v.installPath?.path {
-                Button("Reveal in Finder") {
+                Button(L("runtime.revealInFinder")) {
                     NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
                     confirmUninstall = nil
                 }
             }
-            Button("Cancel", role: .cancel) {
+            Button(L("runtime.cancel"), role: .cancel) {
                 confirmUninstall = nil
             }
         } message: { v in
             if v.isSystem, let path = v.installPath?.path {
-                Text("EnvMatrix will remove the folder:\n\(path)\n\n"
-                     + "If it was installed via brew / sdkman / nvm / pkg, "
-                     + "using its own uninstaller is safer. "
-                     + "Paths owned by the OS may require sudo and will be rejected.")
+                Text(String(format: L("runtime.uninstallSystemMessage"), path))
             } else {
-                Text("This will remove \(v.kind.displayName) \(v.version) from your system.")
+                Text(String(format: L("runtime.uninstallMessage"), v.kind.displayName, v.version))
             }
         }
     }
@@ -59,7 +56,7 @@ public struct InstalledListView: View {
             Image(systemName: "shippingbox")
                 .font(.system(size: 36))
                 .foregroundStyle(.secondary)
-            Text("No installed versions. Switch to Available to install one.")
+            Text(L("runtime.noInstalled"))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
@@ -75,7 +72,7 @@ public struct InstalledListView: View {
                     Text(version.version)
                         .font(.system(.body, design: .monospaced))
                     if version.isSystem {
-                        Text("System")
+                        Text(L("runtime.systemBadge"))
                             .font(.caption.bold())
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
@@ -83,7 +80,7 @@ public struct InstalledListView: View {
                             .foregroundStyle(.orange)
                     }
                     if vm.activeVersion == version.version {
-                        Text("Active")
+                        Text(L("runtime.active"))
                             .font(.caption.bold())
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
@@ -100,7 +97,7 @@ public struct InstalledListView: View {
                 }
             }
             Spacer()
-            Button("Set Active") {
+            Button(L("runtime.setActive")) {
                 vm.activate(version)
             }
             .disabled(vm.activeVersion == version.version)
@@ -112,8 +109,8 @@ public struct InstalledListView: View {
             }
             .buttonStyle(.borderless)
             .help(version.isSystem
-                  ? "Uninstall this system runtime (will confirm before deleting)"
-                  : "Uninstall this version")
+                  ? L("runtime.uninstallSystemTooltip")
+                  : L("runtime.uninstallTooltip"))
         }
         .padding(.vertical, 4)
     }

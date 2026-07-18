@@ -2,21 +2,24 @@ import SwiftUI
 import AppKit
 
 public struct SettingsView: View {
+    @EnvironmentObject private var localization: LocalizationManager
+
     public init() {}
 
     public var body: some View {
         TabView {
             GeneralSettingsTab()
-                .tabItem { Label("General", systemImage: "gearshape") }
+                .tabItem { Label(L("settings.general"), systemImage: "gearshape") }
 
             LogsSettingsTab()
-                .tabItem { Label("Logs", systemImage: "text.alignleft") }
+                .tabItem { Label(L("settings.logs"), systemImage: "text.alignleft") }
 
             AboutSettingsTab()
-                .tabItem { Label("About", systemImage: "info.circle") }
+                .tabItem { Label(L("settings.about"), systemImage: "info.circle") }
         }
         .frame(minWidth: 560, minHeight: 460)
         .padding()
+        .id(localization.language)
     }
 }
 
@@ -30,6 +33,7 @@ public enum MirrorDefaults {
 }
 
 struct GeneralSettingsTab: View {
+    @EnvironmentObject private var localization: LocalizationManager
     @AppStorage("colorSchemePreference") private var colorSchemePreference: String = "system"
     @AppStorage("nodeMirror") private var nodeMirror: String = MirrorDefaults.node
     @AppStorage("pythonMirror") private var pythonMirror: String = MirrorDefaults.python
@@ -38,24 +42,36 @@ struct GeneralSettingsTab: View {
 
     var body: some View {
         Form {
-            Section("Appearance") {
-                Picker("Color Scheme", selection: $colorSchemePreference) {
-                    Text("System").tag("system")
-                    Text("Light").tag("light")
-                    Text("Dark").tag("dark")
+            Section(L("settings.appearance")) {
+                Picker(L("settings.colorScheme"), selection: $colorSchemePreference) {
+                    Text(L("settings.system")).tag("system")
+                    Text(L("settings.light")).tag("light")
+                    Text(L("settings.dark")).tag("dark")
                 }
                 .pickerStyle(.segmented)
             }
 
-            Section("Mirror Sources") {
-                TextField("Node.js Mirror", text: $nodeMirror)
-                TextField("Python Mirror", text: $pythonMirror)
-                TextField("Go Mirror", text: $goMirror)
-                TextField("Java Mirror", text: $javaMirror)
+            Section(L("settings.language")) {
+                Picker(L("settings.languageLabel"), selection: Binding(
+                    get: { localization.language },
+                    set: { localization.language = $0 }
+                )) {
+                    Text(L("settings.system")).tag(AppLanguage.system)
+                    Text("English").tag(AppLanguage.en)
+                    Text("中文").tag(AppLanguage.zh)
+                }
+                .pickerStyle(.segmented)
+            }
+
+            Section(L("settings.mirrors")) {
+                TextField(L("settings.nodeMirror"), text: $nodeMirror)
+                TextField(L("settings.pythonMirror"), text: $pythonMirror)
+                TextField(L("settings.goMirror"), text: $goMirror)
+                TextField(L("settings.javaMirror"), text: $javaMirror)
 
                 HStack {
                     Spacer()
-                    Button("Reset to Defaults") {
+                    Button(L("settings.resetDefaults")) {
                         resetDefaults()
                     }
                 }
@@ -86,13 +102,13 @@ struct LogsSettingsTab: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("\(store.entries.count) entries")
+                Text(String(format: L("settings.entries"), store.entries.count))
                     .foregroundStyle(.secondary)
                 Spacer()
                 Button {
                     store.clear()
                 } label: {
-                    Label("Clear", systemImage: "trash")
+                    Label(L("settings.clear"), systemImage: "trash")
                 }
                 .disabled(store.entries.isEmpty)
             }
@@ -101,7 +117,7 @@ struct LogsSettingsTab: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     if store.entries.isEmpty {
-                        Text("No log entries.")
+                        Text(L("settings.noLogs"))
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding()
@@ -171,10 +187,10 @@ struct AboutSettingsTab: View {
             Text("EnvMatrix")
                 .font(.largeTitle.bold())
 
-            Text("Version \(appVersion)")
+            Text(String(format: L("settings.version"), appVersion))
                 .foregroundStyle(.secondary)
 
-            Text("A unified macOS control panel for managing developer runtimes and AI development environments.")
+            Text(L("settings.aboutDescription"))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: 420)
@@ -182,7 +198,7 @@ struct AboutSettingsTab: View {
             Button {
                 NSWorkspace.shared.open(githubURL)
             } label: {
-                Label("View on GitHub", systemImage: "link")
+                Label(L("settings.viewGitHub"), systemImage: "link")
             }
             .buttonStyle(.borderedProminent)
 

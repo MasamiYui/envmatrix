@@ -21,12 +21,12 @@ public enum NavigationItem: Hashable, Identifiable {
 
     public var displayName: String {
         switch self {
-        case .dashboard: return "Dashboard"
+        case .dashboard: return L("nav.dashboard")
         case .devEnv(let kind): return kind.displayName
-        case .aiSkills: return "Skills"
-        case .aiCLI: return "AI CLI"
-        case .aiMCP: return "MCP Servers"
-        case .settings: return "Settings"
+        case .aiSkills: return L("nav.skills")
+        case .aiCLI: return L("nav.aiCLI")
+        case .aiMCP: return L("nav.mcpServers")
+        case .settings: return L("nav.settings")
         }
     }
 
@@ -67,8 +67,8 @@ extension NavigationItem: CaseIterable {
 public extension NavigationItem {
     static var allSections: [(title: String, items: [NavigationItem])] {
         [
-            (title: "Overview", items: [.dashboard]),
-            (title: "Dev Environments", items: [
+            (title: L("nav.overview"), items: [.dashboard]),
+            (title: L("nav.devEnvironments"), items: [
                 .devEnv(.node),
                 .devEnv(.python),
                 .devEnv(.java),
@@ -81,8 +81,8 @@ public extension NavigationItem {
                 .devEnv(.dotnet),
                 .devEnv(.erlang)
             ]),
-            (title: "AI Environments", items: [.aiSkills, .aiCLI, .aiMCP]),
-            (title: "System", items: [.settings])
+            (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
+            (title: L("nav.system"), items: [.settings])
         ]
     }
 }

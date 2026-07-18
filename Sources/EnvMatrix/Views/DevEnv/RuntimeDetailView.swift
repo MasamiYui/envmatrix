@@ -9,6 +9,7 @@ extension RuntimeKind {
 public struct RuntimeDetailView: View {
     let kind: RuntimeKind
     @StateObject private var viewModel: RuntimeViewModel
+    @EnvironmentObject private var localization: LocalizationManager
     @State private var selectedTab: Int = 0
 
     public init(kind: RuntimeKind) {
@@ -22,8 +23,8 @@ public struct RuntimeDetailView: View {
         VStack(spacing: 0) {
             header
             Picker("", selection: $selectedTab) {
-                Text("Installed").tag(0)
-                Text("Available").tag(1)
+                Text(L("runtime.installed")).tag(0)
+                Text(L("runtime.available")).tag(1)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -42,6 +43,7 @@ public struct RuntimeDetailView: View {
             }
         }
         .navigationTitle(kind.displayName)
+        .id(localization.language)
         .task {
             viewModel.refreshInstalled()
             await viewModel.loadAvailable()
@@ -56,11 +58,11 @@ public struct RuntimeDetailView: View {
                 Text(kind.displayName)
                     .font(.title.bold())
                 HStack(spacing: 6) {
-                    Text("Active: \(viewModel.activeVersion ?? "None")")
+                    Text("\(L("runtime.active")): \(viewModel.activeVersion ?? L("runtime.none"))")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     if viewModel.activeVersion != nil && !viewModel.isManagedActive {
-                        Text("System Default")
+                        Text(L("runtime.systemDefault"))
                             .font(.caption.bold())
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
@@ -70,7 +72,7 @@ public struct RuntimeDetailView: View {
                 }
             }
             Spacer()
-            Button("Refresh") {
+            Button(L("runtime.refresh")) {
                 Task {
                     await viewModel.loadAvailable()
                     viewModel.refreshInstalled()

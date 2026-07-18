@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct DetailView: View {
     let selection: NavigationItem?
+    @EnvironmentObject private var localization: LocalizationManager
 
     public init(selection: NavigationItem?) {
         self.selection = selection
@@ -12,6 +13,7 @@ public struct DetailView: View {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .id(localization.language)
     }
 
     @ViewBuilder
@@ -47,7 +49,7 @@ struct PlaceholderView: View {
                 .foregroundStyle(.secondary)
             Text(title)
                 .font(.largeTitle.bold())
-            Text("This section is under construction.")
+            Text(L("app.underConstruction"))
                 .foregroundStyle(.secondary)
         }
         .padding()
@@ -61,9 +63,9 @@ struct WelcomeView: View {
             Image(systemName: "square.grid.2x2")
                 .font(.system(size: 56))
                 .foregroundStyle(.tint)
-            Text("Welcome to EnvMatrix")
+            Text(L("app.welcome.title"))
                 .font(.largeTitle.bold())
-            Text("Select an item from the sidebar to get started.")
+            Text(L("app.welcome.subtitle"))
                 .foregroundStyle(.secondary)
         }
         .padding()

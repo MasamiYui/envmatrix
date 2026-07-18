@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct SkillsView: View {
     @StateObject private var vm = SkillsViewModel()
+    @EnvironmentObject private var localization: LocalizationManager
 
     public init() {}
 
@@ -20,16 +21,17 @@ public struct SkillsView: View {
                 errorBanner(msg)
             }
         }
-        .navigationTitle("Skills")
+        .navigationTitle(L("skills.title"))
+        .id(localization.language)
         .task { vm.refresh() }
     }
 
     private var header: some View {
         HStack {
-            Text("Skills")
+            Text(L("skills.title"))
                 .font(.title.bold())
             Spacer()
-            Button("Refresh") { vm.refresh() }
+            Button(L("skills.refresh")) { vm.refresh() }
         }
         .padding()
     }
@@ -39,9 +41,9 @@ public struct SkillsView: View {
             Image(systemName: "sparkles")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
-            Text("No Skills Found")
+            Text(L("skills.empty.title"))
                 .font(.title2.bold())
-            Text("Configured skills directories are empty.")
+            Text(L("skills.empty.subtitle"))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -72,9 +74,9 @@ public struct SkillsView: View {
         }
         .padding(.vertical, 4)
         .contextMenu {
-            Button("Reveal in Finder") { vm.revealInFinder(skill) }
+            Button(L("skills.revealInFinder")) { vm.revealInFinder(skill) }
             Divider()
-            Button("Delete", role: .destructive) { vm.delete(skill) }
+            Button(L("skills.delete"), role: .destructive) { vm.delete(skill) }
         }
     }
 

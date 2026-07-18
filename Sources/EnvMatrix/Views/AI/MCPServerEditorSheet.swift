@@ -20,19 +20,19 @@ struct MCPServerEditorSheet: View {
             header
             Divider()
             Form {
-                Section("Basics") {
-                    TextField("Name", text: $name)
-                    TextField("Command", text: $command)
+                Section(L("mcp.editor.basics")) {
+                    TextField(L("mcp.editor.name"), text: $name)
+                    TextField(L("mcp.editor.command"), text: $command)
                 }
-                Section("Arguments") {
-                    TextField("Comma-separated", text: $argsText)
-                        .help("Values separated by commas, e.g. --port,8080")
+                Section(L("mcp.editor.arguments")) {
+                    TextField(L("mcp.editor.argsPlaceholder"), text: $argsText)
+                        .help(L("mcp.editor.argsHelp"))
                 }
-                Section("Environment Variables") {
+                Section(L("mcp.editor.envVars")) {
                     ForEach($envEntries) { $entry in
                         HStack {
-                            TextField("KEY", text: $entry.key)
-                            TextField("value", text: $entry.value)
+                            TextField(L("mcp.editor.envKey"), text: $entry.key)
+                            TextField(L("mcp.editor.envValue"), text: $entry.value)
                             Button {
                                 removeEnv(id: entry.id)
                             } label: {
@@ -44,7 +44,7 @@ struct MCPServerEditorSheet: View {
                     Button {
                         envEntries.append(EnvEntry(key: "", value: ""))
                     } label: {
-                        Label("Add Variable", systemImage: "plus")
+                        Label(L("mcp.editor.addVariable"), systemImage: "plus")
                     }
                 }
             }
@@ -59,8 +59,8 @@ struct MCPServerEditorSheet: View {
     private var header: some View {
         HStack {
             Text(vm.editing != nil && vm.servers.contains(where: { $0.id == vm.editing?.id })
-                 ? "Edit MCP Server"
-                 : "Add MCP Server")
+                 ? L("mcp.editor.editTitle")
+                 : L("mcp.editor.addTitle"))
                 .font(.title2.bold())
             Spacer()
         }
@@ -70,12 +70,12 @@ struct MCPServerEditorSheet: View {
     private var footer: some View {
         HStack {
             Spacer()
-            Button("Cancel", role: .cancel) {
+            Button(L("mcp.editor.cancel"), role: .cancel) {
                 vm.isPresentingEditor = false
                 dismiss()
             }
             .keyboardShortcut(.cancelAction)
-            Button("Save") {
+            Button(L("mcp.editor.save")) {
                 saveServer()
             }
             .keyboardShortcut(.defaultAction)

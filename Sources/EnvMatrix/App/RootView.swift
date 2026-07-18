@@ -3,6 +3,7 @@ import SwiftUI
 public struct RootView: View {
     @State private var selection: NavigationItem? = .dashboard
     @AppStorage("colorSchemePreference") private var schemePref: String = "system"
+    @StateObject private var localization = LocalizationManager.shared
 
     public init() {}
 
@@ -14,6 +15,7 @@ public struct RootView: View {
         }
         .frame(minWidth: 900, minHeight: 600)
         .preferredColorScheme(resolvedScheme)
+        .environmentObject(localization)
     }
 
     private var resolvedScheme: ColorScheme? {

@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct CLIConfigView: View {
     @StateObject private var vm = CLIConfigViewModel()
+    @EnvironmentObject private var localization: LocalizationManager
 
     public init() {}
 
@@ -13,13 +14,14 @@ public struct CLIConfigView: View {
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .navigationTitle("AI CLI")
+        .navigationTitle(L("cli.title"))
+        .id(localization.language)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     vm.save()
                 } label: {
-                    Label("Save", systemImage: "square.and.arrow.down")
+                    Label(L("cli.save"), systemImage: "square.and.arrow.down")
                 }
                 .disabled(vm.selection == nil)
             }
@@ -47,9 +49,9 @@ public struct CLIConfigView: View {
                 Image(systemName: "terminal")
                     .font(.system(size: 48))
                     .foregroundStyle(.secondary)
-                Text("Select a CLI configuration")
+                Text(L("cli.selectPrompt"))
                     .font(.title2.bold())
-                Text("Choose a configuration on the left to edit its values.")
+                Text(L("cli.selectHint"))
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -72,9 +74,9 @@ public struct CLIConfigView: View {
             Divider()
 
             Form {
-                TextField("Model", text: $vm.model)
-                TextField("API Base URL", text: $vm.apiBaseURL)
-                SecureField("API Key", text: $vm.apiKey)
+                TextField(L("cli.model"), text: $vm.model)
+                TextField(L("cli.apiBaseURL"), text: $vm.apiBaseURL)
+                SecureField(L("cli.apiKey"), text: $vm.apiKey)
             }
             .formStyle(.grouped)
 

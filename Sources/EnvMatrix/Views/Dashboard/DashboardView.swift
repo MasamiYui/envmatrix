@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
+    @EnvironmentObject private var localization: LocalizationManager
 
     public init() {}
 
@@ -16,9 +17,9 @@ public struct DashboardView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Dashboard")
+                        Text(L("dashboard.title"))
                             .font(.largeTitle.bold())
-                        Text("Overview of your local dev & AI environments")
+                        Text(L("dashboard.subtitle"))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -26,7 +27,7 @@ public struct DashboardView: View {
                     Button {
                         Task { await viewModel.refresh() }
                     } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
+                        Label(L("dashboard.refresh"), systemImage: "arrow.clockwise")
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -34,31 +35,32 @@ public struct DashboardView: View {
                     ForEach(viewModel.runtimes) { snapshot in
                         DashboardCardView(
                             icon: Self.icon(for: snapshot.kind),
-                            title: "\(snapshot.kind.displayName) Runtime",
-                            subtitle: "Current: \(snapshot.activeVersion ?? "Not Set")",
-                            badge: snapshot.isSystemDefault ? "System" : nil
+                            title: "\(snapshot.kind.displayName) \(L("dashboard.runtimeSuffix"))",
+                            subtitle: "\(L("dashboard.current")): \(snapshot.activeVersion ?? L("dashboard.notSet"))",
+                            badge: snapshot.isSystemDefault ? L("dashboard.system") : nil
                         )
                     }
                     DashboardCardView(
                         icon: "sparkles",
-                        title: "Skills",
-                        subtitle: "\(viewModel.skillsCount) installed"
+                        title: L("dashboard.skills"),
+                        subtitle: "\(viewModel.skillsCount) \(L("dashboard.installed"))"
                     )
                     DashboardCardView(
                         icon: "bolt.horizontal",
-                        title: "MCP Servers",
-                        subtitle: "\(viewModel.mcpCount) configured"
+                        title: L("dashboard.mcpServers"),
+                        subtitle: "\(viewModel.mcpCount) \(L("dashboard.configured"))"
                     )
                     DashboardCardView(
                         icon: "internaldrive",
-                        title: "Storage",
+                        title: L("dashboard.storage"),
                         subtitle: Self.formatBytes(viewModel.storageBytes)
                     )
                 }
             }
             .padding()
         }
-        .navigationTitle("Dashboard")
+        .navigationTitle(L("dashboard.title"))
+        .id(localization.language)
         .task { await viewModel.refresh() }
         .refreshable { await viewModel.refresh() }
     }
