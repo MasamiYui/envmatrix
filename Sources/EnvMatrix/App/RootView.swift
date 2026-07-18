@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct RootView: View {
-    @State private var selection: NavigationItem? = .dashboard
+    @StateObject private var navigator = AppNavigator()
     @AppStorage("colorSchemePreference") private var schemePref: String = "system"
     @StateObject private var localization = LocalizationManager.shared
 
@@ -9,13 +9,14 @@ public struct RootView: View {
 
     public var body: some View {
         NavigationSplitView {
-            SidebarView(selection: $selection)
+            SidebarView(selection: $navigator.selection)
         } detail: {
-            DetailView(selection: selection)
+            DetailView(selection: navigator.selection)
         }
         .frame(minWidth: 900, minHeight: 600)
         .preferredColorScheme(resolvedScheme)
         .environmentObject(localization)
+        .environmentObject(navigator)
     }
 
     private var resolvedScheme: ColorScheme? {
