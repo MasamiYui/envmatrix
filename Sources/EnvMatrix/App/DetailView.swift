@@ -23,6 +23,8 @@ public struct DetailView: View {
         case .devEnv(let kind):
             RuntimeDetailView(kind: kind)
                 .id(kind)
+        case .packagesBrew:
+            BrewView()
         case .aiSkills:
             SkillsView()
         case .aiCLI:

@@ -3,6 +3,7 @@ import Foundation
 public enum NavigationItem: Hashable, Identifiable {
     case dashboard
     case devEnv(RuntimeKind)
+    case packagesBrew
     case aiSkills
     case aiCLI
     case aiMCP
@@ -12,6 +13,7 @@ public enum NavigationItem: Hashable, Identifiable {
         switch self {
         case .dashboard: return "dashboard"
         case .devEnv(let kind): return "devEnv.\(kind.rawValue)"
+        case .packagesBrew: return "packages.brew"
         case .aiSkills: return "aiSkills"
         case .aiCLI: return "aiCLI"
         case .aiMCP: return "aiMCP"
@@ -23,6 +25,7 @@ public enum NavigationItem: Hashable, Identifiable {
         switch self {
         case .dashboard: return L("nav.dashboard")
         case .devEnv(let kind): return kind.displayName
+        case .packagesBrew: return L("nav.homebrew")
         case .aiSkills: return L("nav.skills")
         case .aiCLI: return L("nav.aiCLI")
         case .aiMCP: return L("nav.mcpServers")
@@ -47,6 +50,7 @@ public enum NavigationItem: Hashable, Identifiable {
             case .dotnet: return "n.circle.fill"
             case .erlang: return "antenna.radiowaves.left.and.right"
             }
+        case .packagesBrew: return "cube.box.fill"
         case .aiSkills: return "sparkles"
         case .aiCLI: return "terminal"
         case .aiMCP: return "bolt.horizontal"
@@ -59,7 +63,7 @@ extension NavigationItem: CaseIterable {
     public static var allCases: [NavigationItem] {
         var items: [NavigationItem] = [.dashboard]
         items.append(contentsOf: RuntimeKind.allCases.map { .devEnv($0) })
-        items.append(contentsOf: [.aiSkills, .aiCLI, .aiMCP, .settings])
+        items.append(contentsOf: [.packagesBrew, .aiSkills, .aiCLI, .aiMCP, .settings])
         return items
     }
 }
@@ -81,6 +85,7 @@ public extension NavigationItem {
                 .devEnv(.dotnet),
                 .devEnv(.erlang)
             ]),
+            (title: L("nav.packages"), items: [.packagesBrew]),
             (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
             (title: L("nav.system"), items: [.settings])
         ]
