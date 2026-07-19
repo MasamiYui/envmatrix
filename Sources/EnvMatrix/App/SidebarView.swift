@@ -21,6 +21,11 @@ public struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .frame(minWidth: 220)
+        // Hard floor: SwiftUI has been observed collapsing the sidebar column
+        // below its `.navigationSplitViewColumnWidth(min:)` value when the
+        // window is opened at just above the aggregate minimum. Pinning the
+        // *view* itself guarantees the column can never render narrower than
+        // 220pt regardless of the split-view arithmetic.
+        .frame(minWidth: 220, idealWidth: 240, maxWidth: 320)
     }
 }
