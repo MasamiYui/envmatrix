@@ -25,6 +25,8 @@ public struct DetailView: View {
                 .id(kind)
         case .packagesBrew:
             BrewView()
+        case .packagesMaven:
+            MavenRepositoryView()
         case .aiSkills:
             SkillsView()
         case .aiCLI:
