@@ -27,6 +27,10 @@ public struct DetailView: View {
             BrewView()
         case .packagesMaven:
             MavenRepositoryView()
+        case .packagesGo:
+            GoRepositoryView()
+        case .packagesNode:
+            NodeRepositoryView()
         case .aiSkills:
             SkillsView()
         case .aiCLI:
