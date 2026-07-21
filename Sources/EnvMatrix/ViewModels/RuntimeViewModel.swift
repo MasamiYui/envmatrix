@@ -14,11 +14,37 @@ public final class RuntimeViewModel: ObservableObject {
     @Published public var installProgress: [String: Double] = [:]
     @Published public var installingVersionIDs: Set<String> = []
 
+    @Published public var usageByVersionID: [String: Int64] = [:]
+    @Published public var isLoadingUsage: Bool = false
+
     private let service: RuntimeService
 
     public init(kind: RuntimeKind, service: RuntimeService = DefaultRuntimeService()) {
         self.kind = kind
         self.service = service
+    }
+
+    public var totalUsageBytes: Int64 {
+        usageByVersionID.values.reduce(0, +)
+    }
+
+    public func refreshUsage() async {
+        let items = installed
+        isLoadingUsage = true
+        defer { isLoadingUsage = false }
+        let paths: [(id: String, url: URL)] = items.compactMap { v in
+            guard let p = v.installPath else { return nil }
+            return (v.id, p)
+        }
+        let sizes: [(String, Int64)] = await Task
+            .detached(priority: .utility) { () -> [(String, Int64)] in
+                paths.map { entry in
+                    (entry.id, FolderSizeCalculator.compute(at: entry.url))
+                }
+            }.value
+        var map: [String: Int64] = [:]
+        for (id, size) in sizes { map[id] = size }
+        self.usageByVersionID = map
     }
 
     public func refreshInstalled() async {

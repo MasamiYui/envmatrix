@@ -25,6 +25,7 @@ public struct RuntimeDetailView: View {
             Picker("", selection: $selectedTab) {
                 Text(L("runtime.installed")).tag(0)
                 Text(L("runtime.available")).tag(1)
+                Text(L("runtime.usage")).tag(2)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -32,8 +33,10 @@ public struct RuntimeDetailView: View {
             Group {
                 if selectedTab == 0 {
                     InstalledListView(vm: viewModel)
-                } else {
+                } else if selectedTab == 1 {
                     AvailableListView(vm: viewModel)
+                } else {
+                    UsageListView(vm: viewModel)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -46,6 +49,11 @@ public struct RuntimeDetailView: View {
         .task {
             await viewModel.refreshInstalled()
             await viewModel.loadAvailable()
+        }
+        .onChange(of: selectedTab) { newValue in
+            if newValue == 2 && viewModel.usageByVersionID.isEmpty && !viewModel.isLoadingUsage {
+                Task { await viewModel.refreshUsage() }
+            }
         }
     }
 
