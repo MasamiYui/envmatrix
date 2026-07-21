@@ -27,11 +27,20 @@ public final class DashboardViewModel: ObservableObject {
     @Published public var storageBytes: Int64 = 0
     @Published public var isLoading: Bool = false
     @Published public var packages: [PackageSnapshot] = []
+    /// True while the package-cache scan (phase 3) is running independently
+    /// of the top-level `isLoading` flag. Enables a small spinner in the
+    /// Dashboard "Package Managers" header without blocking the whole view.
+    @Published public var isRefreshingPackages: Bool = false
 
     /// Threshold in bytes above which a package cache is considered
     /// "in need of cleaning". 5 GB — chosen so GOMODCACHE / .m2 caches
     /// on a typical developer machine only trigger after real accumulation.
     public static let cleanupThresholdBytes: Int64 = 5 * 1024 * 1024 * 1024
+
+    /// How long a package-cache scan is considered fresh. Deep folder
+    /// enumeration can be slow on huge caches, so we reuse the previous
+    /// result for 5 minutes unless the user forces a refresh.
+    public static let packagesTTL: TimeInterval = 5 * 60
 
     private let runtimeService: RuntimeService
     private let skillsService: SkillsService
@@ -44,6 +53,8 @@ public final class DashboardViewModel: ObservableObject {
     // avoid re-running expensive work when the view is re-entered.
     private var hasLoadedOnce = false
     private var isRefreshing = false
+    private var packagesLoadedAt: Date?
+    private var corpusInvalidationObserver: NSObjectProtocol?
 
     public init(
         runtimeService: RuntimeService = DefaultRuntimeService(),
@@ -62,6 +73,26 @@ public final class DashboardViewModel: ObservableObject {
         self.runtimes = RuntimeKind.allCases.map {
             RuntimeSnapshot(kind: $0, activeVersion: nil, isSystemDefault: false)
         }
+        // When a package-manager view model reports its corpus has changed
+        // (brew uninstall, npm cache clean, maven/go artifact deletion), drop
+        // the corresponding dashboard cache entry so the next refresh() sees
+        // fresh sizes instead of the stale 5-min TTL value.
+        corpusInvalidationObserver = NotificationCenter.default.addObserver(
+            forName: .envMatrixSearchCorpusInvalidated,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            // Any package-manager write can affect cache bytes; invalidate.
+            Task { @MainActor in
+                self?.packagesLoadedAt = nil
+            }
+        }
+    }
+
+    deinit {
+        if let obs = corpusInvalidationObserver {
+            NotificationCenter.default.removeObserver(obs)
+        }
     }
 
     /// Called from `.task` every time the view appears. Idempotent: if we've
@@ -77,7 +108,16 @@ public final class DashboardViewModel: ObservableObject {
     public func hardRefresh() async {
         runtimeService.invalidateSystemCaches()
         hasLoadedOnce = false
+        packagesLoadedAt = nil
         await performRefresh()
+    }
+
+    /// Re-scan only the package-manager caches (phase 3). Used by the
+    /// Dashboard's "Package Managers" refresh button so users can bust the
+    /// 5-minute TTL without re-running expensive runtime / storage scans.
+    public func refreshPackages() async {
+        packagesLoadedAt = nil
+        await scanPackages()
     }
 
     private func performRefresh() async {
@@ -147,6 +187,22 @@ public final class DashboardViewModel: ObservableObject {
         // Package caches (Homebrew, Maven, Go, npm). Each of these can be
         // multi-GB on a developer machine, and they change slowly, so we
         // compute in the background with utility QoS.
+        await scanPackages()
+    }
+
+    /// Recompute the four package-manager cache sizes, honouring the TTL
+    /// unless the caller has already invalidated `packagesLoadedAt`. Runs
+    /// on a utility-priority detached task; safe to call while the rest of
+    /// the dashboard is idle.
+    private func scanPackages() async {
+        if let loadedAt = packagesLoadedAt,
+           Date().timeIntervalSince(loadedAt) < Self.packagesTTL,
+           !packages.isEmpty {
+            return
+        }
+        isRefreshingPackages = true
+        defer { isRefreshingPackages = false }
+
         let threshold = Self.cleanupThresholdBytes
         let pkgs = await Task.detached(priority: .utility) {
             () -> [PackageSnapshot] in
@@ -171,6 +227,7 @@ public final class DashboardViewModel: ObservableObject {
             ]
         }.value
         self.packages = pkgs
+        self.packagesLoadedAt = Date()
     }
 
     public static func folderSize(at url: URL) async -> Int64 {

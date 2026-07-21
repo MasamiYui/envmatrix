@@ -104,10 +104,27 @@ public struct DashboardView: View {
 
     private var packagesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(
-                icon: "shippingbox.fill",
-                title: L("dashboard.section.packages")
-            )
+            ZStack(alignment: .trailing) {
+                SectionHeader(
+                    icon: "shippingbox.fill",
+                    title: L("dashboard.section.packages")
+                )
+                HStack(spacing: 8) {
+                    if viewModel.isRefreshingPackages {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                    Button {
+                        Task { await viewModel.refreshPackages() }
+                    } label: {
+                        Label(L("dashboard.packages.refresh"), systemImage: "arrow.clockwise")
+                            .labelStyle(.iconOnly)
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(viewModel.isRefreshingPackages)
+                    .help(L("dashboard.packages.refresh"))
+                }
+            }
             LazyVGrid(columns: overviewColumns, spacing: 16) {
                 ForEach(viewModel.packages) { snapshot in
                     DashboardPackageCard(snapshot: snapshot) {

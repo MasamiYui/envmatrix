@@ -37,6 +37,7 @@ extension L10n {
         "dashboard.section.runtimes": "运行时",
         "dashboard.section.overview": "总览",
         "dashboard.section.packages": "包管理器",
+        "dashboard.packages.refresh": "重新扫描包缓存",
         "dashboard.package.cacheSize": "缓存占用",
         "dashboard.package.needsCleanup": "建议清理",
         "dashboard.attention": "需要关注",

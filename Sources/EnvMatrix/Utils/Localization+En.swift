@@ -37,6 +37,7 @@ extension L10n {
         "dashboard.section.runtimes": "Runtimes",
         "dashboard.section.overview": "Overview",
         "dashboard.section.packages": "Package Managers",
+        "dashboard.packages.refresh": "Rescan package caches",
         "dashboard.package.cacheSize": "Cache size",
         "dashboard.package.needsCleanup": "Consider cleaning up",
         "dashboard.attention": "Needs attention",
