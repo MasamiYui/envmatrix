@@ -65,14 +65,51 @@ public struct GlobalSearchView: View {
             noResultsView
         } else {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 2) {
-                    ForEach(viewModel.results) { hit in
-                        resultRow(hit)
+                LazyVStack(alignment: .leading, spacing: 2, pinnedViews: [.sectionHeaders]) {
+                    ForEach(groupedResults, id: \.source) { group in
+                        Section(header: sectionHeader(for: group.source,
+                                                      count: group.hits.count)) {
+                            ForEach(group.hits) { hit in
+                                resultRow(hit)
+                            }
+                        }
                     }
                 }
                 .padding(.vertical, 6)
             }
         }
+    }
+
+    /// Sources present in the current result set, preserved in the fixed
+    /// `SearchHit.Source.allCases` order (brew, maven, go, node) so the
+    /// palette layout stays stable as the user types.
+    private var groupedResults: [(source: SearchHit.Source, hits: [SearchHit])] {
+        let bucketed = Dictionary(grouping: viewModel.results, by: { $0.source })
+        return SearchHit.Source.allCases.compactMap { source in
+            guard let hits = bucketed[source], !hits.isEmpty else { return nil }
+            return (source, hits)
+        }
+    }
+
+    private func sectionHeader(for source: SearchHit.Source, count: Int) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon(for: source))
+                .foregroundStyle(color(for: source))
+            Text(label(for: source))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text("\(count)")
+                .font(.caption2.weight(.semibold))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 1)
+                .background(color(for: source).opacity(0.18),
+                            in: Capsule())
+                .foregroundStyle(color(for: source))
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 4)
+        .background(.regularMaterial)
     }
 
     private var emptyPromptView: some View {
