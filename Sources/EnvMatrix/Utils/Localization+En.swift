@@ -290,6 +290,15 @@ extension L10n {
         "globalSearch.source.brew": "Homebrew",
         "globalSearch.source.maven": "Maven",
         "globalSearch.source.go": "Go",
-        "globalSearch.source.node": "npm"
+        "globalSearch.source.node": "npm",
+
+        "settings.diagnostics": "Diagnostics",
+        "settings.diagnostics.title": "Diagnostic report",
+        "settings.diagnostics.subtitle": "A Markdown snapshot of the current machine's package managers, ready to attach to issues.",
+        "settings.diagnostics.generate": "Generate report",
+        "settings.diagnostics.copy": "Copy",
+        "settings.diagnostics.save": "Save as Markdown…",
+        "settings.diagnostics.copied": "Copied to clipboard",
+        "settings.diagnostics.emptyHint": "Click ‘Generate report’ to scan Homebrew / Maven / Go / npm."
     ]
 }

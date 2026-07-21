@@ -290,6 +290,15 @@ extension L10n {
         "globalSearch.source.brew": "Homebrew",
         "globalSearch.source.maven": "Maven",
         "globalSearch.source.go": "Go",
-        "globalSearch.source.node": "npm"
+        "globalSearch.source.node": "npm",
+
+        "settings.diagnostics": "诊断",
+        "settings.diagnostics.title": "诊断报告",
+        "settings.diagnostics.subtitle": "汇总当前机器的包管理状态，方便附加到 Issue。",
+        "settings.diagnostics.generate": "生成报告",
+        "settings.diagnostics.copy": "复制",
+        "settings.diagnostics.save": "保存为 Markdown…",
+        "settings.diagnostics.copied": "已复制到剪贴板",
+        "settings.diagnostics.emptyHint": "点击「生成报告」以扫描 Homebrew / Maven / Go / npm 状态。"
     ]
 }

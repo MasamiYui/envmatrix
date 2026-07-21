@@ -14,6 +14,9 @@ public struct SettingsView: View {
             BackupsSettingsTab()
                 .tabItem { Label(L("settings.backups"), systemImage: "clock.arrow.circlepath") }
 
+            DiagnosticsSettingsTab()
+                .tabItem { Label(L("settings.diagnostics"), systemImage: "stethoscope") }
+
             LogsSettingsTab()
                 .tabItem { Label(L("settings.logs"), systemImage: "text.alignleft") }
 
