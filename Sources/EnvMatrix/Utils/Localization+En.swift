@@ -73,6 +73,9 @@ extension L10n {
         "runtime.usage.managed": "Managed",
         "runtime.usage.system": "System",
         "runtime.usage.recompute": "Recompute",
+        "runtime.group.managed": "Managed",
+        "runtime.group.system": "System",
+        "runtime.group.count": "%d",
 
         "skills.title": "Skills",
         "skills.refresh": "Refresh",

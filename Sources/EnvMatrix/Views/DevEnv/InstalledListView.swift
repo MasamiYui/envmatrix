@@ -4,6 +4,8 @@ import AppKit
 public struct InstalledListView: View {
     @ObservedObject var vm: RuntimeViewModel
     @State private var confirmUninstall: RuntimeVersion? = nil
+    @State private var managedExpanded: Bool = true
+    @State private var systemExpanded: Bool = true
 
     public init(vm: RuntimeViewModel) {
         self.vm = vm
@@ -14,8 +16,41 @@ public struct InstalledListView: View {
             if vm.installed.isEmpty {
                 emptyState
             } else {
-                List(vm.installed) { version in
-                    row(for: version)
+                List {
+                    if !managedVersions.isEmpty {
+                        Section {
+                            if managedExpanded {
+                                ForEach(managedVersions) { version in
+                                    row(for: version)
+                                }
+                            }
+                        } header: {
+                            groupHeader(
+                                title: L("runtime.group.managed"),
+                                count: managedVersions.count,
+                                icon: "shippingbox.fill",
+                                color: .blue,
+                                isExpanded: $managedExpanded
+                            )
+                        }
+                    }
+                    if !systemVersions.isEmpty {
+                        Section {
+                            if systemExpanded {
+                                ForEach(systemVersions) { version in
+                                    row(for: version)
+                                }
+                            }
+                        } header: {
+                            groupHeader(
+                                title: L("runtime.group.system"),
+                                count: systemVersions.count,
+                                icon: "gearshape.2.fill",
+                                color: .orange,
+                                isExpanded: $systemExpanded
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -49,6 +84,49 @@ public struct InstalledListView: View {
                 Text(String(format: L("runtime.uninstallMessage"), v.kind.displayName, v.version))
             }
         }
+    }
+
+    private var managedVersions: [RuntimeVersion] {
+        vm.installed.filter { !$0.isSystem }
+    }
+
+    private var systemVersions: [RuntimeVersion] {
+        vm.installed.filter { $0.isSystem }
+    }
+
+    private func groupHeader(
+        title: String,
+        count: Int,
+        icon: String,
+        color: Color,
+        isExpanded: Binding<Bool>
+    ) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isExpanded.wrappedValue.toggle()
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: isExpanded.wrappedValue ? "chevron.down" : "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 10)
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Text("\(count)")
+                    .font(.caption2.weight(.semibold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(color.opacity(0.18), in: Capsule())
+                    .foregroundStyle(color)
+                Spacer(minLength: 0)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var emptyState: some View {

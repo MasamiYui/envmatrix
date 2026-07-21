@@ -73,6 +73,9 @@ extension L10n {
         "runtime.usage.managed": "托管",
         "runtime.usage.system": "系统",
         "runtime.usage.recompute": "重新计算",
+        "runtime.group.managed": "托管版本",
+        "runtime.group.system": "系统版本",
+        "runtime.group.count": "%d",
 
         "skills.title": "技能",
         "skills.refresh": "刷新",
