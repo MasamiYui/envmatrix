@@ -281,6 +281,15 @@ extension L10n {
         "settings.backups.restoreSuccess": "已从备份还原 %@。",
         "settings.backups.deleteSuccess": "备份已删除。",
         "settings.backups.kind.npmrc": "npm 镜像 (.npmrc)",
-        "settings.backups.kind.mavenSettings": "Maven settings.xml"
+        "settings.backups.kind.mavenSettings": "Maven settings.xml",
+
+        "globalSearch.placeholder": "在包管理器中搜索…",
+        "globalSearch.hint.title": "跨模块搜索",
+        "globalSearch.hint.subtitle": "输入关键字，跨 Homebrew、Maven、Go 与 npm 快速定位。",
+        "globalSearch.noResults": "没有匹配结果",
+        "globalSearch.source.brew": "Homebrew",
+        "globalSearch.source.maven": "Maven",
+        "globalSearch.source.go": "Go",
+        "globalSearch.source.node": "npm"
     ]
 }

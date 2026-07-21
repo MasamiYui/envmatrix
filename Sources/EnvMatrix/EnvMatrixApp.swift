@@ -1,6 +1,10 @@
 import SwiftUI
 import AppKit
 
+extension Notification.Name {
+    static let envMatrixOpenGlobalSearch = Notification.Name("envmatrix.openGlobalSearch")
+}
+
 @main
 struct EnvMatrixApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
@@ -12,6 +16,14 @@ struct EnvMatrixApp: App {
         .windowStyle(.hiddenTitleBar)
         .windowToolbarStyle(.unified(showsTitle: false))
         .defaultSize(width: 1100, height: 720)
+        .commands {
+            CommandGroup(after: .textEditing) {
+                Button("Find in Packages…") {
+                    NotificationCenter.default.post(name: .envMatrixOpenGlobalSearch, object: nil)
+                }
+                .keyboardShortcut("f", modifiers: [.command])
+            }
+        }
         // NOTE: We intentionally do NOT declare a `Settings { ... }` scene.
         // All settings live inside the main window's sidebar section, and
         // adding a Settings scene caused SwiftUI to restore a ghost floating

@@ -281,6 +281,15 @@ extension L10n {
         "settings.backups.restoreSuccess": "Restored %@ from backup.",
         "settings.backups.deleteSuccess": "Backup deleted.",
         "settings.backups.kind.npmrc": "npm registry (.npmrc)",
-        "settings.backups.kind.mavenSettings": "Maven settings.xml"
+        "settings.backups.kind.mavenSettings": "Maven settings.xml",
+
+        "globalSearch.placeholder": "Search across package managers…",
+        "globalSearch.hint.title": "Search everything",
+        "globalSearch.hint.subtitle": "Type to search Homebrew, Maven, Go modules and global npm packages at once.",
+        "globalSearch.noResults": "No matching results",
+        "globalSearch.source.brew": "Homebrew",
+        "globalSearch.source.maven": "Maven",
+        "globalSearch.source.go": "Go",
+        "globalSearch.source.node": "npm"
     ]
 }
