@@ -202,12 +202,35 @@ public struct BrewView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List(vm.visiblePackages, selection: $vm.selectedPackageID) { pkg in
-                    BrewPackageRow(pkg: pkg)
-                        .tag(pkg.id)
-                        .contextMenu { rowContextMenu(pkg) }
+                // Virtualised list: LazyVStack only realises rows that are
+                // scrolled into view. `pkg.id` ("kind:fullName") is stable
+                // across refreshes so SwiftUI can reuse row identity when
+                // filters change, avoiding a full teardown/rebuild.
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(vm.visiblePackages, id: \.id) { pkg in
+                            Button {
+                                vm.selectedPackageID = pkg.id
+                            } label: {
+                                HStack {
+                                    BrewPackageRow(pkg: pkg)
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
+                                .background(
+                                    vm.selectedPackageID == pkg.id
+                                    ? Color.accentColor.opacity(0.18)
+                                    : Color.clear
+                                )
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu { rowContextMenu(pkg) }
+                            Divider().opacity(0.4)
+                        }
+                    }
                 }
-                .listStyle(.inset)
             }
         }
     }

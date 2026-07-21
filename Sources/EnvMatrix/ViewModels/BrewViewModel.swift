@@ -12,7 +12,14 @@ public final class BrewViewModel: ObservableObject {
 
     // MARK: - UI state
     @Published public var selectedKind: BrewPackageKind = .formula
-    @Published public var searchText: String = ""
+    @Published public var searchText: String = "" {
+        didSet { scheduleSearchDebounce() }
+    }
+    /// The debounced value actually used to filter `visiblePackages`.
+    /// Updated 200 ms after the last keystroke so a very fast typist does
+    /// not force the list to re-render on every character — with several
+    /// thousand formulae this can otherwise stutter noticeably.
+    @Published public private(set) var effectiveSearchText: String = ""
     @Published public var showOnlyOutdated: Bool = false
     @Published public var showOnlyRequested: Bool = false
     @Published public var selectedPackageID: String?
@@ -25,6 +32,7 @@ public final class BrewViewModel: ObservableObject {
 
     private let service: HomebrewService
     private var hasLoadedOnce = false
+    private var searchDebounceTask: Task<Void, Never>?
 
     public init(service: HomebrewService = DefaultHomebrewService()) {
         self.service = service
@@ -37,7 +45,7 @@ public final class BrewViewModel: ObservableObject {
     /// Packages of the currently selected kind, filtered by search + toggles.
     public var visiblePackages: [BrewPackage] {
         let base = selectedKind == .formula ? formulae : casks
-        let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let q = effectiveSearchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         return base.filter { pkg in
             if showOnlyOutdated && !pkg.isOutdated { return false }
             if showOnlyRequested && !pkg.installedOnRequest { return false }
@@ -46,6 +54,27 @@ public final class BrewViewModel: ObservableObject {
             if pkg.fullName.lowercased().contains(q) { return true }
             if let d = pkg.description?.lowercased(), d.contains(q) { return true }
             return false
+        }
+    }
+
+    /// Debounce `searchText` -> `effectiveSearchText` by 200 ms so the
+    /// list only re-filters once the user pauses typing. If the field is
+    /// cleared (empty), skip the delay to keep the UI feeling snappy.
+    private func scheduleSearchDebounce() {
+        searchDebounceTask?.cancel()
+        let pending = searchText
+        if pending.isEmpty {
+            effectiveSearchText = ""
+            return
+        }
+        searchDebounceTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard let self, !Task.isCancelled else { return }
+            await MainActor.run {
+                if self.searchText == pending {
+                    self.effectiveSearchText = pending
+                }
+            }
         }
     }
 
