@@ -11,13 +11,16 @@ public struct SettingsView: View {
             GeneralSettingsTab()
                 .tabItem { Label(L("settings.general"), systemImage: "gearshape") }
 
+            BackupsSettingsTab()
+                .tabItem { Label(L("settings.backups"), systemImage: "clock.arrow.circlepath") }
+
             LogsSettingsTab()
                 .tabItem { Label(L("settings.logs"), systemImage: "text.alignleft") }
 
             AboutSettingsTab()
                 .tabItem { Label(L("settings.about"), systemImage: "info.circle") }
         }
-        .frame(minWidth: 560, minHeight: 460)
+        .frame(minWidth: 640, minHeight: 500)
         .padding()
     }
 }

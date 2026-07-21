@@ -259,6 +259,24 @@ extension L10n {
         "nodeRepo.cache.size": "缓存大小",
         "common.refresh": "刷新",
         "common.cancel": "取消",
-        "common.confirm": "确定"
+        "common.confirm": "确定",
+
+        "settings.backups": "备份",
+        "settings.backups.title": "配置文件备份",
+        "settings.backups.subtitle": "EnvMatrix 修改配置文件前会自动生成的备份。你可以在这里一键还原或删除。",
+        "settings.backups.empty": "暂无备份。通过 EnvMatrix 切换镜像或修改配置后，备份会自动出现在这里。",
+        "settings.backups.column.file": "备份文件",
+        "settings.backups.column.target": "目标",
+        "settings.backups.column.time": "修改时间",
+        "settings.backups.column.size": "大小",
+        "settings.backups.restore": "还原",
+        "settings.backups.delete": "删除",
+        "settings.backups.reveal": "在 Finder 中显示",
+        "settings.backups.confirmRestore": "还原此备份？这将覆盖 %@。",
+        "settings.backups.confirmDelete": "确认删除该备份？此操作不可撤销。",
+        "settings.backups.restoreSuccess": "已从备份还原 %@。",
+        "settings.backups.deleteSuccess": "备份已删除。",
+        "settings.backups.kind.npmrc": "npm 镜像 (.npmrc)",
+        "settings.backups.kind.mavenSettings": "Maven settings.xml"
     ]
 }

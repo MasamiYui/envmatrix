@@ -259,6 +259,24 @@ extension L10n {
         "nodeRepo.cache.size": "Cache size",
         "common.refresh": "Refresh",
         "common.cancel": "Cancel",
-        "common.confirm": "Confirm"
+        "common.confirm": "Confirm",
+
+        "settings.backups": "Backups",
+        "settings.backups.title": "Configuration Backups",
+        "settings.backups.subtitle": "Backups automatically created before EnvMatrix modifies your configuration files. You can restore or delete them here.",
+        "settings.backups.empty": "No backups found. Backups will appear here after you apply a mirror or edit configuration through EnvMatrix.",
+        "settings.backups.column.file": "Backup File",
+        "settings.backups.column.target": "Target",
+        "settings.backups.column.time": "Modified",
+        "settings.backups.column.size": "Size",
+        "settings.backups.restore": "Restore",
+        "settings.backups.delete": "Delete",
+        "settings.backups.reveal": "Reveal in Finder",
+        "settings.backups.confirmRestore": "Restore backup? This will overwrite %@.",
+        "settings.backups.confirmDelete": "Delete this backup? This cannot be undone.",
+        "settings.backups.restoreSuccess": "Restored %@ from backup.",
+        "settings.backups.deleteSuccess": "Backup deleted.",
+        "settings.backups.kind.npmrc": "npm registry (.npmrc)",
+        "settings.backups.kind.mavenSettings": "Maven settings.xml"
     ]
 }
