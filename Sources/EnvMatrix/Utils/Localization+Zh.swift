@@ -209,6 +209,7 @@ extension L10n {
 
         "nav.goRepo": "Go 仓库",
         "nav.nodeRepo": "Node 仓库",
+        "nav.pythonRepo": "Python 仓库",
         "goRepo.title": "Go 仓库",
         "goRepo.subtitle": "管理 GOPROXY 镜像并清理本地 GOMODCACHE",
         "goRepo.tab.proxy": "GOPROXY",
@@ -279,6 +280,31 @@ extension L10n {
         "nodeRepo.pkg.total": "共 %d 个",
         "nodeRepo.cache.path": "缓存目录",
         "nodeRepo.cache.size": "缓存大小",
+
+        "pythonRepo.title": "Python 仓库",
+        "pythonRepo.subtitle": "管理 pip index-url、用户级包与 wheel 缓存",
+        "pythonRepo.tab.index": "镜像源",
+        "pythonRepo.tab.globalPkg": "用户包",
+        "pythonRepo.tab.cache": "缓存",
+        "pythonRepo.index.current": "当前 index：",
+        "pythonRepo.index.presets": "预设镜像",
+        "pythonRepo.index.custom": "自定义 URL",
+        "pythonRepo.index.apply": "应用",
+        "pythonRepo.index.confirmApply": "确定要切换 pip 镜像吗？",
+        "pythonRepo.msg.saved": "已保存",
+        "pythonRepo.msg.invalidURL": "URL 必须以 http:// 或 https:// 开头",
+        "pythonRepo.pkg.uninstall": "卸载",
+        "pythonRepo.pkg.confirmDelete": "确定要卸载该 Python 包吗？",
+        "pythonRepo.pkg.empty": "未安装用户级 Python 包",
+        "pythonRepo.pkg.search": "搜索包名",
+        "pythonRepo.pkg.total": "共 %d 个",
+        "pythonRepo.cache.path": "缓存目录",
+        "pythonRepo.cache.size": "缓存大小",
+        "pythonRepo.cache.clean": "清理缓存",
+        "pythonRepo.cache.confirmClean": "清理 pip 缓存？",
+        "pythonRepo.cache.cleaned": "缓存已清理",
+        "pythonRepo.pipMissing.title": "未检测到 pip",
+        "pythonRepo.pipMissing.subtitle": "PATH 上未找到 `pip3` 命令。请先在开发环境中安装 Python。",
         "common.refresh": "刷新",
         "common.cancel": "取消",
         "common.confirm": "确定",
@@ -309,6 +335,7 @@ extension L10n {
         "globalSearch.source.maven": "Maven",
         "globalSearch.source.go": "Go",
         "globalSearch.source.node": "npm",
+        "globalSearch.source.python": "pip",
 
         "settings.diagnostics": "诊断",
         "settings.diagnostics.title": "诊断报告",
@@ -328,6 +355,8 @@ extension L10n {
         "notify.brew.failure.title": "Homebrew 操作失败",
         "notify.brew.failure.body": "brew %@ 未能完成，请查看输出日志。",
         "notify.npm.cache.title": "npm 缓存已清理",
-        "notify.npm.cache.body": "本地 npm 缓存已经全部释放。"
+        "notify.npm.cache.body": "本地 npm 缓存已经全部释放。",
+        "notify.pip.cache.title": "pip 缓存已清理",
+        "notify.pip.cache.body": "本地 pip 缓存已经全部释放。"
     ]
 }

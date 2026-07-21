@@ -209,6 +209,7 @@ extension L10n {
 
         "nav.goRepo": "Go Repository",
         "nav.nodeRepo": "Node Repository",
+        "nav.pythonRepo": "Python Repository",
         "goRepo.title": "Go Repository",
         "goRepo.subtitle": "Manage GOPROXY mirror and clean local GOMODCACHE",
         "goRepo.tab.proxy": "GOPROXY",
@@ -279,6 +280,31 @@ extension L10n {
         "nodeRepo.pkg.total": "%d total",
         "nodeRepo.cache.path": "Cache directory",
         "nodeRepo.cache.size": "Cache size",
+
+        "pythonRepo.title": "Python Repository",
+        "pythonRepo.subtitle": "Manage pip index-url, user packages and wheel cache",
+        "pythonRepo.tab.index": "Index",
+        "pythonRepo.tab.globalPkg": "User Packages",
+        "pythonRepo.tab.cache": "Cache",
+        "pythonRepo.index.current": "Current index:",
+        "pythonRepo.index.presets": "Preset mirrors",
+        "pythonRepo.index.custom": "Custom URL",
+        "pythonRepo.index.apply": "Apply",
+        "pythonRepo.index.confirmApply": "Switch pip index?",
+        "pythonRepo.msg.saved": "Saved",
+        "pythonRepo.msg.invalidURL": "URL must start with http:// or https://",
+        "pythonRepo.pkg.uninstall": "Uninstall",
+        "pythonRepo.pkg.confirmDelete": "Uninstall this Python package?",
+        "pythonRepo.pkg.empty": "No user-installed Python packages",
+        "pythonRepo.pkg.search": "Search packages",
+        "pythonRepo.pkg.total": "%d total",
+        "pythonRepo.cache.path": "Cache directory",
+        "pythonRepo.cache.size": "Cache size",
+        "pythonRepo.cache.clean": "Purge cache",
+        "pythonRepo.cache.confirmClean": "Purge pip cache?",
+        "pythonRepo.cache.cleaned": "Cache purged",
+        "pythonRepo.pipMissing.title": "pip Not Found",
+        "pythonRepo.pipMissing.subtitle": "The `pip3` command is not on PATH. Install Python from EnvMatrix Dev Environments first.",
         "common.refresh": "Refresh",
         "common.cancel": "Cancel",
         "common.confirm": "Confirm",
@@ -309,6 +335,7 @@ extension L10n {
         "globalSearch.source.maven": "Maven",
         "globalSearch.source.go": "Go",
         "globalSearch.source.node": "npm",
+        "globalSearch.source.python": "pip",
 
         "settings.diagnostics": "Diagnostics",
         "settings.diagnostics.title": "Diagnostic report",
@@ -328,6 +355,8 @@ extension L10n {
         "notify.brew.failure.title": "Homebrew task failed",
         "notify.brew.failure.body": "brew %@ did not finish. Check the operation log.",
         "notify.npm.cache.title": "npm cache cleaned",
-        "notify.npm.cache.body": "The local npm cache has been fully released."
+        "notify.npm.cache.body": "The local npm cache has been fully released.",
+        "notify.pip.cache.title": "pip cache purged",
+        "notify.pip.cache.body": "The local pip cache has been fully released."
     ]
 }

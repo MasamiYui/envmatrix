@@ -189,10 +189,11 @@ public struct GlobalSearchView: View {
     private func open(_ hit: SearchHit) {
         let target: NavigationItem
         switch hit.source {
-        case .brew:  target = .packagesBrew
-        case .maven: target = .packagesMaven
-        case .go:    target = .packagesGo
-        case .node:  target = .packagesNode
+        case .brew:   target = .packagesBrew
+        case .maven:  target = .packagesMaven
+        case .go:     target = .packagesGo
+        case .node:   target = .packagesNode
+        case .python: target = .packagesPython
         }
         navigator.select(target)
         dismiss()
@@ -200,28 +201,31 @@ public struct GlobalSearchView: View {
 
     private func icon(for source: SearchHit.Source) -> String {
         switch source {
-        case .brew:  return "mug"
-        case .maven: return "cube.box"
-        case .go:    return "chevron.left.forwardslash.chevron.right"
-        case .node:  return "leaf.circle.fill"
+        case .brew:   return "mug"
+        case .maven:  return "cube.box"
+        case .go:     return "chevron.left.forwardslash.chevron.right"
+        case .node:   return "leaf.circle.fill"
+        case .python: return "shippingbox.and.arrow.backward"
         }
     }
 
     private func color(for source: SearchHit.Source) -> Color {
         switch source {
-        case .brew:  return .orange
-        case .maven: return .indigo
-        case .go:    return .cyan
-        case .node:  return .green
+        case .brew:   return .orange
+        case .maven:  return .indigo
+        case .go:     return .cyan
+        case .node:   return .green
+        case .python: return .yellow
         }
     }
 
     private func label(for source: SearchHit.Source) -> String {
         switch source {
-        case .brew:  return L("globalSearch.source.brew")
-        case .maven: return L("globalSearch.source.maven")
-        case .go:    return L("globalSearch.source.go")
-        case .node:  return L("globalSearch.source.node")
+        case .brew:   return L("globalSearch.source.brew")
+        case .maven:  return L("globalSearch.source.maven")
+        case .go:     return L("globalSearch.source.go")
+        case .node:   return L("globalSearch.source.node")
+        case .python: return L("globalSearch.source.python")
         }
     }
 }

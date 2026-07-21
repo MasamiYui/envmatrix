@@ -7,6 +7,7 @@ public struct SearchHit: Identifiable, Hashable {
         case maven
         case go
         case node
+        case python
     }
 
     public let id: String
@@ -53,6 +54,7 @@ public final class SearchAggregator: ObservableObject {
     private let mavenService: MavenLocalRepositoryService
     private let goService: GoLocalCacheService
     private let npmService: NpmService
+    private let pipService: PipService
     private let ttl: TimeInterval
 
     private var cache: [SearchHit.Source: CacheEntry] = [:]
@@ -63,12 +65,14 @@ public final class SearchAggregator: ObservableObject {
         mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(),
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
         npmService: NpmService = DefaultNpmService(),
+        pipService: PipService = DefaultPipService(),
         ttl: TimeInterval = SearchAggregator.defaultTTL
     ) {
         self.brewService = brewService
         self.mavenService = mavenService
         self.goService = goService
         self.npmService = npmService
+        self.pipService = pipService
         self.ttl = ttl
         subscribeToInvalidations()
     }
@@ -100,12 +104,13 @@ public final class SearchAggregator: ObservableObject {
         async let maven = corpus(.maven)
         async let go = corpus(.go)
         async let npm = corpus(.node)
+        async let pip = corpus(.python)
 
-        let all = await [brew, maven, go, npm]
+        let all = await [brew, maven, go, npm, pip]
         let needle = trimmed.lowercased()
 
         var results: [SearchHit] = []
-        results.reserveCapacity(limitPerSource * 4)
+        results.reserveCapacity(limitPerSource * 5)
         for corpus in all {
             var takenFromSource = 0
             for hit in corpus where takenFromSource < limitPerSource {
@@ -127,10 +132,11 @@ public final class SearchAggregator: ObservableObject {
         }
         let hits: [SearchHit]
         switch source {
-        case .brew:  hits = await loadBrew()
-        case .maven: hits = await loadMaven()
-        case .go:    hits = await loadGo()
-        case .node:  hits = await loadNpm()
+        case .brew:   hits = await loadBrew()
+        case .maven:  hits = await loadMaven()
+        case .go:     hits = await loadGo()
+        case .node:   hits = await loadNpm()
+        case .python: hits = await loadPip()
         }
         cache[source] = CacheEntry(hits: hits, storedAt: Date())
         return hits
@@ -180,6 +186,20 @@ public final class SearchAggregator: ObservableObject {
             let packages = try await npmService.listGlobalPackages()
             return packages.map {
                 SearchHit(source: .node,
+                          title: $0.name,
+                          subtitle: $0.version)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    private func loadPip() async -> [SearchHit] {
+        guard await pipService.isPipAvailable() else { return [] }
+        do {
+            let packages = try await pipService.listUserPackages()
+            return packages.map {
+                SearchHit(source: .python,
                           title: $0.name,
                           subtitle: $0.version)
             }

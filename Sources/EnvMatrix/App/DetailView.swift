@@ -31,6 +31,8 @@ public struct DetailView: View {
             GoRepositoryView()
         case .packagesNode:
             NodeRepositoryView()
+        case .packagesPython:
+            PythonRepositoryView()
         case .aiSkills:
             SkillsView()
         case .aiCLI:
