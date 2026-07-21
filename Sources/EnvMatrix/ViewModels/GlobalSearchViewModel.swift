@@ -14,7 +14,9 @@ public final class GlobalSearchViewModel: ObservableObject {
     private var debounceTask: Task<Void, Never>?
 
     public init(aggregator: SearchAggregator? = nil) {
-        self.aggregator = aggregator ?? SearchAggregator()
+        // Default to the shared, TTL-cached aggregator so successive ⌘F
+        // opens reuse the previously-scanned corpora.
+        self.aggregator = aggregator ?? SearchAggregator.shared
     }
 
     /// Trigger a debounced search whenever `query` changes.

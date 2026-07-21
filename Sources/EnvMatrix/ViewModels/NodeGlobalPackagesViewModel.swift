@@ -70,6 +70,10 @@ public final class NodeGlobalPackagesViewModel: ObservableObject {
         do {
             try await service.uninstallGlobal(target.name)
             await load()
+            NotificationCenter.default.post(
+                name: .envMatrixSearchCorpusInvalidated,
+                object: SearchHit.Source.node
+            )
         } catch {
             self.errorMessage = error.localizedDescription
         }

@@ -48,6 +48,10 @@ public final class NodeCacheViewModel: ObservableObject {
             self.infoMessage = L("nodeRepo.cache.cleaned")
             await load()
             scheduleInfoClear()
+            NotificationCenter.default.post(
+                name: .envMatrixSearchCorpusInvalidated,
+                object: SearchHit.Source.node
+            )
             SystemNotifier.shared.notify(
                 title: L("notify.npm.cache.title"),
                 body: L("notify.npm.cache.body")

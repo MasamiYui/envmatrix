@@ -2,7 +2,7 @@ import Foundation
 
 /// A single search hit that can be shown in the global search palette.
 public struct SearchHit: Identifiable, Hashable {
-    public enum Source: String, Hashable {
+    public enum Source: String, Hashable, CaseIterable {
         case brew
         case maven
         case go
@@ -22,43 +22,72 @@ public struct SearchHit: Identifiable, Hashable {
     }
 }
 
+/// Broadcast when any mutation (install, uninstall, cache clean, mirror
+/// switch...) invalidates a specific corpus and search results should be
+/// re-scanned on next open.
+///
+/// The `object` is a `SearchHit.Source` value; observers can filter on it.
+public extension Notification.Name {
+    static let envMatrixSearchCorpusInvalidated = Notification.Name("envmatrix.search.corpusInvalidated")
+}
+
 /// Aggregates lightweight, filterable data from the various package
 /// managers so the global search palette can query them in one place.
 ///
-/// The heavy scans (Maven / Go / npm) are performed lazily on first
-/// query and then cached in-memory for the lifetime of the aggregator.
+/// Each corpus is cached with a TTL (default 5 minutes). Callers can also
+/// post `envMatrixSearchCorpusInvalidated` after any mutation to drop a
+/// specific source proactively.
 @MainActor
 public final class SearchAggregator: ObservableObject {
     public static let shared = SearchAggregator()
+
+    /// How long a per-source corpus is considered fresh.
+    public nonisolated static let defaultTTL: TimeInterval = 5 * 60
+
+    private struct CacheEntry {
+        let hits: [SearchHit]
+        let storedAt: Date
+    }
 
     private let brewService: HomebrewService
     private let mavenService: MavenLocalRepositoryService
     private let goService: GoLocalCacheService
     private let npmService: NpmService
+    private let ttl: TimeInterval
 
-    private var brewHits: [SearchHit]?
-    private var mavenHits: [SearchHit]?
-    private var goHits: [SearchHit]?
-    private var npmHits: [SearchHit]?
+    private var cache: [SearchHit.Source: CacheEntry] = [:]
+    private var invalidationObserver: NSObjectProtocol?
 
     public init(
         brewService: HomebrewService = DefaultHomebrewService(),
         mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(),
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
-        npmService: NpmService = DefaultNpmService()
+        npmService: NpmService = DefaultNpmService(),
+        ttl: TimeInterval = SearchAggregator.defaultTTL
     ) {
         self.brewService = brewService
         self.mavenService = mavenService
         self.goService = goService
         self.npmService = npmService
+        self.ttl = ttl
+        subscribeToInvalidations()
+    }
+
+    deinit {
+        if let observer = invalidationObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     /// Drop every cached corpus so the next `search()` re-scans.
     public func invalidate() {
-        brewHits = nil
-        mavenHits = nil
-        goHits = nil
-        npmHits = nil
+        cache.removeAll()
+    }
+
+    /// Drop a single corpus. Safe to call from any actor via the
+    /// `envMatrixSearchCorpusInvalidated` notification.
+    public func invalidate(_ source: SearchHit.Source) {
+        cache.removeValue(forKey: source)
     }
 
     /// Perform a case-insensitive contains search across every source.
@@ -90,29 +119,21 @@ public final class SearchAggregator: ObservableObject {
         return results
     }
 
+    // MARK: - Corpus loading
+
     private func corpus(_ source: SearchHit.Source) async -> [SearchHit] {
-        switch source {
-        case .brew:
-            if let cached = brewHits { return cached }
-            let hits = await loadBrew()
-            brewHits = hits
-            return hits
-        case .maven:
-            if let cached = mavenHits { return cached }
-            let hits = await loadMaven()
-            mavenHits = hits
-            return hits
-        case .go:
-            if let cached = goHits { return cached }
-            let hits = await loadGo()
-            goHits = hits
-            return hits
-        case .node:
-            if let cached = npmHits { return cached }
-            let hits = await loadNpm()
-            npmHits = hits
-            return hits
+        if let entry = cache[source], Date().timeIntervalSince(entry.storedAt) < ttl {
+            return entry.hits
         }
+        let hits: [SearchHit]
+        switch source {
+        case .brew:  hits = await loadBrew()
+        case .maven: hits = await loadMaven()
+        case .go:    hits = await loadGo()
+        case .node:  hits = await loadNpm()
+        }
+        cache[source] = CacheEntry(hits: hits, storedAt: Date())
+        return hits
     }
 
     private func loadBrew() async -> [SearchHit] {
@@ -164,6 +185,25 @@ public final class SearchAggregator: ObservableObject {
             }
         } catch {
             return []
+        }
+    }
+
+    // MARK: - Invalidation wiring
+
+    private func subscribeToInvalidations() {
+        invalidationObserver = NotificationCenter.default.addObserver(
+            forName: .envMatrixSearchCorpusInvalidated,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            guard let self else { return }
+            Task { @MainActor in
+                if let source = note.object as? SearchHit.Source {
+                    self.invalidate(source)
+                } else {
+                    self.invalidate()
+                }
+            }
         }
     }
 }

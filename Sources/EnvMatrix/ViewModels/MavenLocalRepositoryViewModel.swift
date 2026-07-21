@@ -94,6 +94,10 @@ public final class MavenLocalRepositoryViewModel: ObservableObject {
             try service.deleteArtifact(artifact)
             artifacts.removeAll { $0.id == artifact.id }
             totalSizeBytes -= artifact.totalSizeBytes
+            NotificationCenter.default.post(
+                name: .envMatrixSearchCorpusInvalidated,
+                object: SearchHit.Source.maven
+            )
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -119,6 +123,10 @@ public final class MavenLocalRepositoryViewModel: ObservableObject {
                 }
                 totalSizeBytes -= version.sizeBytes
             }
+            NotificationCenter.default.post(
+                name: .envMatrixSearchCorpusInvalidated,
+                object: SearchHit.Source.maven
+            )
         } catch {
             self.errorMessage = error.localizedDescription
         }

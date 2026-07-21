@@ -99,6 +99,10 @@ public final class BrewViewModel: ObservableObject {
             let output = try await service.run(operation)
             self.lastOperationOutput = output
             await refresh(force: true)
+            NotificationCenter.default.post(
+                name: .envMatrixSearchCorpusInvalidated,
+                object: SearchHit.Source.brew
+            )
             SystemNotifier.shared.notify(
                 title: L("notify.brew.success.title"),
                 body: String(format: L("notify.brew.success.body"), operation.displayLabel)
