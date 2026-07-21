@@ -36,6 +36,10 @@ extension L10n {
         "dashboard.managed": "Managed",
         "dashboard.section.runtimes": "Runtimes",
         "dashboard.section.overview": "Overview",
+        "dashboard.section.packages": "Package Managers",
+        "dashboard.package.cacheSize": "Cache size",
+        "dashboard.package.needsCleanup": "Consider cleaning up",
+        "dashboard.attention": "Needs attention",
         "dashboard.storage.subtitle": "Used by managed versions",
         "dashboard.card.openHint": "Open details",
 

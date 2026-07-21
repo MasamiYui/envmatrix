@@ -20,6 +20,7 @@ public struct DashboardView: View {
             VStack(alignment: .leading, spacing: 24) {
                 header
                 runtimesSection
+                packagesSection
                 overviewSection
             }
             .padding(24)
@@ -100,6 +101,31 @@ public struct DashboardView: View {
     }
 
     // MARK: - Overview (skills / mcp / storage)
+
+    private var packagesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(
+                icon: "shippingbox.fill",
+                title: L("dashboard.section.packages")
+            )
+            LazyVGrid(columns: overviewColumns, spacing: 16) {
+                ForEach(viewModel.packages) { snapshot in
+                    DashboardPackageCard(snapshot: snapshot) {
+                        navigator.select(navItem(for: snapshot.kind))
+                    }
+                }
+            }
+        }
+    }
+
+    private func navItem(for kind: DashboardViewModel.PackageSnapshot.Kind) -> NavigationItem {
+        switch kind {
+        case .brew:  return .packagesBrew
+        case .maven: return .packagesMaven
+        case .go:    return .packagesGo
+        case .node:  return .packagesNode
+        }
+    }
 
     private var overviewSection: some View {
         VStack(alignment: .leading, spacing: 12) {

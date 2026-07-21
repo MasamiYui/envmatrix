@@ -36,6 +36,10 @@ extension L10n {
         "dashboard.managed": "已托管",
         "dashboard.section.runtimes": "运行时",
         "dashboard.section.overview": "总览",
+        "dashboard.section.packages": "包管理器",
+        "dashboard.package.cacheSize": "缓存占用",
+        "dashboard.package.needsCleanup": "建议清理",
+        "dashboard.attention": "需要关注",
         "dashboard.storage.subtitle": "托管版本占用",
         "dashboard.card.openHint": "打开详情",
 

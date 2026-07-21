@@ -10,11 +10,28 @@ public final class DashboardViewModel: ObservableObject {
         public var id: String { kind.rawValue }
     }
 
+    public struct PackageSnapshot: Identifiable {
+        public enum Kind: String {
+            case brew, maven, go, node
+        }
+        public let kind: Kind
+        public let cacheBytes: Int64
+        public let itemCount: Int?
+        public let needsAttention: Bool
+        public var id: String { kind.rawValue }
+    }
+
     @Published public var runtimes: [RuntimeSnapshot] = []
     @Published public var skillsCount: Int = 0
     @Published public var mcpCount: Int = 0
     @Published public var storageBytes: Int64 = 0
     @Published public var isLoading: Bool = false
+    @Published public var packages: [PackageSnapshot] = []
+
+    /// Threshold in bytes above which a package cache is considered
+    /// "in need of cleaning". 5 GB — chosen so GOMODCACHE / .m2 caches
+    /// on a typical developer machine only trigger after real accumulation.
+    public static let cleanupThresholdBytes: Int64 = 5 * 1024 * 1024 * 1024
 
     private let runtimeService: RuntimeService
     private let skillsService: SkillsService
@@ -125,6 +142,35 @@ public final class DashboardViewModel: ObservableObject {
             FolderSizeCalculator.compute(at: dir)
         }.value
         self.storageBytes = bytes
+
+        // --- Phase 3 -----------------------------------------------------
+        // Package caches (Homebrew, Maven, Go, npm). Each of these can be
+        // multi-GB on a developer machine, and they change slowly, so we
+        // compute in the background with utility QoS.
+        let threshold = Self.cleanupThresholdBytes
+        let pkgs = await Task.detached(priority: .utility) {
+            () -> [PackageSnapshot] in
+            let home = URL(fileURLWithPath: NSHomeDirectory())
+            let brew = FolderSizeCalculator.compute(
+                at: home.appendingPathComponent("Library/Caches/Homebrew", isDirectory: true))
+            let maven = FolderSizeCalculator.compute(
+                at: home.appendingPathComponent(".m2/repository", isDirectory: true))
+            let goMod = FolderSizeCalculator.compute(
+                at: home.appendingPathComponent("go/pkg/mod", isDirectory: true))
+            let npm = FolderSizeCalculator.compute(
+                at: home.appendingPathComponent(".npm/_cacache", isDirectory: true))
+            return [
+                PackageSnapshot(kind: .brew, cacheBytes: brew, itemCount: nil,
+                                needsAttention: brew > threshold),
+                PackageSnapshot(kind: .maven, cacheBytes: maven, itemCount: nil,
+                                needsAttention: maven > threshold),
+                PackageSnapshot(kind: .go, cacheBytes: goMod, itemCount: nil,
+                                needsAttention: goMod > threshold),
+                PackageSnapshot(kind: .node, cacheBytes: npm, itemCount: nil,
+                                needsAttention: npm > threshold)
+            ]
+        }.value
+        self.packages = pkgs
     }
 
     public static func folderSize(at url: URL) async -> Int64 {
