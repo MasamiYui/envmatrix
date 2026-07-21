@@ -126,3 +126,47 @@ struct DashboardPackageCard: View {
         .animation(.easeOut(duration: 0.15), value: isHovering)
     }
 }
+
+/// Neutral, non-interactive placeholder shown in the Dashboard's Package
+/// Managers grid while the first (or a manually-triggered) scan is still
+/// running. Kept structurally identical to `DashboardPackageCard` so the
+/// grid does not visibly reflow when real data arrives.
+struct DashboardPackageCardSkeleton: View {
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.secondary.opacity(pulse ? 0.18 : 0.32))
+                .frame(width: 48, height: 48)
+            VStack(alignment: .leading, spacing: 6) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(pulse ? 0.18 : 0.32))
+                    .frame(width: 90, height: 10)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(pulse ? 0.18 : 0.32))
+                    .frame(width: 60, height: 18)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(pulse ? 0.14 : 0.24))
+                    .frame(width: 100, height: 8)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.regularMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.secondary.opacity(0.15), lineWidth: 0.5)
+        )
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}

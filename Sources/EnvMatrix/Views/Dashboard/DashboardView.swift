@@ -126,9 +126,16 @@ public struct DashboardView: View {
                 }
             }
             LazyVGrid(columns: overviewColumns, spacing: 16) {
-                ForEach(viewModel.packages) { snapshot in
-                    DashboardPackageCard(snapshot: snapshot) {
-                        navigator.select(navItem(for: snapshot.kind))
+                if viewModel.packages.isEmpty
+                    && (viewModel.isLoading || viewModel.isRefreshingPackages) {
+                    ForEach(0..<4, id: \.self) { _ in
+                        DashboardPackageCardSkeleton()
+                    }
+                } else {
+                    ForEach(viewModel.packages) { snapshot in
+                        DashboardPackageCard(snapshot: snapshot) {
+                            navigator.select(navItem(for: snapshot.kind))
+                        }
                     }
                 }
             }
