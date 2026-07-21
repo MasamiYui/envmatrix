@@ -83,6 +83,7 @@ extension L10n {
         "skills.empty.subtitle": "配置的技能目录为空。",
         "skills.revealInFinder": "在访达中显示",
         "skills.delete": "删除",
+        "skills.source.unknown": "未分类",
 
         "cli.title": "AI 命令行",
         "cli.save": "保存",

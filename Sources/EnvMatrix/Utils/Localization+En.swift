@@ -83,6 +83,7 @@ extension L10n {
         "skills.empty.subtitle": "Configured skills directories are empty.",
         "skills.revealInFinder": "Reveal in Finder",
         "skills.delete": "Delete",
+        "skills.source.unknown": "Uncategorized",
 
         "cli.title": "AI CLI",
         "cli.save": "Save",
