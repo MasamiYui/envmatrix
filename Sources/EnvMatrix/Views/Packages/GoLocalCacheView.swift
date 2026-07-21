@@ -95,11 +95,16 @@ struct GoLocalCacheView: View {
 
     private var sortMenu: some View {
         Menu {
-            Picker("", selection: $vm.sortMode) {
+            // .inline picker renders the three tags as flat menu rows with
+            // checkmarks. Without .inline the Picker collapses into an
+            // empty-titled submenu entry (previously showed as a blank
+            // highlighted bar above the "Ascending" toggle).
+            Picker(L("goRepo.cache.sortByName"), selection: $vm.sortMode) {
                 Text(L("goRepo.cache.sortByName")).tag(GoModuleSortMode.name)
                 Text(L("goRepo.cache.sortBySize")).tag(GoModuleSortMode.size)
                 Text(L("goRepo.cache.sortByModified")).tag(GoModuleSortMode.modified)
             }
+            .pickerStyle(.inline)
             Divider()
             Toggle(L("goRepo.cache.ascending"), isOn: $vm.sortAscending)
         } label: {

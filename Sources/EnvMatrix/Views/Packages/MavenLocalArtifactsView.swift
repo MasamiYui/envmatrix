@@ -95,11 +95,16 @@ struct MavenLocalArtifactsView: View {
 
     private var sortMenu: some View {
         Menu {
-            Picker("", selection: $vm.sortMode) {
+            // .inline picker renders the three tags as flat menu rows with
+            // checkmarks. Without .inline the Picker collapses into an
+            // empty-titled submenu entry (previously showed as a blank
+            // highlighted bar above the "Ascending" toggle).
+            Picker(L("mavenRepo.artifact.sortByName"), selection: $vm.sortMode) {
                 Text(L("mavenRepo.artifact.sortByName")).tag(MavenArtifactSortMode.name)
                 Text(L("mavenRepo.artifact.sortBySize")).tag(MavenArtifactSortMode.size)
                 Text(L("mavenRepo.artifact.sortByModified")).tag(MavenArtifactSortMode.modified)
             }
+            .pickerStyle(.inline)
             Divider()
             Toggle(L("mavenRepo.artifact.ascending"), isOn: $vm.sortAscending)
         } label: {
