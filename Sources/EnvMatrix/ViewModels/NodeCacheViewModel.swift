@@ -48,6 +48,10 @@ public final class NodeCacheViewModel: ObservableObject {
             self.infoMessage = L("nodeRepo.cache.cleaned")
             await load()
             scheduleInfoClear()
+            SystemNotifier.shared.notify(
+                title: L("notify.npm.cache.title"),
+                body: L("notify.npm.cache.body")
+            )
         } catch {
             self.errorMessage = error.localizedDescription
         }

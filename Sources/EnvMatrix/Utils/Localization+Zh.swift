@@ -299,6 +299,17 @@ extension L10n {
         "settings.diagnostics.copy": "复制",
         "settings.diagnostics.save": "保存为 Markdown…",
         "settings.diagnostics.copied": "已复制到剪贴板",
-        "settings.diagnostics.emptyHint": "点击「生成报告」以扫描 Homebrew / Maven / Go / npm 状态。"
+        "settings.diagnostics.emptyHint": "点击「生成报告」以扫描 Homebrew / Maven / Go / npm 状态。",
+
+        "settings.notifications": "通知",
+        "settings.notifications.toggle": "长任务完成时发送系统通知",
+        "settings.notifications.hint": "首次开启会请求 macOS 的通知权限；关闭后 EnvMatrix 不会再打扰你。",
+
+        "notify.brew.success.title": "Homebrew 操作完成",
+        "notify.brew.success.body": "brew %@ 已成功完成。",
+        "notify.brew.failure.title": "Homebrew 操作失败",
+        "notify.brew.failure.body": "brew %@ 未能完成，请查看输出日志。",
+        "notify.npm.cache.title": "npm 缓存已清理",
+        "notify.npm.cache.body": "本地 npm 缓存已经全部释放。"
     ]
 }

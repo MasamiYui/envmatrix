@@ -299,6 +299,17 @@ extension L10n {
         "settings.diagnostics.copy": "Copy",
         "settings.diagnostics.save": "Save as Markdown…",
         "settings.diagnostics.copied": "Copied to clipboard",
-        "settings.diagnostics.emptyHint": "Click ‘Generate report’ to scan Homebrew / Maven / Go / npm."
+        "settings.diagnostics.emptyHint": "Click ‘Generate report’ to scan Homebrew / Maven / Go / npm.",
+
+        "settings.notifications": "Notifications",
+        "settings.notifications.toggle": "Notify me when long tasks finish",
+        "settings.notifications.hint": "The first time this is on, macOS will ask for notification permission. Turn off and EnvMatrix will stay quiet.",
+
+        "notify.brew.success.title": "Homebrew task finished",
+        "notify.brew.success.body": "brew %@ completed successfully.",
+        "notify.brew.failure.title": "Homebrew task failed",
+        "notify.brew.failure.body": "brew %@ did not finish. Check the operation log.",
+        "notify.npm.cache.title": "npm cache cleaned",
+        "notify.npm.cache.body": "The local npm cache has been fully released."
     ]
 }

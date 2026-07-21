@@ -44,6 +44,7 @@ struct GeneralSettingsTab: View {
     @AppStorage("pythonMirror") private var pythonMirror: String = MirrorDefaults.python
     @AppStorage("goMirror") private var goMirror: String = MirrorDefaults.go
     @AppStorage("javaMirror") private var javaMirror: String = MirrorDefaults.java
+    @AppStorage("notificationsEnabled") private var notificationsEnabled: Bool = true
 
     var body: some View {
         Form {
@@ -66,6 +67,13 @@ struct GeneralSettingsTab: View {
                     Text("中文").tag(AppLanguage.zh)
                 }
                 .pickerStyle(.segmented)
+            }
+
+            Section(L("settings.notifications")) {
+                Toggle(L("settings.notifications.toggle"), isOn: $notificationsEnabled)
+                Text(L("settings.notifications.hint"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section(L("settings.mirrors")) {

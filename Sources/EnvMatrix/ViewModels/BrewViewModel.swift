@@ -99,8 +99,17 @@ public final class BrewViewModel: ObservableObject {
             let output = try await service.run(operation)
             self.lastOperationOutput = output
             await refresh(force: true)
+            SystemNotifier.shared.notify(
+                title: L("notify.brew.success.title"),
+                body: String(format: L("notify.brew.success.body"), operation.displayLabel)
+            )
         } catch {
-            self.errorMessage = (error as? BrewError)?.errorDescription ?? error.localizedDescription
+            let message = (error as? BrewError)?.errorDescription ?? error.localizedDescription
+            self.errorMessage = message
+            SystemNotifier.shared.notify(
+                title: L("notify.brew.failure.title"),
+                body: String(format: L("notify.brew.failure.body"), operation.displayLabel)
+            )
         }
     }
 
