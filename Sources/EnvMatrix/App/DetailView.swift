@@ -33,6 +33,8 @@ public struct DetailView: View {
             NodeRepositoryView()
         case .packagesPython:
             PythonRepositoryView()
+        case .packagesProjectEnv:
+            ProjectEnvView()
         case .aiSkills:
             SkillsView()
         case .aiCLI:

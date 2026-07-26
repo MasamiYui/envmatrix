@@ -8,6 +8,7 @@ public enum NavigationItem: Hashable, Identifiable {
     case packagesGo
     case packagesNode
     case packagesPython
+    case packagesProjectEnv
     case aiSkills
     case aiCLI
     case aiMCP
@@ -22,6 +23,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .packagesGo: return "packages.go"
         case .packagesNode: return "packages.node"
         case .packagesPython: return "packages.python"
+        case .packagesProjectEnv: return "packages.projectEnv"
         case .aiSkills: return "aiSkills"
         case .aiCLI: return "aiCLI"
         case .aiMCP: return "aiMCP"
@@ -38,6 +40,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .packagesGo: return L("nav.goRepo")
         case .packagesNode: return L("nav.nodeRepo")
         case .packagesPython: return L("nav.pythonRepo")
+        case .packagesProjectEnv: return L("nav.projectEnv")
         case .aiSkills: return L("nav.skills")
         case .aiCLI: return L("nav.aiCLI")
         case .aiMCP: return L("nav.mcpServers")
@@ -67,6 +70,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .packagesGo: return "shippingbox.circle"
         case .packagesNode: return "leaf.circle.fill"
         case .packagesPython: return "shippingbox.and.arrow.backward"
+        case .packagesProjectEnv: return "folder.badge.gearshape"
         case .aiSkills: return "sparkles"
         case .aiCLI: return "terminal"
         case .aiMCP: return "bolt.horizontal"
@@ -79,7 +83,7 @@ extension NavigationItem: CaseIterable {
     public static var allCases: [NavigationItem] {
         var items: [NavigationItem] = [.dashboard]
         items.append(contentsOf: RuntimeKind.allCases.map { .devEnv($0) })
-        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .aiSkills, .aiCLI, .aiMCP, .settings])
+        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .settings])
         return items
     }
 }
@@ -101,7 +105,7 @@ public extension NavigationItem {
                 .devEnv(.dotnet),
                 .devEnv(.erlang)
             ]),
-            (title: L("nav.packages"), items: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython]),
+            (title: L("nav.packages"), items: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesProjectEnv]),
             (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
             (title: L("nav.system"), items: [.settings])
         ]
