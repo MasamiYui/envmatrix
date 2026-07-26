@@ -8,6 +8,10 @@ public enum NavigationItem: Hashable, Identifiable {
     case packagesGo
     case packagesNode
     case packagesPython
+    case packagesRuby
+    case packagesRust
+    case packagesPhp
+    case packagesDotnet
     case packagesProjectEnv
     case aiSkills
     case aiCLI
@@ -23,6 +27,10 @@ public enum NavigationItem: Hashable, Identifiable {
         case .packagesGo: return "packages.go"
         case .packagesNode: return "packages.node"
         case .packagesPython: return "packages.python"
+        case .packagesRuby: return "packages.ruby"
+        case .packagesRust: return "packages.rust"
+        case .packagesPhp: return "packages.php"
+        case .packagesDotnet: return "packages.dotnet"
         case .packagesProjectEnv: return "packages.projectEnv"
         case .aiSkills: return "aiSkills"
         case .aiCLI: return "aiCLI"
@@ -40,6 +48,10 @@ public enum NavigationItem: Hashable, Identifiable {
         case .packagesGo: return L("nav.goRepo")
         case .packagesNode: return L("nav.nodeRepo")
         case .packagesPython: return L("nav.pythonRepo")
+        case .packagesRuby: return L("nav.rubyRepo")
+        case .packagesRust: return L("nav.rustRepo")
+        case .packagesPhp: return L("nav.phpRepo")
+        case .packagesDotnet: return L("nav.dotnetRepo")
         case .packagesProjectEnv: return L("nav.projectEnv")
         case .aiSkills: return L("nav.skills")
         case .aiCLI: return L("nav.aiCLI")
@@ -70,6 +82,10 @@ public enum NavigationItem: Hashable, Identifiable {
         case .packagesGo: return "shippingbox.circle"
         case .packagesNode: return "leaf.circle.fill"
         case .packagesPython: return "shippingbox.and.arrow.backward"
+        case .packagesRuby: return "diamond.fill"
+        case .packagesRust: return "gearshape.2.fill"
+        case .packagesPhp: return "chevron.left.forwardslash.chevron.right"
+        case .packagesDotnet: return "n.circle.fill"
         case .packagesProjectEnv: return "folder.badge.gearshape"
         case .aiSkills: return "sparkles"
         case .aiCLI: return "terminal"
@@ -83,7 +99,7 @@ extension NavigationItem: CaseIterable {
     public static var allCases: [NavigationItem] {
         var items: [NavigationItem] = [.dashboard]
         items.append(contentsOf: RuntimeKind.allCases.map { .devEnv($0) })
-        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .settings])
+        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .settings])
         return items
     }
 }
@@ -105,7 +121,7 @@ public extension NavigationItem {
                 .devEnv(.dotnet),
                 .devEnv(.erlang)
             ]),
-            (title: L("nav.packages"), items: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesProjectEnv]),
+            (title: L("nav.packages"), items: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv]),
             (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
             (title: L("nav.system"), items: [.settings])
         ]

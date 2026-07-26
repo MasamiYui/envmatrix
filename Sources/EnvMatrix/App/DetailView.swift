@@ -33,6 +33,14 @@ public struct DetailView: View {
             NodeRepositoryView()
         case .packagesPython:
             PythonRepositoryView()
+        case .packagesRuby:
+            RubyRepositoryView()
+        case .packagesRust:
+            RustRepositoryView()
+        case .packagesPhp:
+            PhpRepositoryView()
+        case .packagesDotnet:
+            DotnetRepositoryView()
         case .packagesProjectEnv:
             ProjectEnvView()
         case .aiSkills:
