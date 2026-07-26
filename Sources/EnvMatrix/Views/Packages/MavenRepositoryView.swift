@@ -3,12 +3,14 @@ import SwiftUI
 public enum MavenTab: String, CaseIterable, Identifiable {
     case mirrors
     case localArtifacts
+    case gradleCache
     public var id: String { rawValue }
 
     var title: String {
         switch self {
         case .mirrors: return L("mavenRepo.tab.mirrors")
         case .localArtifacts: return L("mavenRepo.tab.localArtifacts")
+        case .gradleCache: return L("mavenRepo.tab.gradleCache")
         }
     }
 }
@@ -16,6 +18,7 @@ public enum MavenTab: String, CaseIterable, Identifiable {
 public struct MavenRepositoryView: View {
     @StateObject private var settingsVM = MavenSettingsViewModel()
     @StateObject private var localVM = MavenLocalRepositoryViewModel()
+    @StateObject private var gradleVM = GradleCacheViewModel()
     @EnvironmentObject private var localization: LocalizationManager
     @State private var selectedTab: MavenTab = .mirrors
 
@@ -32,6 +35,8 @@ public struct MavenRepositoryView: View {
                     MavenMirrorsView(vm: settingsVM)
                 case .localArtifacts:
                     MavenLocalArtifactsView(vm: localVM)
+                case .gradleCache:
+                    GradleCacheView(vm: gradleVM)
                 }
             }
         }
@@ -39,6 +44,7 @@ public struct MavenRepositoryView: View {
         .task {
             settingsVM.refresh()
             localVM.refresh()
+            await gradleVM.refresh()
         }
     }
 
@@ -59,6 +65,7 @@ public struct MavenRepositoryView: View {
                 switch selectedTab {
                 case .mirrors: settingsVM.refresh()
                 case .localArtifacts: localVM.refresh()
+                case .gradleCache: Task { await gradleVM.refresh() }
                 }
             } label: {
                 Label(L("mavenRepo.refresh"), systemImage: "arrow.clockwise")
@@ -76,7 +83,7 @@ public struct MavenRepositoryView: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .frame(maxWidth: 360)
+            .frame(maxWidth: 480)
             Spacer()
         }
         .padding(.horizontal)

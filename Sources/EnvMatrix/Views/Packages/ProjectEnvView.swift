@@ -2,18 +2,21 @@ import SwiftUI
 import AppKit
 
 public struct ProjectEnvView: View {
-    @StateObject private var vm = ProjectEnvViewModel()
+    @StateObject var vm = ProjectEnvViewModel()
     @EnvironmentObject private var localization: LocalizationManager
 
-    @State private var deleteTarget: ProjectEnvironment?
-    @State private var showLogSheet: Bool = false
-    @State private var showRootsSheet: Bool = false
+    @State var deleteTarget: ProjectEnvironment?
+    @State var showLogSheet: Bool = false
+    @State var showRootsSheet: Bool = false
+    @State var showBatchDeleteSheet: Bool = false
+    @State var showAbandonedCleanupSheet: Bool = false
 
     public init() {}
 
     public var body: some View {
         VStack(spacing: 0) {
             header
+            overviewCard
             Divider()
             toolbar
             Divider()
@@ -37,6 +40,12 @@ public struct ProjectEnvView: View {
         }
         .sheet(isPresented: $showLogSheet) {
             logSheet
+        }
+        .sheet(isPresented: $showBatchDeleteSheet) {
+            batchDeleteConfirmSheet
+        }
+        .sheet(isPresented: $showAbandonedCleanupSheet) {
+            abandonedCleanupSheet
         }
     }
 
@@ -115,6 +124,39 @@ public struct ProjectEnvView: View {
 
             Spacer()
 
+            Menu {
+                ForEach(ProjectEnvSortOption.allCases) { opt in
+                    Button {
+                        vm.sortOption = opt
+                    } label: {
+                        if vm.sortOption == opt {
+                            Label(opt.label, systemImage: "checkmark")
+                        } else {
+                            Text(opt.label)
+                        }
+                    }
+                }
+            } label: {
+                Label(
+                    String(format: L("projenv.sort.menuLabel"), vm.sortOption.label),
+                    systemImage: "arrow.up.arrow.down"
+                )
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+
+            if !vm.selectedEnvIDs.isEmpty {
+                Button {
+                    showBatchDeleteSheet = true
+                } label: {
+                    Label(
+                        String(format: L("projenv.toolbar.deleteSelected"),
+                               vm.selectedEnvIDs.count),
+                        systemImage: "trash"
+                    )
+                }
+            }
+
             Button {
                 showRootsSheet = true
             } label: {
@@ -145,7 +187,7 @@ public struct ProjectEnvView: View {
             } else if vm.visibleEnvironments.isEmpty {
                 emptyState
             } else {
-                List(selection: $vm.selectedEnvID) {
+                List(selection: $vm.selectedEnvIDs) {
                     ForEach(vm.visibleEnvironments) { env in
                         row(for: env)
                             .tag(env.id)
@@ -195,6 +237,14 @@ public struct ProjectEnvView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color(hex: vm.health(for: env).hex))
+                        .frame(width: 6, height: 6)
+                    Text(vm.health(for: env).label)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(.vertical, 4)
@@ -204,7 +254,10 @@ public struct ProjectEnvView: View {
 
     @ViewBuilder
     private var detailPane: some View {
-        if let env = vm.selectedEnv {
+        if vm.selectedEnvIDs.count > 1 {
+            multiSelectionDetail
+        } else if let id = vm.selectedEnvIDs.first,
+                  let env = vm.environments.first(where: { $0.id == id }) {
             envDetail(env)
         } else {
             VStack(spacing: 10) {
@@ -219,7 +272,8 @@ public struct ProjectEnvView: View {
     }
 
     private func envDetail(_ env: ProjectEnvironment) -> some View {
-        ScrollView {
+        let health = vm.health(for: env)
+        return ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: env.kind == .venv ? "swift" : "square.stack.3d.up.fill")
@@ -228,10 +282,17 @@ public struct ProjectEnvView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(env.displayTitle)
                             .font(.title3.bold())
-                        Text(env.kind.shortLabel)
-                            .font(.caption)
-                            .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(.quaternary, in: Capsule())
+                        HStack(spacing: 6) {
+                            Text(env.kind.shortLabel)
+                                .font(.caption)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(.quaternary, in: Capsule())
+                            Text(health.label)
+                                .font(.caption)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Color(hex: health.hex).opacity(0.18), in: Capsule())
+                                .foregroundStyle(Color(hex: health.hex))
+                        }
                     }
                     Spacer()
                 }
@@ -298,168 +359,9 @@ public struct ProjectEnvView: View {
         }
     }
 
-    // MARK: - Sheets
-
-    private func deleteConfirmSheet(_ env: ProjectEnvironment) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                    .font(.title2)
-                Text(L("projenv.deleteConfirm.title")).font(.title3.bold())
-            }
-            Text(String(format: L("projenv.deleteConfirm.body"),
-                        env.displayTitle,
-                        ByteFormatter.format(env.sizeBytes)))
-            Text(env.url.path)
-                .font(.footnote.monospaced())
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .lineLimit(3)
-                .truncationMode(.middle)
-
-            HStack {
-                Spacer()
-                Button(L("projenv.cancel")) { deleteTarget = nil }
-                    .keyboardShortcut(.cancelAction)
-                Button(role: .destructive) {
-                    vm.delete(env)
-                    deleteTarget = nil
-                } label: {
-                    Text(L("projenv.deleteConfirm.confirm"))
-                }
-                .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(20)
-        .frame(minWidth: 460)
-    }
-
-    private var rootsEditorSheet: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L("projenv.rootsEditor.title")).font(.title3.bold())
-            Text(L("projenv.rootsEditor.hint"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            List {
-                ForEach(vm.roots, id: \.self) { url in
-                    HStack {
-                        Image(systemName: "folder")
-                        Text(url.path).font(.callout.monospaced()).lineLimit(1).truncationMode(.middle)
-                        Spacer()
-                        Button(role: .destructive) {
-                            vm.removeRoot(url)
-                        } label: { Image(systemName: "minus.circle") }
-                            .buttonStyle(.borderless)
-                    }
-                }
-            }
-            .frame(minHeight: 200)
-            HStack {
-                Button {
-                    pickFolder { url in
-                        if let url { vm.addRoot(url) }
-                    }
-                } label: {
-                    Label(L("projenv.rootsEditor.add"), systemImage: "plus")
-                }
-                Spacer()
-                Button(L("projenv.done")) {
-                    showRootsSheet = false
-                    Task { await vm.rescan() }
-                }
-                .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(20)
-        .frame(minWidth: 520, minHeight: 360)
-    }
-
-    private var logSheet: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(L("projenv.log.title")).font(.title3.bold())
-                Spacer()
-                if vm.runningOpID != nil {
-                    ProgressView().controlSize(.small)
-                }
-                Button(L("projenv.done")) { showLogSheet = false }
-                    .disabled(vm.runningOpID != nil)
-            }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(vm.opLog.enumerated()), id: \.offset) { _, line in
-                        Text(line)
-                            .font(.system(.caption, design: .monospaced))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-                .padding(8)
-            }
-            .background(.black.opacity(0.85))
-            .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-        }
-        .padding(20)
-        .frame(minWidth: 640, minHeight: 420)
-    }
-
-    // MARK: - Empty / scanning / error
-
-    private var scanningState: some View {
-        VStack(spacing: 12) {
-            ProgressView().controlSize(.large)
-            Text(L("projenv.scanning"))
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "shippingbox")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text(vm.hasNoRoots ? L("projenv.empty.noRoots") : L("projenv.empty.noEnvs"))
-                .font(.headline)
-            if vm.hasNoRoots {
-                Button {
-                    showRootsSheet = true
-                } label: {
-                    Label(L("projenv.rootsEditor.add"), systemImage: "plus")
-                }
-            } else {
-                Button {
-                    Task { await vm.rescan() }
-                } label: {
-                    Label(L("projenv.rescan"), systemImage: "arrow.clockwise")
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(40)
-    }
-
-    private func errorBanner(_ msg: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-            Text(msg).font(.callout)
-            Spacer()
-            Button {
-                vm.errorMessage = nil
-            } label: {
-                Image(systemName: "xmark")
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(.horizontal, 16).padding(.vertical, 10)
-        .background(.red.opacity(0.12))
-    }
-
     // MARK: - Helpers
 
-    private func infoRow(_ title: String, _ value: String) -> some View {
+    func infoRow(_ title: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Text(title).font(.caption).foregroundStyle(.secondary).frame(width: 100, alignment: .leading)
             Text(value)
@@ -468,47 +370,9 @@ public struct ProjectEnvView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
-    private func statChip(value: Int, label: String, systemImage: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: systemImage)
-                .foregroundStyle(.secondary)
-            Text("\(value)").font(.callout.monospacedDigit().bold())
-            Text(label).font(.caption).foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 10).padding(.vertical, 6)
-        .background(.quaternary, in: Capsule())
-    }
-
-    private func statChip(text: String, label: String, systemImage: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: systemImage)
-                .foregroundStyle(.secondary)
-            Text(text).font(.callout.monospacedDigit().bold())
-            Text(label).font(.caption).foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 10).padding(.vertical, 6)
-        .background(.quaternary, in: Capsule())
-    }
-
-    /// Open an NSOpenPanel restricted to selecting a single directory.
-    private func pickFolder(_ completion: @escaping (URL?) -> Void) {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = L("projenv.rootsEditor.add")
-        panel.begin { response in
-            if response == .OK {
-                completion(panel.url)
-            } else {
-                completion(nil)
-            }
-        }
-    }
 }
 
 // Convenience: view-facing helpers.
-private extension ProjectEnvViewModel {
+extension ProjectEnvViewModel {
     var hasNoRoots: Bool { roots.isEmpty }
 }

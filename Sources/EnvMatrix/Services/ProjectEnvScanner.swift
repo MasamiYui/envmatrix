@@ -35,7 +35,7 @@ public struct ProjectEnvScanner: Sendable {
                 // macOS system / cache dirs
                 "Library", ".Trash", ".cache", ".DS_Store", "Applications",
                 // Language-specific opaque caches
-                "Pods", ".gradle", ".m2", ".cargo", "target",
+                "Pods", ".m2", ".cargo",
                 "build", "DerivedData", "dist", "out", "coverage",
                 "__pycache__", ".mypy_cache", ".pytest_cache",
                 ".tox", ".ruff_cache", ".next", ".nuxt", ".turbo",
@@ -174,15 +174,27 @@ public struct ProjectEnvScanner: Sendable {
         //    that by looking at its sentinel files instead of relying on the
         //    directory name so we do not miss uncommon naming conventions
         //    (e.g. `env`, `.venv`, `venv312`).
-        if let asVenv = detectVenv(at: dir, fm: fm) {
+        if let asVenv = Self.detectVenv(at: dir, fm: fm) {
             matches.append(asVenv)
             // A venv's `lib/python*/site-packages` is huge but has no further
             // environments inside it. Don't recurse.
             return (matches, [])
         }
-        if let asNodeModules = detectNodeModules(at: dir, fm: fm) {
+        if let asNodeModules = Self.detectNodeModules(at: dir, fm: fm) {
             matches.append(asNodeModules)
             // Same rationale — do not recurse into node_modules itself.
+            return (matches, [])
+        }
+        if let asMavenTarget = Self.detectMavenTarget(at: dir, fm: fm) {
+            matches.append(asMavenTarget)
+            return (matches, [])
+        }
+        if let asRustTarget = Self.detectRustTarget(at: dir, fm: fm) {
+            matches.append(asRustTarget)
+            return (matches, [])
+        }
+        if let asGradleCache = Self.detectGradleCache(at: dir, fm: fm) {
+            matches.append(asGradleCache)
             return (matches, [])
         }
 
@@ -195,7 +207,7 @@ public struct ProjectEnvScanner: Sendable {
             contents = try fm.contentsOfDirectory(
                 at: dir,
                 includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey],
-                options: [.skipsHiddenFiles.union(.skipsPackageDescendants)]
+                options: [.skipsPackageDescendants]
             )
         } catch {
             // Unreadable directory — silently skip. This is common inside
@@ -264,6 +276,131 @@ public struct ProjectEnvScanner: Sendable {
             packageManager: pm,
             modifiedAt: mtime
         )
+    }
+
+    /// A Maven `target` directory: name matches and its parent contains a
+    /// `pom.xml`. This filters out any random folder named `target` that is
+    /// not actually a Maven build output.
+    private static func detectMavenTarget(at dir: URL, fm: FileManager) -> ProjectEnvironment? {
+        guard dir.lastPathComponent == "target" else { return nil }
+        let parent = dir.deletingLastPathComponent()
+        let pom = parent.appendingPathComponent("pom.xml")
+        guard fm.fileExists(atPath: pom.path) else { return nil }
+
+        let size = directorySize(at: dir, fm: fm)
+        let mtime = (try? dir.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+
+        return ProjectEnvironment(
+            kind: .mavenTarget,
+            url: dir,
+            projectRoot: parent,
+            sizeBytes: size,
+            pythonVersion: nil,
+            packageManager: nil,
+            modifiedAt: mtime
+        )
+    }
+
+    /// A Rust `target` directory: name matches and its parent contains a
+    /// `Cargo.toml`. Cargo always emits its build cache into `<crate>/target`.
+    private static func detectRustTarget(at dir: URL, fm: FileManager) -> ProjectEnvironment? {
+        guard dir.lastPathComponent == "target" else { return nil }
+        let parent = dir.deletingLastPathComponent()
+        let cargo = parent.appendingPathComponent("Cargo.toml")
+        guard fm.fileExists(atPath: cargo.path) else { return nil }
+
+        let size = directorySize(at: dir, fm: fm)
+        let mtime = (try? dir.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+
+        return ProjectEnvironment(
+            kind: .rustTarget,
+            url: dir,
+            projectRoot: parent,
+            sizeBytes: size,
+            pythonVersion: nil,
+            packageManager: nil,
+            modifiedAt: mtime
+        )
+    }
+
+    /// A Gradle project-local `.gradle` cache: name matches and the parent
+    /// directory holds any of the common Gradle build/settings scripts.
+    private static func detectGradleCache(at dir: URL, fm: FileManager) -> ProjectEnvironment? {
+        guard dir.lastPathComponent == ".gradle" else { return nil }
+        let parent = dir.deletingLastPathComponent()
+        let sentinels = [
+            "build.gradle", "build.gradle.kts",
+            "settings.gradle", "settings.gradle.kts"
+        ]
+        let hasSentinel = sentinels.contains { name in
+            fm.fileExists(atPath: parent.appendingPathComponent(name).path)
+        }
+        guard hasSentinel else { return nil }
+
+        let size = directorySize(at: dir, fm: fm)
+        let mtime = (try? dir.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+
+        return ProjectEnvironment(
+            kind: .gradleCache,
+            url: dir,
+            projectRoot: parent,
+            sizeBytes: size,
+            pythonVersion: nil,
+            packageManager: nil,
+            modifiedAt: mtime
+        )
+    }
+
+    /// Enumerate the first-level children of `~/Library/Developer/Xcode/DerivedData`.
+    /// Each child is itself a self-contained per-project derived-data unit, so
+    /// its `projectRoot` is the child directory itself. Not invoked from
+    /// `inspect` — the ViewModel calls this explicitly.
+    public static func detectXcodeDerivedData(fm: FileManager) -> [ProjectEnvironment] {
+        let base = FileSystem.homeURL
+            .appendingPathComponent("Library", isDirectory: true)
+            .appendingPathComponent("Developer", isDirectory: true)
+            .appendingPathComponent("Xcode", isDirectory: true)
+            .appendingPathComponent("DerivedData", isDirectory: true)
+
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: base.path, isDirectory: &isDir), isDir.boolValue else {
+            return []
+        }
+
+        let children: [URL]
+        do {
+            children = try fm.contentsOfDirectory(
+                at: base,
+                includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey, .contentModificationDateKey],
+                options: [.skipsHiddenFiles.union(.skipsPackageDescendants)]
+            )
+        } catch {
+            return []
+        }
+
+        var results: [ProjectEnvironment] = []
+        for child in children {
+            var childIsDir: ObjCBool = false
+            guard fm.fileExists(atPath: child.path, isDirectory: &childIsDir), childIsDir.boolValue else { continue }
+            let resolved = try? child.resourceValues(forKeys: [.isSymbolicLinkKey])
+            if resolved?.isSymbolicLink == true { continue }
+
+            let size = Self.directorySize(at: child, fm: fm)
+            let mtime = (try? child.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+
+            results.append(
+                ProjectEnvironment(
+                    kind: .xcodeDerivedData,
+                    url: child,
+                    projectRoot: child,
+                    sizeBytes: size,
+                    pythonVersion: nil,
+                    packageManager: nil,
+                    modifiedAt: mtime
+                )
+            )
+        }
+        return results
     }
 
     /// Infer the JS package manager by looking for lockfiles in the project

@@ -10,6 +10,10 @@ import Foundation
 public enum ProjectEnvKind: String, Sendable, Codable, CaseIterable, Identifiable {
     case venv
     case nodeModules
+    case rustTarget
+    case xcodeDerivedData
+    case gradleCache
+    case mavenTarget
 
     public var id: String { rawValue }
 
@@ -18,6 +22,35 @@ public enum ProjectEnvKind: String, Sendable, Codable, CaseIterable, Identifiabl
         switch self {
         case .venv: return "Python venv"
         case .nodeModules: return "node_modules"
+        case .rustTarget: return "Rust target"
+        case .xcodeDerivedData: return "Xcode DerivedData"
+        case .gradleCache: return "Gradle cache"
+        case .mavenTarget: return "Maven target"
+        }
+    }
+
+    /// SF Symbol used to represent the kind in list rows / detail headers.
+    public var iconName: String {
+        switch self {
+        case .venv: return "swift"
+        case .nodeModules: return "square.stack.3d.up.fill"
+        case .rustTarget: return "gearshape.2.fill"
+        case .xcodeDerivedData: return "hammer.fill"
+        case .gradleCache: return "shippingbox.fill"
+        case .mavenTarget: return "shippingbox.and.arrow.backward.fill"
+        }
+    }
+
+    /// Accent hex color (UI layer converts to Color) — keeps the model layer
+    /// free of SwiftUI imports.
+    public var themeHex: String {
+        switch self {
+        case .venv: return "#3DBE6A"           // green
+        case .nodeModules: return "#3B82F6"    // blue
+        case .rustTarget: return "#B7410E"     // rust orange-brown
+        case .xcodeDerivedData: return "#1F6FEB"// xcode blue
+        case .gradleCache: return "#02303A"    // gradle deep teal
+        case .mavenTarget: return "#C71A36"    // maven red
         }
     }
 }

@@ -79,13 +79,13 @@ public enum NavigationItem: Hashable, Identifiable {
             }
         case .packagesBrew: return "cube.box.fill"
         case .packagesMaven: return "shippingbox.fill"
-        case .packagesGo: return "shippingbox.circle"
-        case .packagesNode: return "leaf.circle.fill"
-        case .packagesPython: return "shippingbox.and.arrow.backward"
-        case .packagesRuby: return "diamond.fill"
-        case .packagesRust: return "gearshape.2.fill"
-        case .packagesPhp: return "chevron.left.forwardslash.chevron.right"
-        case .packagesDotnet: return "n.circle.fill"
+        case .packagesGo: return "shippingbox.fill"
+        case .packagesNode: return "shippingbox.fill"
+        case .packagesPython: return "shippingbox.fill"
+        case .packagesRuby: return "shippingbox.fill"
+        case .packagesRust: return "shippingbox.fill"
+        case .packagesPhp: return "shippingbox.fill"
+        case .packagesDotnet: return "shippingbox.fill"
         case .packagesProjectEnv: return "folder.badge.gearshape"
         case .aiSkills: return "sparkles"
         case .aiCLI: return "terminal"
@@ -121,7 +121,9 @@ public extension NavigationItem {
                 .devEnv(.dotnet),
                 .devEnv(.erlang)
             ]),
-            (title: L("nav.packages"), items: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv]),
+            (title: L("nav.packagesSystem"), items: [.packagesBrew]),
+            (title: L("nav.packagesLangs"), items: [.packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet]),
+            (title: L("nav.projectEnvGroup"), items: [.packagesProjectEnv]),
             (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
             (title: L("nav.system"), items: [.settings])
         ]
