@@ -49,6 +49,8 @@ public struct DetailView: View {
             CLIConfigView()
         case .aiMCP:
             MCPServersView()
+        case .systemShellEnv:
+            ShellEnvView()
         case .settings:
             SettingsView()
         case .none:
