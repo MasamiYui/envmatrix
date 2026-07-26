@@ -30,8 +30,9 @@
 
 以下功能在 v0.3（Phase 1–3）中陆续落地：
 
-- � **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
-- �🔍 **全局搜索 (⌘F)**：跨 Brew / Maven / Go / npm / **pip** 聚合搜索，按 Source 分组、每组显示条数徽标，5 分钟 TTL 缓存 + 主动失效
+- 🐚 **Shell 本地环境管理**（新增）：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
+- 🐍 **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
+- 🔍 **全局搜索 (⌘F)**：跨 Brew / Maven / Go / npm / **pip** 聚合搜索，按 Source 分组、每组显示条数徽标，5 分钟 TTL 缓存 + 主动失效
 - 📊 **诊断报告**：一键导出 Markdown 报告，包含 OS / brew / mvn / go / npm / **pip** 系统信息
 - 💾 **备份历史面板**：集中管理所有 `.envmatrix.bak` 文件，支持在线恢复 / 删除
 - 🔔 **系统通知**：长耗时任务完成后触发原生通知（可在 Settings 关闭）
@@ -93,6 +94,19 @@
 - **Skills**：AI 助手技能集合管理，按 `source` 分组、可折叠、每组计数徽标
 - **AI CLI**：常见 AI CLI 工具的模型 / API Base URL / API Key 配置
 - **MCP Servers**：Model Context Protocol 服务清单，按 `transport` (`npx / uvx / node / python / other`) 自动分组、可折叠
+
+### 🐚 Shell 本地环境（Shell Environment）
+
+集中管理 macOS 下最常见的 shell 配置文件，让"改 rc、加 PATH、导出环境变量"不再需要打开编辑器：
+
+- 支持文件：`~/.zshrc`、`~/.zprofile`、`~/.zshenv`、`~/.bashrc`、`~/.bash_profile`、`~/.profile`
+- **双视图切换**：
+  - **结构化视图**：解析 `export KEY=VALUE`、`PATH=...:$PATH` 追加项，可视化增删改；支持双引号 / 单引号 / 无引号策略
+  - **原文视图**：等宽字体编辑器，保留注释、空行、行尾风格
+  - 两种视图之间**无损往返**，切换后仍可继续编辑
+- **当前 Shell 高亮**：根据 `$SHELL` 环境变量识别当前 shell 类型并在侧边栏标记
+- **安全写入**：保存前自动生成 `.envmatrix.bak` 备份，可通过 **Settings → Backups** 一键还原
+- **异步 IO**：文件读写在后台线程执行，UI 主线程零阻塞
 
 ### 🔍 全局搜索（Global Search）
 
@@ -199,6 +213,8 @@ EnvMatrix/
 │   │   ├── NpmrcService.swift
 │   │   ├── NpmService.swift
 │   │   ├── PipService.swift              # pip3 CLI + pip.conf INI 读写
+│   │   ├── ShellEnvParser.swift          # rc 文件解析 / 序列化（无损往返）
+│   │   ├── ShellEnvService.swift         # rc 文件列举 / 读写 / 备份
 │   │   ├── SearchAggregator.swift        # 全局搜索聚合器 + TTL 缓存
 │   │   ├── BackupService.swift           # .envmatrix.bak 扫描 / 恢复
 │   │   ├── DiagnosticReportService.swift # Markdown 诊断报告
@@ -210,6 +226,7 @@ EnvMatrix/
 │   │   ├── DevEnv/            # Installed / Available / Usage 三分栏
 │   │   ├── Packages/          # Brew / Maven / Go / Node / Python
 │   │   ├── AI/                # Skills / CLI / MCP
+│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）
 │   │   ├── Settings/          # General / Backups / Diagnostics
 │   │   └── GlobalSearchView.swift        # ⌘F 全局搜索面板
 │   ├── Utils/                 # 工具类（Localization、Shell 执行等）
@@ -285,6 +302,7 @@ swiftlint                   # 代码风格检查
 - [x] 备份历史 & 诊断报告
 - [x] Runtime Usage 分栏 + Managed/System 分组
 - [x] Skills / MCP Servers 分组视图
+- [x] Shell 本地环境（rc 文件双视图编辑）
 - [ ] Dashboard 支持自定义卡片顺序
 - [ ] 支持 cargo / gem / composer 镜像管理
 - [ ] Docker / Podman 上下文管理
