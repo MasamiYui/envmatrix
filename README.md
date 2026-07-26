@@ -30,7 +30,8 @@
 
 以下功能在 v0.3（Phase 1–3）中陆续落地：
 
-- 🌐 **/etc/hosts 管理**（新增）：结构化 + 原文双视图编辑，支持条目启用/禁用、Profile 分组切换、通过 AppleScript `with administrator privileges` 提权写入并自动生成备份，与 Shell 环境模块共享同一交互范式
+- 📱 **本地应用管理**（新增）：扫描 `/Applications` 与 `~/Applications`，识别应用来源（App Store / Brew Cask / 其他），支持打开、Finder 显示位置、移到废纸篓与残余文件（Preferences / Caches / Application Support / Logs / Saved State / Containers / Group Containers）勾选清理；系统托管与 `com.apple.*` 应用受保护
+- 🌐 **/etc/hosts 管理**：结构化 + 原文双视图编辑，支持条目启用/禁用、Profile 分组切换、通过 AppleScript `with administrator privileges` 提权写入并自动生成备份，与 Shell 环境模块共享同一交互范式
 - 🐚 **Shell 本地环境管理**：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
 - 🐍 **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
 - 🔍 **全局搜索 (⌘F)**：跨 Brew / Maven / Go / npm / **pip** 聚合搜索，按 Source 分组、每组显示条数徽标，5 分钟 TTL 缓存 + 主动失效
@@ -120,6 +121,22 @@
 - **提权写入**：通过 AppleScript `with administrator privileges` 触发系统授权对话框，仅在用户确认后调用 `cp` 覆盖 `/etc/hosts`，无需常驻 root 权限
 - **自动备份**：每次写入前将当前 `/etc/hosts` 复制为带时间戳的备份文件，保存路径展示在 UI 中，可随时手动恢复
 - **异步 IO**：Profile 加载、系统 hosts 读写均在后台线程执行，UI 主线程零阻塞
+
+### 📱 本地应用管理（Local Apps）
+
+在应用内一览 macOS 上的所有本地 GUI 应用，安全卸载并清理残余：
+
+- **扫描目录**：并发遍历 `/Applications`、`~/Applications` 及其一级子目录（如 `Utilities`），过滤所有 `*.app` bundle
+- **元信息解析**：从 `Contents/Info.plist` 抽取 name / displayName / version / bundleId / icon，递归 `totalFileAllocatedSize` 计算磁盘占用
+- **来源识别**：
+  - `Contents/_MASReceipt/receipt` 存在 → **App Store**
+  - Homebrew `brew list --cask` basename 命中 → **Brew Cask**（并展示 cask token）
+  - 其他 → **Other**
+- **安全操作**：Open（`NSWorkspace`）/ Reveal in Finder / Move to Trash（`FileManager.trashItem`）
+- **保护策略**：`/System/Applications`、`/Applications/Utilities` 下 Apple 预装应用与 `com.apple.*` bundleId 禁用卸载按钮并 tooltip 提示
+- **残余清理**：卸载后弹出 Sheet，扫描 `~/Library/Preferences`、`Caches`、`Application Support`、`Logs`、`Saved Application State`、`Containers`、`Group Containers` 中匹配 Bundle ID 的文件/目录，勾选后 `trashItem` 逐项移除
+- **筛选与排序**：按 name / bundleId 搜索、按来源 segmented 过滤、按 name / size / source 排序
+- **异步 IO**：扫描、卸载、残余清理均在 `Task.detached(priority: .utility)` 中执行，`isBusy` 状态驱动 ProgressView
 
 ### 🔍 全局搜索（Global Search）
 
@@ -230,6 +247,8 @@ EnvMatrix/
 │   │   ├── ShellEnvService.swift         # rc 文件列举 / 读写 / 备份
 │   │   ├── HostsParser.swift             # /etc/hosts 解析 / 序列化（无损往返）
 │   │   ├── HostsService.swift            # /etc/hosts 读写（osascript 提权）+ Profile CRUD
+│   │   ├── LocalAppsScanner.swift        # /Applications 并发扫描 + Info.plist 解析 + Brew Cask probe
+│   │   ├── LocalAppsService.swift        # Open / Reveal / Trash / 残余扫描与清理
 │   │   ├── SearchAggregator.swift        # 全局搜索聚合器 + TTL 缓存
 │   │   ├── BackupService.swift           # .envmatrix.bak 扫描 / 恢复
 │   │   ├── DiagnosticReportService.swift # Markdown 诊断报告
@@ -241,7 +260,7 @@ EnvMatrix/
 │   │   ├── DevEnv/            # Installed / Available / Usage 三分栏
 │   │   ├── Packages/          # Brew / Maven / Go / Node / Python
 │   │   ├── AI/                # Skills / CLI / MCP
-│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）+ /etc/hosts 管理
+│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）+ /etc/hosts 管理 + Local Apps
 │   │   ├── Settings/          # General / Backups / Diagnostics
 │   │   └── GlobalSearchView.swift        # ⌘F 全局搜索面板
 │   ├── Utils/                 # 工具类（Localization、Shell 执行等）
@@ -319,6 +338,7 @@ swiftlint                   # 代码风格检查
 - [x] Skills / MCP Servers 分组视图
 - [x] Shell 本地环境（rc 文件双视图编辑）
 - [x] /etc/hosts 双视图管理 + Profile 分组 + 提权写入
+- [x] 本地应用扫描、来源识别与安全卸载（含残余清理）
 - [ ] Dashboard 支持自定义卡片顺序
 - [ ] 支持 cargo / gem / composer 镜像管理
 - [ ] Docker / Podman 上下文管理

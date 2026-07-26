@@ -53,6 +53,8 @@ public struct DetailView: View {
             ShellEnvView()
         case .systemHosts:
             HostsView()
+        case .systemLocalApps:
+            LocalAppsView()
         case .settings:
             SettingsView()
         case .none:
