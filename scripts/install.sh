@@ -126,6 +126,23 @@ mkdir -p "$APP_STAGE/Contents/MacOS" "$APP_STAGE/Contents/Resources"
 cp "$BIN_FILE" "$APP_STAGE/Contents/MacOS/$APP_NAME"
 chmod +x "$APP_STAGE/Contents/MacOS/$APP_NAME"
 
+# SwiftPM emits a per-target resource bundle next to the binary (e.g.
+# `EnvMatrix_EnvMatrix.bundle`). `Bundle.module` searches the executable's
+# directory *and* the standard `.app/Contents/Resources` location, so we place
+# it under Contents/Resources — this keeps codesign happy (nested bundles under
+# Contents/MacOS confuse `codesign --deep`) while still being discoverable.
+shopt -s nullglob
+RESOURCE_BUNDLES=("$BIN_PATH"/*.bundle)
+shopt -u nullglob
+if (( ${#RESOURCE_BUNDLES[@]} > 0 )); then
+    for bundle in "${RESOURCE_BUNDLES[@]}"; do
+        cp -R "$bundle" "$APP_STAGE/Contents/Resources/"
+        ok "Included SwiftPM resource bundle: $(basename "$bundle")"
+    done
+else
+    warn "No SwiftPM resource bundle found in $BIN_PATH; Bundle.module lookups may fail."
+fi
+
 if [[ -f "$ICON_SRC" ]]; then
     cp "$ICON_SRC" "$APP_STAGE/Contents/Resources/AppIcon.icns"
     ICON_KEY="<key>CFBundleIconFile</key><string>AppIcon</string>"

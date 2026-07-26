@@ -33,8 +33,7 @@ struct EnvMatrixApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if let url = Bundle.module.url(forResource: "AppIcon", withExtension: "icns"),
-           let image = NSImage(contentsOf: url) {
+        if let image = Self.loadAppIconImage() {
             NSApplication.shared.applicationIconImage = image
         }
 
@@ -58,5 +57,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             window.center()
         }
+    }
+
+    /// Loads the bundled AppIcon in a way that never fatals at launch.
+    ///
+    /// `Bundle.module` triggers an unconditional `fatalError` when the SwiftPM
+    /// resource bundle cannot be located next to the executable (e.g. when a
+    /// packaging script forgot to copy `EnvMatrix_EnvMatrix.bundle` into the
+    /// `.app`). We walk the candidate locations manually so a missing icon
+    /// degrades gracefully instead of crashing the whole process.
+    private static func loadAppIconImage() -> NSImage? {
+        let candidateBundles: [Bundle] = {
+            var bundles: [Bundle] = [.main]
+            let exeDir = Bundle.main.bundleURL
+                .appendingPathComponent("Contents/MacOS", isDirectory: true)
+            let bundleName = "EnvMatrix_EnvMatrix.bundle"
+            let candidatePaths = [
+                exeDir.appendingPathComponent(bundleName),
+                Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/\(bundleName)"),
+                Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent(bundleName)
+            ]
+            for url in candidatePaths {
+                if FileManager.default.fileExists(atPath: url.path),
+                   let bundle = Bundle(url: url) {
+                    bundles.append(bundle)
+                }
+            }
+            return bundles
+        }()
+
+        for bundle in candidateBundles {
+            if let url = bundle.url(forResource: "AppIcon", withExtension: "icns"),
+               let image = NSImage(contentsOf: url) {
+                return image
+            }
+        }
+        return nil
     }
 }
