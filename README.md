@@ -1,7 +1,7 @@
 # EnvMatrix
 
 <p align="center">
-  <img src="Sources/EnvMatrix/Resources/AppIcon.icns" alt="EnvMatrix" width="128" height="128" />
+  <img src="docs/logo.png" alt="EnvMatrix" width="128" height="128" />
 </p>
 
 <p align="center">
