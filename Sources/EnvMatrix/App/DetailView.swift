@@ -51,6 +51,8 @@ public struct DetailView: View {
             MCPServersView()
         case .systemShellEnv:
             ShellEnvView()
+        case .systemHosts:
+            HostsView()
         case .settings:
             SettingsView()
         case .none:

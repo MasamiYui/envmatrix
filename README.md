@@ -30,7 +30,8 @@
 
 以下功能在 v0.3（Phase 1–3）中陆续落地：
 
-- 🐚 **Shell 本地环境管理**（新增）：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
+- 🌐 **/etc/hosts 管理**（新增）：结构化 + 原文双视图编辑，支持条目启用/禁用、Profile 分组切换、通过 AppleScript `with administrator privileges` 提权写入并自动生成备份，与 Shell 环境模块共享同一交互范式
+- 🐚 **Shell 本地环境管理**：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
 - 🐍 **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
 - 🔍 **全局搜索 (⌘F)**：跨 Brew / Maven / Go / npm / **pip** 聚合搜索，按 Source 分组、每组显示条数徽标，5 分钟 TTL 缓存 + 主动失效
 - 📊 **诊断报告**：一键导出 Markdown 报告，包含 OS / brew / mvn / go / npm / **pip** 系统信息
@@ -107,6 +108,18 @@
 - **当前 Shell 高亮**：根据 `$SHELL` 环境变量识别当前 shell 类型并在侧边栏标记
 - **安全写入**：保存前自动生成 `.envmatrix.bak` 备份，可通过 **Settings → Backups** 一键还原
 - **异步 IO**：文件读写在后台线程执行，UI 主线程零阻塞
+
+### 🌐 Hosts 管理（/etc/hosts）
+
+在应用内可视化管理 `/etc/hosts`，摆脱手动 `sudo vim` 的繁琐流程：
+
+- **双视图切换**：
+  - **结构化视图**：解析每一条 `IP + 主机名 + 注释`，可视化增删改；每行支持独立的**启用 / 禁用**开关（通过前置 `#` 注释切换）
+  - **原文视图**：等宽字体编辑器，保留空行、注释与未识别行，双视图之间**无损往返**
+- **Profile 分组**：可保存多套 hosts 方案到应用私有目录（如 `dev` / `staging` / `office`），支持新建、重命名、删除、设为默认，一键**应用到系统**
+- **提权写入**：通过 AppleScript `with administrator privileges` 触发系统授权对话框，仅在用户确认后调用 `cp` 覆盖 `/etc/hosts`，无需常驻 root 权限
+- **自动备份**：每次写入前将当前 `/etc/hosts` 复制为带时间戳的备份文件，保存路径展示在 UI 中，可随时手动恢复
+- **异步 IO**：Profile 加载、系统 hosts 读写均在后台线程执行，UI 主线程零阻塞
 
 ### 🔍 全局搜索（Global Search）
 
@@ -215,6 +228,8 @@ EnvMatrix/
 │   │   ├── PipService.swift              # pip3 CLI + pip.conf INI 读写
 │   │   ├── ShellEnvParser.swift          # rc 文件解析 / 序列化（无损往返）
 │   │   ├── ShellEnvService.swift         # rc 文件列举 / 读写 / 备份
+│   │   ├── HostsParser.swift             # /etc/hosts 解析 / 序列化（无损往返）
+│   │   ├── HostsService.swift            # /etc/hosts 读写（osascript 提权）+ Profile CRUD
 │   │   ├── SearchAggregator.swift        # 全局搜索聚合器 + TTL 缓存
 │   │   ├── BackupService.swift           # .envmatrix.bak 扫描 / 恢复
 │   │   ├── DiagnosticReportService.swift # Markdown 诊断报告
@@ -226,7 +241,7 @@ EnvMatrix/
 │   │   ├── DevEnv/            # Installed / Available / Usage 三分栏
 │   │   ├── Packages/          # Brew / Maven / Go / Node / Python
 │   │   ├── AI/                # Skills / CLI / MCP
-│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）
+│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）+ /etc/hosts 管理
 │   │   ├── Settings/          # General / Backups / Diagnostics
 │   │   └── GlobalSearchView.swift        # ⌘F 全局搜索面板
 │   ├── Utils/                 # 工具类（Localization、Shell 执行等）
@@ -303,6 +318,7 @@ swiftlint                   # 代码风格检查
 - [x] Runtime Usage 分栏 + Managed/System 分组
 - [x] Skills / MCP Servers 分组视图
 - [x] Shell 本地环境（rc 文件双视图编辑）
+- [x] /etc/hosts 双视图管理 + Profile 分组 + 提权写入
 - [ ] Dashboard 支持自定义卡片顺序
 - [ ] 支持 cargo / gem / composer 镜像管理
 - [ ] Docker / Podman 上下文管理
@@ -314,7 +330,7 @@ swiftlint                   # 代码风格检查
 ## ❓ FAQ
 
 **Q: EnvMatrix 会修改我的系统配置吗？**
-A: 只有你在界面上**主动点击**"应用/切换/删除"时才会写入。所有写操作在覆盖前都会生成 `.envmatrix.bak` 备份文件，可随时通过 **Settings → Backups** 面板一键还原。
+A: 只有你在界面上**主动点击**"应用/切换/删除"时才会写入。所有写操作在覆盖前都会生成 `.envmatrix.bak` 备份文件，可随时通过 **Settings → Backups** 面板一键还原。对 `/etc/hosts` 的写入会通过 macOS 授权对话框请求管理员权限，仅在你确认后才执行。
 
 **Q: 没有安装 `go` / `npm` / `pip3` / `mvn` 会怎样？**
 A: 对应模块会显示"未检测到 xxx"的空状态并提示安装建议，不会崩溃或误报。

@@ -17,6 +17,7 @@ public enum NavigationItem: Hashable, Identifiable {
     case aiCLI
     case aiMCP
     case systemShellEnv
+    case systemHosts
     case settings
 
     public var id: String {
@@ -37,6 +38,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .aiCLI: return "aiCLI"
         case .aiMCP: return "aiMCP"
         case .systemShellEnv: return "system.shellEnv"
+        case .systemHosts: return "system.hosts"
         case .settings: return "settings"
         }
     }
@@ -59,6 +61,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .aiCLI: return L("nav.aiCLI")
         case .aiMCP: return L("nav.mcpServers")
         case .systemShellEnv: return L("nav.shellEnv")
+        case .systemHosts: return L("nav.hosts")
         case .settings: return L("nav.settings")
         }
     }
@@ -94,6 +97,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .aiCLI: return "terminal"
         case .aiMCP: return "bolt.horizontal"
         case .systemShellEnv: return "terminal.fill"
+        case .systemHosts: return "externaldrive.connected.to.line.below"
         case .settings: return "gearshape"
         }
     }
@@ -103,7 +107,7 @@ extension NavigationItem: CaseIterable {
     public static var allCases: [NavigationItem] {
         var items: [NavigationItem] = [.dashboard]
         items.append(contentsOf: RuntimeKind.allCases.map { .devEnv($0) })
-        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .systemShellEnv, .settings])
+        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .systemShellEnv, .systemHosts, .settings])
         return items
     }
 }
@@ -129,7 +133,7 @@ public extension NavigationItem {
             (title: L("nav.packagesLangs"), items: [.packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet]),
             (title: L("nav.projectEnvGroup"), items: [.packagesProjectEnv]),
             (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
-            (title: L("nav.system"), items: [.systemShellEnv, .settings])
+            (title: L("nav.system"), items: [.systemShellEnv, .systemHosts, .settings])
         ]
     }
 }
