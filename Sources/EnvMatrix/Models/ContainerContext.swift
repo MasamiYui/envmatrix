@@ -122,6 +122,7 @@ public enum ContainerContextsError: Error, LocalizedError, Hashable, Sendable {
     case parseFailed(ContainerEngine, String)
     case timeout(ContainerEngine)
     case invalidInput(String)
+    case notRunning(ContainerEngine, String)
 
     public var errorDescription: String? {
         switch self {
@@ -135,6 +136,8 @@ public enum ContainerContextsError: Error, LocalizedError, Hashable, Sendable {
             return "\(engine.displayName) command timed out."
         case .invalidInput(let reason):
             return "Invalid input: \(reason)"
+        case .notRunning(let engine, let stderr):
+            return "\(engine.displayName) is not running: \(stderr)"
         }
     }
 }

@@ -195,6 +195,20 @@ public struct GlobalSearchView: View {
         case .node:   target = .packagesNode
         case .python: target = .packagesPython
         case .containerContext: target = .systemContainerContexts
+        case .containerImage:
+            target = .systemContainerContexts
+            NotificationCenter.default.post(
+                name: .init("ContainerContextsSetTab"),
+                object: nil,
+                userInfo: ["tab": "images"]
+            )
+        case .containerInstance:
+            target = .systemContainerContexts
+            NotificationCenter.default.post(
+                name: .init("ContainerContextsSetTab"),
+                object: nil,
+                userInfo: ["tab": "containers"]
+            )
         }
         navigator.select(target)
         dismiss()
@@ -208,6 +222,8 @@ public struct GlobalSearchView: View {
         case .node:   return "leaf.circle.fill"
         case .python: return "shippingbox.and.arrow.backward"
         case .containerContext: return "shippingbox.and.arrow.backward.fill"
+        case .containerImage: return "photo.on.rectangle"
+        case .containerInstance: return "shippingbox"
         }
     }
 
@@ -219,6 +235,8 @@ public struct GlobalSearchView: View {
         case .node:   return .green
         case .python: return .yellow
         case .containerContext: return .teal
+        case .containerImage: return .blue
+        case .containerInstance: return .purple
         }
     }
 
@@ -230,6 +248,8 @@ public struct GlobalSearchView: View {
         case .node:   return L("globalSearch.source.node")
         case .python: return L("globalSearch.source.python")
         case .containerContext: return L("globalSearch.source.containerContext")
+        case .containerImage: return L("search.source.containerImage")
+        case .containerInstance: return L("search.source.containerInstance")
         }
     }
 }

@@ -30,9 +30,10 @@
 
 以下功能在 v0.3（Phase 1–3）中陆续落地：
 
+- 容器镜像与实例管理：Docker/Podman 镜像 list/pull/tag/rm/prune/inspect，实例 list/start/stop/restart/rm/logs/inspect
 - 📦 **Cargo / Gem / Composer 镜像管理**（新增）：为 Rust / Ruby / PHP 三大生态补齐镜像切换 + 全局包卸载 + 缓存统计清理三件套，全部沿用「镜像源 / 全局包 / 缓存」三 Tab 结构与二次确认 + 备份策略
-- � **Docker / Podman 上下文管理**（新增）：Docker Contexts 与 Podman Connections 统一入口，支持列表 / 切换 / 新建 / 编辑 / 删除 / Ping 连通性检测，进程调用全部走参数数组、TLS 与 SSH identity 可选，双引擎缺失时相互隔离展示空态
-- � **本地应用管理**：扫描 `/Applications` 与 `~/Applications`，识别应用来源（App Store / Brew Cask / 其他），支持打开、Finder 显示位置、移到废纸篓与残余文件（Preferences / Caches / Application Support / Logs / Saved State / Containers / Group Containers）勾选清理；系统托管与 `com.apple.*` 应用受保护
+- **Docker / Podman 上下文管理**（新增）：Docker Contexts 与 Podman Connections 统一入口，支持列表 / 切换 / 新建 / 编辑 / 删除 / Ping 连通性检测，进程调用全部走参数数组、TLS 与 SSH identity 可选，双引擎缺失时相互隔离展示空态
+- **本地应用管理**：扫描 `/Applications` 与 `~/Applications`，识别应用来源（App Store / Brew Cask / 其他），支持打开、Finder 显示位置、移到废纸篓与残余文件（Preferences / Caches / Application Support / Logs / Saved State / Containers / Group Containers）勾选清理；系统托管与 `com.apple.*` 应用受保护
 - 🌐 **/etc/hosts 管理**：结构化 + 原文双视图编辑，支持条目启用/禁用、Profile 分组切换、通过 AppleScript `with administrator privileges` 提权写入并自动生成备份，与 Shell 环境模块共享同一交互范式
 - 🐚 **Shell 本地环境管理**：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
 - 🐍 **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
@@ -152,9 +153,15 @@
 - **筛选与排序**：按 name / bundleId 搜索、按来源 segmented 过滤、按 name / size / source 排序
 - **异步 IO**：扫描、卸载、残余清理均在 `Task.detached(priority: .utility)` 中执行，`isBusy` 状态驱动 ProgressView
 
-### � 容器上下文（Container Contexts）
+### 容器工作台 / Container Workbench
 
-统一管理 Docker Contexts 与 Podman Connections，不必再在终端里 `docker context ls` / `podman system connection list`：
+统一管理 Docker 与 Podman 的上下文、镜像与实例。侧边栏「容器工作台」入口下分为三个 Tab：
+
+- **Contexts**：Docker Contexts 与 Podman Connections 的列表 / 切换 / 新建 / 编辑 / 删除 / Ping 连通性检测
+- **Images**：Docker/Podman 镜像的 list / pull / tag / rm / prune / inspect，支持仓库与 tag 检索
+- **Instances**：Docker/Podman 容器实例的 list / start / stop / restart / rm / logs / inspect，展示状态与端口摘要
+
+具体能力：
 
 - **双引擎并列**：Docker 分区与 Podman 分区互相隔离，任一 CLI 缺失只展示对应空态，不影响另一分区
 - **Docker 支持**：`docker context ls/create/update/rm/use`，unix / tcp / ssh 三种 endpoint 模板，可选 TLS（CA / client cert / client key / skip verify），内置 `default` 不可删除
@@ -163,9 +170,9 @@
 - **进程调用零 shell 拼接**：所有参数以数组形式传递给 `Foundation.Process`，避免命令注入
 - **异步 IO**：所有 CLI 调用在 `Task.detached(priority: .utility)` 中执行，主线程零阻塞
 
-### �🔍 全局搜索（Global Search）
+### 🔍 全局搜索（Global Search）
 
-- 按 **⌘F** 打开搜索面板，跨 Brew / Maven / Go / npm / pip 语料聚合
+- 按 **⌘F** 打开搜索面板，跨 Brew / Maven / Go / npm / pip / 容器镜像 / 容器实例 语料聚合
 - 结果按 Source 分组，每组显示条数徽标
 - **180 ms 输入防抖** + **5 分钟 TTL 缓存**，避免频繁扫盘
 - 支持 **Return** 键直达详情页
@@ -281,14 +288,27 @@ EnvMatrix/
 │   │   ├── BackupService.swift           # .envmatrix.bak 扫描 / 恢复
 │   │   ├── DiagnosticReportService.swift # Markdown 诊断报告
 │   │   ├── SystemNotifier.swift          # UNUserNotificationCenter 封装
-│   │   └── SystemRuntimeDetector.swift   # 系统运行时探测
+│   │   ├── SystemRuntimeDetector.swift   # 系统运行时探测
+│   │   ├── DockerContextService.swift    # docker context ls/create/update/rm/use
+│   │   ├── PodmanConnectionService.swift # podman system connection list/add/remove/default
+│   │   ├── DockerImageService.swift      # docker image list/pull/tag/rm/prune/inspect
+│   │   ├── DockerContainerService.swift  # docker container list/start/stop/restart/rm/logs/inspect
+│   │   ├── PodmanImageService.swift      # podman image list/pull/tag/rm/prune/inspect
+│   │   └── PodmanContainerService.swift  # podman container list/start/stop/restart/rm/logs/inspect
 │   ├── ViewModels/            # 响应式状态管理（@Published）
 │   ├── Views/                 # SwiftUI 视图
 │   │   ├── Dashboard/         # 总览（含骨架屏）
 │   │   ├── DevEnv/            # Installed / Available / Usage 三分栏
 │   │   ├── Packages/          # Brew / Maven / Go / Node / Python / Rust / Ruby / PHP
 │   │   ├── AI/                # Skills / CLI / MCP
-│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）+ /etc/hosts 管理 + Local Apps + Container Contexts
+│   │   ├── System/            # Shell 本地环境 + /etc/hosts 管理 + Local Apps + 容器工作台（Contexts / Images / Instances）
+│   │   │   ├── ContainerImagesTab.swift
+│   │   │   ├── ContainerImageRow.swift
+│   │   │   ├── ContainerImagePullSheet.swift
+│   │   │   ├── ContainerInspectSheet.swift
+│   │   │   ├── ContainerInstancesTab.swift
+│   │   │   ├── ContainerInstanceRow.swift
+│   │   │   └── ContainerLogsSheet.swift
 │   │   ├── Settings/          # General / Backups / Diagnostics
 │   │   └── GlobalSearchView.swift        # ⌘F 全局搜索面板
 │   ├── Utils/                 # 工具类（Localization、Shell 执行等）
@@ -369,6 +389,7 @@ swiftlint                   # 代码风格检查
 - [x] 本地应用扫描、来源识别与安全卸载（含残余清理）
 - [x] 支持 cargo / gem / composer 镜像管理
 - [x] Docker / Podman 上下文管理
+- [x] Docker / Podman 镜像与实例管理
 - [ ] Dashboard 支持自定义卡片顺序
 - [ ] 环境快照导入导出（一键迁移到新机器）
 - [ ] Runtime Usage 引入 TTL 缓存 & 持久化折叠状态

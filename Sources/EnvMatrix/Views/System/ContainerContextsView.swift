@@ -13,16 +13,24 @@ public struct ContainerContextsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 header
-                dockerSection
-                if let msg = viewModel.dockerError {
-                    errorBanner(msg) { viewModel.dockerError = nil }
-                }
-                podmanSection
-                if let msg = viewModel.podmanError {
-                    errorBanner(msg) { viewModel.podmanError = nil }
-                }
-                if let notice = viewModel.podmanNotice {
-                    errorBanner(notice) { viewModel.podmanNotice = nil }
+                tabPicker
+                switch viewModel.selectedTab {
+                case .contexts:
+                    dockerSection
+                    if let msg = viewModel.dockerError {
+                        errorBanner(msg) { viewModel.dockerError = nil }
+                    }
+                    podmanSection
+                    if let msg = viewModel.podmanError {
+                        errorBanner(msg) { viewModel.podmanError = nil }
+                    }
+                    if let notice = viewModel.podmanNotice {
+                        errorBanner(notice) { viewModel.podmanNotice = nil }
+                    }
+                case .images:
+                    ContainerImagesTab(parent: viewModel)
+                case .containers:
+                    ContainerInstancesTab(parent: viewModel)
                 }
             }
             .padding(.horizontal, 16)
@@ -30,6 +38,12 @@ public struct ContainerContextsView: View {
         }
         .navigationTitle(L("container.title"))
         .task { await viewModel.refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("ContainerContextsSetTab"))) { note in
+            guard let userInfo = note.userInfo,
+                  let raw = userInfo["tab"] as? String,
+                  let tab = ContainerContextsTab(rawValue: raw) else { return }
+            viewModel.selectedTab = tab
+        }
         .sheet(item: $dockerEditor) { state in
             DockerEditorSheet(
                 viewModel: viewModel,
@@ -46,6 +60,16 @@ public struct ContainerContextsView: View {
             )
             .environmentObject(localization)
         }
+    }
+
+    private var tabPicker: some View {
+        Picker("", selection: $viewModel.selectedTab) {
+            Text(L("container.tab.contexts")).tag(ContainerContextsTab.contexts)
+            Text(L("container.tab.images")).tag(ContainerContextsTab.images)
+            Text(L("container.tab.containers")).tag(ContainerContextsTab.containers)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 
     private var header: some View {

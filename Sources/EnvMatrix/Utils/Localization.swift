@@ -63,7 +63,25 @@ public func L(_ key: String) -> String {
 
 public enum L10n {
     public static let strings: [String: [String: String]] = [
-        "en": en.merging(enContainer) { current, _ in current },
-        "zh": zh.merging(zhContainer) { current, _ in current }
+        "en": en
+            .merging(enContainer) { current, _ in current }
+            .merging(enContainerImages) { current, _ in current }
+            .merging(enNavigation) { current, _ in current }
+            .merging(enDashboard) { current, _ in current }
+            .merging(enRuntime) { current, _ in current }
+            .merging(enPackages) { current, _ in current }
+            .merging(enPackagesExtra) { current, _ in current }
+            .merging(enSystem) { current, _ in current }
+            .merging(enSettings) { current, _ in current },
+        "zh": zh
+            .merging(zhContainer) { current, _ in current }
+            .merging(zhContainerImages) { current, _ in current }
+            .merging(zhNavigation) { current, _ in current }
+            .merging(zhDashboard) { current, _ in current }
+            .merging(zhRuntime) { current, _ in current }
+            .merging(zhPackages) { current, _ in current }
+            .merging(zhPackagesExtra) { current, _ in current }
+            .merging(zhSystem) { current, _ in current }
+            .merging(zhSettings) { current, _ in current }
     ]
 }

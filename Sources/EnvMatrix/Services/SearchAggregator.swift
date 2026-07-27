@@ -9,18 +9,22 @@ public struct SearchHit: Identifiable, Hashable {
         case node
         case python
         case containerContext
+        case containerImage
+        case containerInstance
     }
 
     public let id: String
     public let source: Source
     public let title: String
     public let subtitle: String?
+    public let keywords: String?
 
-    public init(source: Source, title: String, subtitle: String?) {
-        self.id = "\(source.rawValue):\(title)"
+    public init(source: Source, title: String, subtitle: String?, keywords: String? = nil) {
+        self.id = "\(source.rawValue):\(title):\(keywords ?? "")"
         self.source = source
         self.title = title
         self.subtitle = subtitle
+        self.keywords = keywords
     }
 }
 
@@ -58,6 +62,10 @@ public final class SearchAggregator: ObservableObject {
     private let pipService: PipService
     private let dockerService: DockerContextService
     private let podmanService: PodmanContextService
+    private let dockerImageService: DockerImageService
+    private let podmanImageService: PodmanImageService
+    private let dockerContainerService: DockerContainerService
+    private let podmanContainerService: PodmanContainerService
     private let ttl: TimeInterval
 
     private var cache: [SearchHit.Source: CacheEntry] = [:]
@@ -71,6 +79,10 @@ public final class SearchAggregator: ObservableObject {
         pipService: PipService = DefaultPipService(),
         dockerService: DockerContextService = DefaultDockerContextService(),
         podmanService: PodmanContextService = DefaultPodmanContextService(),
+        dockerImageService: DockerImageService = DefaultDockerImageService(),
+        podmanImageService: PodmanImageService = DefaultPodmanImageService(),
+        dockerContainerService: DockerContainerService = DefaultDockerContainerService(),
+        podmanContainerService: PodmanContainerService = DefaultPodmanContainerService(),
         ttl: TimeInterval = SearchAggregator.defaultTTL
     ) {
         self.brewService = brewService
@@ -80,6 +92,10 @@ public final class SearchAggregator: ObservableObject {
         self.pipService = pipService
         self.dockerService = dockerService
         self.podmanService = podmanService
+        self.dockerImageService = dockerImageService
+        self.podmanImageService = podmanImageService
+        self.dockerContainerService = dockerContainerService
+        self.podmanContainerService = podmanContainerService
         self.ttl = ttl
         subscribeToInvalidations()
     }
@@ -113,17 +129,20 @@ public final class SearchAggregator: ObservableObject {
         async let npm = corpus(.node)
         async let pip = corpus(.python)
         async let containers = corpus(.containerContext)
+        async let images = corpus(.containerImage)
+        async let instances = corpus(.containerInstance)
 
-        let all = await [brew, maven, go, npm, pip, containers]
+        let all = await [brew, maven, go, npm, pip, containers, images, instances]
         let needle = trimmed.lowercased()
 
         var results: [SearchHit] = []
-        results.reserveCapacity(limitPerSource * 6)
+        results.reserveCapacity(limitPerSource * all.count)
         for corpus in all {
             var takenFromSource = 0
             for hit in corpus where takenFromSource < limitPerSource {
                 if hit.title.lowercased().contains(needle) ||
-                    (hit.subtitle?.lowercased().contains(needle) ?? false) {
+                    (hit.subtitle?.lowercased().contains(needle) ?? false) ||
+                    (hit.keywords?.lowercased().contains(needle) ?? false) {
                     results.append(hit)
                     takenFromSource += 1
                 }
@@ -146,6 +165,8 @@ public final class SearchAggregator: ObservableObject {
         case .node:   hits = await loadNpm()
         case .python: hits = await loadPip()
         case .containerContext: hits = await loadContainers()
+        case .containerImage: hits = await loadContainerImages()
+        case .containerInstance: hits = await loadContainerInstances()
         }
         cache[source] = CacheEntry(hits: hits, storedAt: Date())
         return hits
@@ -246,6 +267,55 @@ public final class SearchAggregator: ObservableObject {
         }()
         let (d, p) = await (dockerHits, podmanHits)
         return d + p
+    }
+
+    private func loadContainerImages() async -> [SearchHit] {
+        let dockerSvc = dockerImageService
+        let podmanSvc = podmanImageService
+        async let dockerImages: [ContainerImage] = {
+            (try? await dockerSvc.list()) ?? []
+        }()
+        async let podmanImages: [ContainerImage] = {
+            (try? await podmanSvc.list()) ?? []
+        }()
+        let (dockers, podmans) = await (dockerImages, podmanImages)
+        let mapped = (dockers + podmans).map { img -> SearchHit in
+            let repo = img.repository.isEmpty ? "<none>" : img.repository
+            let tag = img.tag.isEmpty ? "<none>" : img.tag
+            let title = "\(repo):\(tag)"
+            let subtitle = img.engine == .docker ? "docker" : "podman"
+            var kw = img.id
+            if let digest = img.digest, !digest.isEmpty {
+                kw += " \(digest)"
+            }
+            return SearchHit(source: .containerImage,
+                             title: title,
+                             subtitle: subtitle,
+                             keywords: kw)
+        }
+        return mapped
+    }
+
+    private func loadContainerInstances() async -> [SearchHit] {
+        let dockerSvc = dockerContainerService
+        let podmanSvc = podmanContainerService
+        async let dockerInstances: [ContainerInstance] = {
+            (try? await dockerSvc.list(all: true)) ?? []
+        }()
+        async let podmanInstances: [ContainerInstance] = {
+            (try? await podmanSvc.list(all: true)) ?? []
+        }()
+        let (dockers, podmans) = await (dockerInstances, podmanInstances)
+        let mapped = (dockers + podmans).map { inst -> SearchHit in
+            let title = inst.names.first ?? inst.id
+            let subtitle = "\(inst.image) · \(inst.state.rawValue)"
+            let kw = ([inst.id] + inst.names).joined(separator: " ")
+            return SearchHit(source: .containerInstance,
+                             title: title,
+                             subtitle: subtitle,
+                             keywords: kw)
+        }
+        return mapped
     }
 
     // MARK: - Invalidation wiring

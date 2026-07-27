@@ -1,5 +1,9 @@
 import Foundation
 
+public enum ContainerContextsTab: String, CaseIterable, Sendable, Hashable {
+    case contexts, images, containers
+}
+
 /// Coordinates Docker and Podman context discovery, mutation, and reachability probing for the UI layer.
 @MainActor
 public final class ContainerContextsViewModel: ObservableObject {
@@ -15,16 +19,30 @@ public final class ContainerContextsViewModel: ObservableObject {
     @Published public var podmanCollapsed: Bool = false
     @Published public var pingResults: [String: ContainerPingResult] = [:]
     @Published public var podmanNotice: String? = nil
+    @Published public var selectedTab: ContainerContextsTab = .contexts
+
+    public let imagesVMDocker: ContainerImagesViewModel
+    public let imagesVMPodman: ContainerImagesViewModel
+    public let instancesVMDocker: ContainerInstancesViewModel
+    public let instancesVMPodman: ContainerInstancesViewModel
 
     private let dockerService: DockerContextService
     private let podmanService: PodmanContextService
 
     public init(
         dockerService: DockerContextService = DefaultDockerContextService(),
-        podmanService: PodmanContextService = DefaultPodmanContextService()
+        podmanService: PodmanContextService = DefaultPodmanContextService(),
+        dockerImageService: DockerImageService = DefaultDockerImageService(),
+        podmanImageService: PodmanImageService = DefaultPodmanImageService(),
+        dockerContainerService: DockerContainerService = DefaultDockerContainerService(),
+        podmanContainerService: PodmanContainerService = DefaultPodmanContainerService()
     ) {
         self.dockerService = dockerService
         self.podmanService = podmanService
+        self.imagesVMDocker = ContainerImagesViewModel(engine: .docker, dockerService: dockerImageService)
+        self.imagesVMPodman = ContainerImagesViewModel(engine: .podman, podmanService: podmanImageService)
+        self.instancesVMDocker = ContainerInstancesViewModel(engine: .docker, dockerService: dockerContainerService)
+        self.instancesVMPodman = ContainerInstancesViewModel(engine: .podman, podmanService: podmanContainerService)
     }
 
     public func refresh() async {
@@ -41,6 +59,8 @@ public final class ContainerContextsViewModel: ObservableObject {
             try await dockerService.useContext(name)
             isDockerBusy = false
             await refreshDocker()
+            imagesVMDocker.markStale()
+            instancesVMDocker.markStale()
         } catch {
             dockerError = Self.describe(error)
             isDockerBusy = false
@@ -97,6 +117,8 @@ public final class ContainerContextsViewModel: ObservableObject {
             try await podmanService.setDefault(name)
             isPodmanBusy = false
             await refreshPodman()
+            imagesVMPodman.markStale()
+            instancesVMPodman.markStale()
         } catch {
             podmanError = Self.describe(error)
             isPodmanBusy = false

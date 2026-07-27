@@ -117,3 +117,198 @@ private final class TimedOutBox: @unchecked Sendable {
         return flag
     }
 }
+
+public final class StreamingHandle: @unchecked Sendable {
+    private let process: Process
+
+    init(process: Process) {
+        self.process = process
+    }
+
+    public func cancel() {
+        if process.isRunning {
+            process.terminate()
+        }
+    }
+
+    public var isRunning: Bool {
+        process.isRunning
+    }
+}
+
+public protocol StreamingProcessExecutor: ProcessExecutor {
+    func stream(
+        executable: URL,
+        args: [String],
+        onLine: @Sendable @escaping (String) -> Void
+    ) async throws -> ProcessResult
+
+    func spawn(
+        executable: URL,
+        args: [String],
+        onLine: @Sendable @escaping (String) -> Void
+    ) -> StreamingHandle
+}
+
+private final class LineBuffer: @unchecked Sendable {
+    private let lock = NSLock()
+    private var pending = ""
+    private var captured = ""
+    private let prefix: String
+    private let onLine: @Sendable (String) -> Void
+
+    init(prefix: String, onLine: @escaping @Sendable (String) -> Void) {
+        self.prefix = prefix
+        self.onLine = onLine
+    }
+
+    func append(_ chunk: String) {
+        lock.lock()
+        pending.append(chunk)
+        captured.append(chunk)
+        var emitted: [String] = []
+        while let newlineIndex = pending.firstIndex(of: "\n") {
+            let line = String(pending[..<newlineIndex])
+            pending.removeSubrange(...newlineIndex)
+            emitted.append(line)
+        }
+        lock.unlock()
+        for line in emitted {
+            onLine(prefix + line)
+        }
+    }
+
+    func flush() {
+        lock.lock()
+        let remaining = pending
+        pending = ""
+        lock.unlock()
+        if !remaining.isEmpty {
+            onLine(prefix + remaining)
+        }
+    }
+
+    var collected: String {
+        lock.lock()
+        defer { lock.unlock() }
+        return captured
+    }
+}
+
+extension DefaultProcessExecutor: StreamingProcessExecutor {
+    public func stream(
+        executable: URL,
+        args: [String],
+        onLine: @Sendable @escaping (String) -> Void
+    ) async throws -> ProcessResult {
+        let process = Process()
+        process.executableURL = executable
+        process.arguments = args
+
+        let stdoutPipe = Pipe()
+        let stderrPipe = Pipe()
+        process.standardOutput = stdoutPipe
+        process.standardError = stderrPipe
+
+        let stdoutBuffer = LineBuffer(prefix: "", onLine: onLine)
+        let stderrBuffer = LineBuffer(prefix: "stderr: ", onLine: onLine)
+
+        stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty { return }
+            if let text = String(data: data, encoding: .utf8) {
+                stdoutBuffer.append(text)
+            }
+        }
+        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty { return }
+            if let text = String(data: data, encoding: .utf8) {
+                stderrBuffer.append(text)
+            }
+        }
+
+        do {
+            try process.run()
+        } catch {
+            stdoutPipe.fileHandleForReading.readabilityHandler = nil
+            stderrPipe.fileHandleForReading.readabilityHandler = nil
+            throw ProcessExecutorError.launchFailed(error.localizedDescription)
+        }
+
+        await Task.detached(priority: .utility) { [process] in
+            process.waitUntilExit()
+        }.value
+
+        stdoutPipe.fileHandleForReading.readabilityHandler = nil
+        stderrPipe.fileHandleForReading.readabilityHandler = nil
+
+        let tailOut = try? stdoutPipe.fileHandleForReading.readToEnd()
+        if let tailOut, let text = String(data: tailOut, encoding: .utf8), !text.isEmpty {
+            stdoutBuffer.append(text)
+        }
+        let tailErr = try? stderrPipe.fileHandleForReading.readToEnd()
+        if let tailErr, let text = String(data: tailErr, encoding: .utf8), !text.isEmpty {
+            stderrBuffer.append(text)
+        }
+
+        stdoutBuffer.flush()
+        stderrBuffer.flush()
+
+        return ProcessResult(
+            stdout: stdoutBuffer.collected,
+            stderr: stderrBuffer.collected,
+            exitCode: process.terminationStatus
+        )
+    }
+
+    public func spawn(
+        executable: URL,
+        args: [String],
+        onLine: @Sendable @escaping (String) -> Void
+    ) -> StreamingHandle {
+        let process = Process()
+        process.executableURL = executable
+        process.arguments = args
+
+        let stdoutPipe = Pipe()
+        let stderrPipe = Pipe()
+        process.standardOutput = stdoutPipe
+        process.standardError = stderrPipe
+
+        let stdoutBuffer = LineBuffer(prefix: "", onLine: onLine)
+        let stderrBuffer = LineBuffer(prefix: "stderr: ", onLine: onLine)
+
+        stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty { return }
+            if let text = String(data: data, encoding: .utf8) {
+                stdoutBuffer.append(text)
+            }
+        }
+        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty { return }
+            if let text = String(data: data, encoding: .utf8) {
+                stderrBuffer.append(text)
+            }
+        }
+
+        process.terminationHandler = { _ in
+            stdoutPipe.fileHandleForReading.readabilityHandler = nil
+            stderrPipe.fileHandleForReading.readabilityHandler = nil
+            stdoutBuffer.flush()
+            stderrBuffer.flush()
+        }
+
+        do {
+            try process.run()
+        } catch {
+            stdoutPipe.fileHandleForReading.readabilityHandler = nil
+            stderrPipe.fileHandleForReading.readabilityHandler = nil
+            onLine("stderr: \(error.localizedDescription)")
+        }
+
+        return StreamingHandle(process: process)
+    }
+}
