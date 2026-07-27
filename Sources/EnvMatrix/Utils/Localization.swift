@@ -63,7 +63,7 @@ public func L(_ key: String) -> String {
 
 public enum L10n {
     public static let strings: [String: [String: String]] = [
-        "en": en,
-        "zh": zh
+        "en": en.merging(enContainer) { current, _ in current },
+        "zh": zh.merging(zhContainer) { current, _ in current }
     ]
 }

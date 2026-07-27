@@ -8,6 +8,7 @@ public struct SearchHit: Identifiable, Hashable {
         case go
         case node
         case python
+        case containerContext
     }
 
     public let id: String
@@ -55,6 +56,8 @@ public final class SearchAggregator: ObservableObject {
     private let goService: GoLocalCacheService
     private let npmService: NpmService
     private let pipService: PipService
+    private let dockerService: DockerContextService
+    private let podmanService: PodmanContextService
     private let ttl: TimeInterval
 
     private var cache: [SearchHit.Source: CacheEntry] = [:]
@@ -66,6 +69,8 @@ public final class SearchAggregator: ObservableObject {
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
         npmService: NpmService = DefaultNpmService(),
         pipService: PipService = DefaultPipService(),
+        dockerService: DockerContextService = DefaultDockerContextService(),
+        podmanService: PodmanContextService = DefaultPodmanContextService(),
         ttl: TimeInterval = SearchAggregator.defaultTTL
     ) {
         self.brewService = brewService
@@ -73,6 +78,8 @@ public final class SearchAggregator: ObservableObject {
         self.goService = goService
         self.npmService = npmService
         self.pipService = pipService
+        self.dockerService = dockerService
+        self.podmanService = podmanService
         self.ttl = ttl
         subscribeToInvalidations()
     }
@@ -105,12 +112,13 @@ public final class SearchAggregator: ObservableObject {
         async let go = corpus(.go)
         async let npm = corpus(.node)
         async let pip = corpus(.python)
+        async let containers = corpus(.containerContext)
 
-        let all = await [brew, maven, go, npm, pip]
+        let all = await [brew, maven, go, npm, pip, containers]
         let needle = trimmed.lowercased()
 
         var results: [SearchHit] = []
-        results.reserveCapacity(limitPerSource * 5)
+        results.reserveCapacity(limitPerSource * 6)
         for corpus in all {
             var takenFromSource = 0
             for hit in corpus where takenFromSource < limitPerSource {
@@ -137,6 +145,7 @@ public final class SearchAggregator: ObservableObject {
         case .go:     hits = await loadGo()
         case .node:   hits = await loadNpm()
         case .python: hits = await loadPip()
+        case .containerContext: hits = await loadContainers()
         }
         cache[source] = CacheEntry(hits: hits, storedAt: Date())
         return hits
@@ -206,6 +215,37 @@ public final class SearchAggregator: ObservableObject {
         } catch {
             return []
         }
+    }
+
+    private func loadContainers() async -> [SearchHit] {
+        async let dockerHits: [SearchHit] = {
+            guard await dockerService.isDockerAvailable() else { return [] }
+            do {
+                let contexts = try await dockerService.listContexts()
+                return contexts.map { ctx in
+                    SearchHit(source: .containerContext,
+                              title: "docker · \(ctx.name)",
+                              subtitle: ctx.endpoint)
+                }
+            } catch {
+                return []
+            }
+        }()
+        async let podmanHits: [SearchHit] = {
+            guard await podmanService.isPodmanAvailable() else { return [] }
+            do {
+                let conns = try await podmanService.listConnections()
+                return conns.map { conn in
+                    SearchHit(source: .containerContext,
+                              title: "podman · \(conn.name)",
+                              subtitle: conn.uri)
+                }
+            } catch {
+                return []
+            }
+        }()
+        let (d, p) = await (dockerHits, podmanHits)
+        return d + p
     }
 
     // MARK: - Invalidation wiring

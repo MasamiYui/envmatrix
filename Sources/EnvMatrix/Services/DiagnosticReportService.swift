@@ -10,19 +10,25 @@ public struct DiagnosticReportService {
     private let goService: GoLocalCacheService
     private let npmService: NpmService
     private let npmrcService: NpmrcService
+    private let dockerService: DockerContextService
+    private let podmanService: PodmanContextService
 
     public init(
         brewService: HomebrewService = DefaultHomebrewService(),
         mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(),
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
         npmService: NpmService = DefaultNpmService(),
-        npmrcService: NpmrcService = DefaultNpmrcService()
+        npmrcService: NpmrcService = DefaultNpmrcService(),
+        dockerService: DockerContextService = DefaultDockerContextService(),
+        podmanService: PodmanContextService = DefaultPodmanContextService()
     ) {
         self.brewService = brewService
         self.mavenService = mavenService
         self.goService = goService
         self.npmService = npmService
         self.npmrcService = npmrcService
+        self.dockerService = dockerService
+        self.podmanService = podmanService
     }
 
     /// Build the report. Safe to call from any actor; internally offloads
@@ -100,6 +106,37 @@ public struct DiagnosticReportService {
             }
         } else {
             lines.append("- npm not detected on PATH")
+        }
+        lines.append("")
+
+        lines.append("## Container Contexts")
+        if await dockerService.isDockerAvailable() {
+            if let contexts = try? await dockerService.listContexts() {
+                let current = contexts.first(where: { $0.isCurrent })
+                lines.append("- Docker current: `\(current?.name ?? "(none)")`")
+                if let current, !current.endpoint.isEmpty {
+                    lines.append("- Docker endpoint: `\(current.endpoint)`")
+                }
+                lines.append("- Docker contexts: \(contexts.count)")
+            } else {
+                lines.append("- Docker: available but list failed")
+            }
+        } else {
+            lines.append("- Docker not detected on PATH")
+        }
+        if await podmanService.isPodmanAvailable() {
+            if let conns = try? await podmanService.listConnections() {
+                let def = conns.first(where: { $0.isDefault })
+                lines.append("- Podman default: `\(def?.name ?? "(none)")`")
+                if let def, !def.uri.isEmpty {
+                    lines.append("- Podman URI: `\(def.uri)`")
+                }
+                lines.append("- Podman connections: \(conns.count)")
+            } else {
+                lines.append("- Podman: available but list failed")
+            }
+        } else {
+            lines.append("- Podman not detected on PATH")
         }
         lines.append("")
 

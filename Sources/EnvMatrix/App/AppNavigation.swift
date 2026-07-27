@@ -19,6 +19,7 @@ public enum NavigationItem: Hashable, Identifiable {
     case systemShellEnv
     case systemHosts
     case systemLocalApps
+    case systemContainerContexts
     case settings
 
     public var id: String {
@@ -41,6 +42,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .systemShellEnv: return "system.shellEnv"
         case .systemHosts: return "system.hosts"
         case .systemLocalApps: return "system.localApps"
+        case .systemContainerContexts: return "system.containerContexts"
         case .settings: return "settings"
         }
     }
@@ -65,6 +67,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .systemShellEnv: return L("nav.shellEnv")
         case .systemHosts: return L("nav.hosts")
         case .systemLocalApps: return L("nav.localApps")
+        case .systemContainerContexts: return L("nav.containerContexts")
         case .settings: return L("nav.settings")
         }
     }
@@ -102,6 +105,7 @@ public enum NavigationItem: Hashable, Identifiable {
         case .systemShellEnv: return "terminal.fill"
         case .systemHosts: return "externaldrive.connected.to.line.below"
         case .systemLocalApps: return "app.badge.checkmark"
+        case .systemContainerContexts: return "shippingbox.and.arrow.backward.fill"
         case .settings: return "gearshape"
         }
     }
@@ -111,7 +115,7 @@ extension NavigationItem: CaseIterable {
     public static var allCases: [NavigationItem] {
         var items: [NavigationItem] = [.dashboard]
         items.append(contentsOf: RuntimeKind.allCases.map { .devEnv($0) })
-        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .systemShellEnv, .systemHosts, .systemLocalApps, .settings])
+        items.append(contentsOf: [.packagesBrew, .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesProjectEnv, .aiSkills, .aiCLI, .aiMCP, .systemShellEnv, .systemHosts, .systemLocalApps, .systemContainerContexts, .settings])
         return items
     }
 }
@@ -137,7 +141,7 @@ public extension NavigationItem {
             (title: L("nav.packagesLangs"), items: [.packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet]),
             (title: L("nav.projectEnvGroup"), items: [.packagesProjectEnv]),
             (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
-            (title: L("nav.system"), items: [.systemShellEnv, .systemHosts, .systemLocalApps, .settings])
+            (title: L("nav.system"), items: [.systemShellEnv, .systemHosts, .systemLocalApps, .systemContainerContexts, .settings])
         ]
     }
 }

@@ -194,6 +194,7 @@ public struct GlobalSearchView: View {
         case .go:     target = .packagesGo
         case .node:   target = .packagesNode
         case .python: target = .packagesPython
+        case .containerContext: target = .systemContainerContexts
         }
         navigator.select(target)
         dismiss()
@@ -206,6 +207,7 @@ public struct GlobalSearchView: View {
         case .go:     return "chevron.left.forwardslash.chevron.right"
         case .node:   return "leaf.circle.fill"
         case .python: return "shippingbox.and.arrow.backward"
+        case .containerContext: return "shippingbox.and.arrow.backward.fill"
         }
     }
 
@@ -216,6 +218,7 @@ public struct GlobalSearchView: View {
         case .go:     return .cyan
         case .node:   return .green
         case .python: return .yellow
+        case .containerContext: return .teal
         }
     }
 
@@ -226,6 +229,7 @@ public struct GlobalSearchView: View {
         case .go:     return L("globalSearch.source.go")
         case .node:   return L("globalSearch.source.node")
         case .python: return L("globalSearch.source.python")
+        case .containerContext: return L("globalSearch.source.containerContext")
         }
     }
 }

@@ -30,7 +30,9 @@
 
 以下功能在 v0.3（Phase 1–3）中陆续落地：
 
-- 📱 **本地应用管理**（新增）：扫描 `/Applications` 与 `~/Applications`，识别应用来源（App Store / Brew Cask / 其他），支持打开、Finder 显示位置、移到废纸篓与残余文件（Preferences / Caches / Application Support / Logs / Saved State / Containers / Group Containers）勾选清理；系统托管与 `com.apple.*` 应用受保护
+- 📦 **Cargo / Gem / Composer 镜像管理**（新增）：为 Rust / Ruby / PHP 三大生态补齐镜像切换 + 全局包卸载 + 缓存统计清理三件套，全部沿用「镜像源 / 全局包 / 缓存」三 Tab 结构与二次确认 + 备份策略
+- � **Docker / Podman 上下文管理**（新增）：Docker Contexts 与 Podman Connections 统一入口，支持列表 / 切换 / 新建 / 编辑 / 删除 / Ping 连通性检测，进程调用全部走参数数组、TLS 与 SSH identity 可选，双引擎缺失时相互隔离展示空态
+- � **本地应用管理**：扫描 `/Applications` 与 `~/Applications`，识别应用来源（App Store / Brew Cask / 其他），支持打开、Finder 显示位置、移到废纸篓与残余文件（Preferences / Caches / Application Support / Logs / Saved State / Containers / Group Containers）勾选清理；系统托管与 `com.apple.*` 应用受保护
 - 🌐 **/etc/hosts 管理**：结构化 + 原文双视图编辑，支持条目启用/禁用、Profile 分组切换、通过 AppleScript `with administrator privileges` 提权写入并自动生成备份，与 Shell 环境模块共享同一交互范式
 - 🐚 **Shell 本地环境管理**：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
 - 🐍 **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
@@ -77,7 +79,7 @@
 
 ### 📦 包管理与仓库镜像（Packages）
 
-一站式管理开发者最关心的五大包生态：
+一站式管理开发者最关心的八大包生态：
 
 - **🍺 Homebrew**：可视化 formulae / cask 列表、200ms debounce 搜索、依赖树、卸载、虚拟化滚动
 - **☕ Maven**：`~/.m2/settings.xml` 镜像管理（阿里 / 华为 / 腾讯 / 中央）+ 本地仓库构件浏览、按 GAV 搜索、批量删除；服务器密码写入 macOS Keychain 而非明文
@@ -90,6 +92,18 @@
   - `~/.config/pip/pip.conf` `index-url` 镜像切换（清华 TUNA / 阿里云 / 腾讯 / USTC / PyPI 官方），写入前自动生成 `pip.conf.envmatrix.bak` 备份
   - `pip list --user --format=json` 解析出用户级安装包（**不动系统 Python**），一键搜索 / 卸载
   - `~/Library/Caches/pip` 尺寸统计与 `pip cache purge`
+- **🦀 Rust (cargo)**：
+  - `~/.cargo/config.toml` `[source.crates-io] replace-with` 镜像切换（USTC sparse / TUNA sparse / rsproxy.cn / crates.io 官方），写入前自动备份
+  - `cargo install --list` 解析全局 Crate（`~/.cargo/bin`）+ `cargo uninstall` 二次确认卸载
+  - `~/.cargo/registry` + `~/.cargo/git` 尺寸统计与一键清理
+- **🐡 Ruby (gem)**：
+  - `~/.gemrc` `:sources:` 镜像切换（RubyChina / TUNA / USTC / RubyGems 官方），写入前自动备份
+  - `gem list --user-install` 可视化用户级 Gem，二次确认卸载（**不影响 System Ruby**）
+  - `gem environment` 定位 `GEM_HOME/cache` 尺寸统计与清理
+- **🐘 PHP (composer)**：
+  - `~/.composer/config.json` / `~/.config/composer/config.json` `repositories.packagist.org` 镜像切换（阿里 / 腾讯 / 华为 / Packagist 官方），写入前自动备份
+  - `composer global show --format=json` 列出全局包 + `composer global remove` 二次确认卸载
+  - `composer config cache-dir` 尺寸统计与 `composer clear-cache`
 
 ### 🤖 AI 环境（AI Environments）
 
@@ -138,7 +152,18 @@
 - **筛选与排序**：按 name / bundleId 搜索、按来源 segmented 过滤、按 name / size / source 排序
 - **异步 IO**：扫描、卸载、残余清理均在 `Task.detached(priority: .utility)` 中执行，`isBusy` 状态驱动 ProgressView
 
-### 🔍 全局搜索（Global Search）
+### � 容器上下文（Container Contexts）
+
+统一管理 Docker Contexts 与 Podman Connections，不必再在终端里 `docker context ls` / `podman system connection list`：
+
+- **双引擎并列**：Docker 分区与 Podman 分区互相隔离，任一 CLI 缺失只展示对应空态，不影响另一分区
+- **Docker 支持**：`docker context ls/create/update/rm/use`，unix / tcp / ssh 三种 endpoint 模板，可选 TLS（CA / client cert / client key / skip verify），内置 `default` 不可删除
+- **Podman 支持**：`podman system connection list/add/remove/default`，编辑走 remove + add 事务并在失败时回滚老连接，删除当前 default 后 UI 明确提示"当前默认已失效"
+- **连通性检测**：Ping 展示 client / server 版本或原始 stderr 前 500 字，超过 5s 判为 timeout
+- **进程调用零 shell 拼接**：所有参数以数组形式传递给 `Foundation.Process`，避免命令注入
+- **异步 IO**：所有 CLI 调用在 `Task.detached(priority: .utility)` 中执行，主线程零阻塞
+
+### �🔍 全局搜索（Global Search）
 
 - 按 **⌘F** 打开搜索面板，跨 Brew / Maven / Go / npm / pip 语料聚合
 - 结果按 Source 分组，每组显示条数徽标
@@ -197,7 +222,7 @@
 
 - **macOS 13 Ventura** 及以上
 - **Swift 5.9+**（Xcode 15 或独立 Swift toolchain）
-- 可选：`brew`、`npm`、`pip3`、`go`、`mvn` 等 CLI（EnvMatrix 会在缺失时优雅降级并给出提示）
+- 可选：`brew`、`npm`、`pip3`、`go`、`mvn`、`cargo`、`gem`、`composer` 等 CLI（EnvMatrix 会在缺失时优雅降级并给出提示）
 
 ### 从源码构建
 
@@ -243,6 +268,9 @@ EnvMatrix/
 │   │   ├── NpmrcService.swift
 │   │   ├── NpmService.swift
 │   │   ├── PipService.swift              # pip3 CLI + pip.conf INI 读写
+│   │   ├── CargoService.swift            # cargo CLI + ~/.cargo/config.toml 读写
+│   │   ├── GemService.swift              # gem CLI + ~/.gemrc 读写
+│   │   ├── ComposerService.swift         # composer CLI + composer config.json 读写
 │   │   ├── ShellEnvParser.swift          # rc 文件解析 / 序列化（无损往返）
 │   │   ├── ShellEnvService.swift         # rc 文件列举 / 读写 / 备份
 │   │   ├── HostsParser.swift             # /etc/hosts 解析 / 序列化（无损往返）
@@ -258,9 +286,9 @@ EnvMatrix/
 │   ├── Views/                 # SwiftUI 视图
 │   │   ├── Dashboard/         # 总览（含骨架屏）
 │   │   ├── DevEnv/            # Installed / Available / Usage 三分栏
-│   │   ├── Packages/          # Brew / Maven / Go / Node / Python
+│   │   ├── Packages/          # Brew / Maven / Go / Node / Python / Rust / Ruby / PHP
 │   │   ├── AI/                # Skills / CLI / MCP
-│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）+ /etc/hosts 管理 + Local Apps
+│   │   ├── System/            # Shell 本地环境（rc 文件双视图编辑器）+ /etc/hosts 管理 + Local Apps + Container Contexts
 │   │   ├── Settings/          # General / Backups / Diagnostics
 │   │   └── GlobalSearchView.swift        # ⌘F 全局搜索面板
 │   ├── Utils/                 # 工具类（Localization、Shell 执行等）
@@ -330,7 +358,7 @@ swiftlint                   # 代码风格检查
 
 ## 🗺️ Roadmap
 
-- [x] Homebrew / Maven / Go / Node / Python 包管理
+- [x] Homebrew / Maven / Go / Node / Python / Cargo / Gem / Composer 包管理
 - [x] 11 语言运行时的版本探测与切换
 - [x] 全局搜索 (⌘F) + 结果分组
 - [x] 备份历史 & 诊断报告
@@ -339,9 +367,9 @@ swiftlint                   # 代码风格检查
 - [x] Shell 本地环境（rc 文件双视图编辑）
 - [x] /etc/hosts 双视图管理 + Profile 分组 + 提权写入
 - [x] 本地应用扫描、来源识别与安全卸载（含残余清理）
+- [x] 支持 cargo / gem / composer 镜像管理
+- [x] Docker / Podman 上下文管理
 - [ ] Dashboard 支持自定义卡片顺序
-- [ ] 支持 cargo / gem / composer 镜像管理
-- [ ] Docker / Podman 上下文管理
 - [ ] 环境快照导入导出（一键迁移到新机器）
 - [ ] Runtime Usage 引入 TTL 缓存 & 持久化折叠状态
 - [ ] Universal Binary（Apple Silicon + Intel）发布产物
@@ -352,7 +380,7 @@ swiftlint                   # 代码风格检查
 **Q: EnvMatrix 会修改我的系统配置吗？**
 A: 只有你在界面上**主动点击**"应用/切换/删除"时才会写入。所有写操作在覆盖前都会生成 `.envmatrix.bak` 备份文件，可随时通过 **Settings → Backups** 面板一键还原。对 `/etc/hosts` 的写入会通过 macOS 授权对话框请求管理员权限，仅在你确认后才执行。
 
-**Q: 没有安装 `go` / `npm` / `pip3` / `mvn` 会怎样？**
+**Q: 没有安装 `go` / `npm` / `pip3` / `mvn` / `cargo` / `gem` / `composer` 会怎样？**
 A: 对应模块会显示"未检测到 xxx"的空状态并提示安装建议，不会崩溃或误报。
 
 **Q: 为什么 System 版本的运行时无法删除？**

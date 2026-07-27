@@ -55,6 +55,8 @@ public struct DetailView: View {
             HostsView()
         case .systemLocalApps:
             LocalAppsView()
+        case .systemContainerContexts:
+            ContainerContextsView()
         case .settings:
             SettingsView()
         case .none:
