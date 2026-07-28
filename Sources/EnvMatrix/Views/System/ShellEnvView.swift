@@ -10,7 +10,7 @@ public struct ShellEnvView: View {
     public var body: some View {
         HStack(spacing: 0) {
             sidebar
-                .frame(minWidth: 220, maxWidth: 280)
+                .frame(minWidth: 170, idealWidth: 190, maxWidth: 210)
             Divider()
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -41,15 +41,19 @@ public struct ShellEnvView: View {
 
     private var sidebar: some View {
         List(vm.files, selection: $vm.selection) { file in
-            HStack {
+            HStack(spacing: 6) {
+                Image(systemName: "doc.text")
+                    .foregroundStyle(.secondary)
                 Text(file.kind.displayName)
-                Spacer()
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Spacer(minLength: 4)
                 if file.isCurrentShell {
                     Text(L("shellEnv.currentShell"))
                         .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Capsule().fill(Color.accentColor.opacity(0.2)))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.18)))
                         .foregroundStyle(Color.accentColor)
                 }
             }
@@ -96,6 +100,7 @@ public struct ShellEnvView: View {
                 Text(L("shellEnv.mode.raw")).tag(ShellEnvViewMode.raw)
             }
             .pickerStyle(.segmented)
+            .frame(maxWidth: 320, alignment: .leading)
             .padding(.horizontal)
             .padding(.top, 8)
 
@@ -135,7 +140,9 @@ public struct ShellEnvView: View {
                         .padding(.top, 8)
                 }
             }
+            .frame(maxWidth: 1100, alignment: .leading)
             .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -162,23 +169,32 @@ public struct ShellEnvView: View {
         HStack(spacing: 8) {
             Toggle(L("shellEnv.export"), isOn: exportedBinding(id: v.id))
                 .toggleStyle(.checkbox)
+                .labelsHidden()
+            Text("export")
+                .font(.caption.monospaced())
+                .foregroundStyle(.secondary)
             TextField(L("shellEnv.key"), text: keyBinding(id: v.id))
-                .frame(width: 180)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 140)
             TextField(L("shellEnv.value"), text: valueBinding(id: v.id))
-                .frame(minWidth: 200)
-            Picker(L("shellEnv.quoting"), selection: quotingBinding(id: v.id)) {
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: .infinity)
+            Picker("", selection: quotingBinding(id: v.id)) {
                 Text(L("shellEnv.quoting.double")).tag(ShellQuoting.double)
                 Text(L("shellEnv.quoting.single")).tag(ShellQuoting.single)
                 Text(L("shellEnv.quoting.none")).tag(ShellQuoting.none)
             }
+            .labelsHidden()
             .pickerStyle(.menu)
-            .frame(width: 110)
+            .frame(width: 92)
             Button(action: { vm.removeVariable(id: v.id) }) {
                 Image(systemName: "trash").foregroundStyle(.red)
             }
             .buttonStyle(.borderless)
+            .help(L("shellEnv.removeSegment"))
         }
-        .padding(8)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
         .background(Color.gray.opacity(0.06))
         .cornerRadius(6)
     }
@@ -221,6 +237,8 @@ public struct ShellEnvView: View {
             ForEach(Array(entry.segments.enumerated()), id: \.offset) { idx, seg in
                 HStack(spacing: 8) {
                     TextField("", text: segmentBinding(entryID: entry.id, index: idx, initial: seg))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: .infinity)
                     Button {
                         vm.removePathAppendSegment(pathEntryID: entry.id, at: idx)
                     } label: {
@@ -232,6 +250,8 @@ public struct ShellEnvView: View {
             }
             HStack(spacing: 8) {
                 TextField(L("shellEnv.segment.placeholder"), text: draftBinding(entryID: entry.id))
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: .infinity)
                     .onSubmit { commitDraft(entryID: entry.id) }
                 Button {
                     commitDraft(entryID: entry.id)
