@@ -132,4 +132,84 @@ final class RuntimeViewModelTests: XCTestCase {
         XCTAssertFalse(vm.installed.contains(where: { $0.version == "18.17.0" }))
         XCTAssertNil(vm.activeVersion)
     }
+
+    func testUsageTTLCacheHitSkipsScan() async throws {
+        let mock = MockRuntimeService()
+        let vm = RuntimeViewModel(kind: .node, service: mock)
+
+        await vm.refreshUsage()
+        let firstDate = vm.usageLoadedAt
+        XCTAssertNotNil(firstDate)
+
+        try await Task.sleep(nanoseconds: 10_000_000)
+
+        await vm.refreshUsage()
+        XCTAssertEqual(vm.usageLoadedAt, firstDate)
+    }
+
+    func testUsageForceRefreshBypassesTTL() async throws {
+        let mock = MockRuntimeService()
+        let vm = RuntimeViewModel(kind: .node, service: mock)
+
+        await vm.refreshUsage()
+        let firstDate = vm.usageLoadedAt
+        XCTAssertNotNil(firstDate)
+
+        try await Task.sleep(nanoseconds: 10_000_000)
+
+        await vm.refreshUsage(force: true)
+        XCTAssertNotNil(vm.usageLoadedAt)
+        XCTAssertGreaterThan(vm.usageLoadedAt!, firstDate!)
+    }
+
+    func testActivateAndUninstallInvalidateUsageLoadedAt() async throws {
+        // Activate invalidates.
+        do {
+            let mock = MockRuntimeService()
+            let v = makeVersion("18.17.0")
+            mock.installedList = [v]
+            let vm = RuntimeViewModel(kind: .node, service: mock)
+
+            await vm.refreshInstalled()
+            await vm.refreshUsage()
+            XCTAssertNotNil(vm.usageLoadedAt)
+
+            await vm.activate(v)
+            XCTAssertNil(vm.usageLoadedAt)
+        }
+
+        // Uninstall invalidates.
+        do {
+            let mock = MockRuntimeService()
+            let v = makeVersion("18.17.0")
+            mock.installedList = [v]
+            let vm = RuntimeViewModel(kind: .node, service: mock)
+
+            await vm.refreshInstalled()
+            await vm.refreshUsage()
+            XCTAssertNotNil(vm.usageLoadedAt)
+
+            await vm.uninstall(v)
+            XCTAssertNil(vm.usageLoadedAt)
+        }
+    }
+
+    func testIsUsageFreshBoundaries() async throws {
+        let mock = MockRuntimeService()
+        let vm = RuntimeViewModel(kind: .node, service: mock)
+
+        // nil usageLoadedAt => false regardless of ttl.
+        XCTAssertFalse(vm.isUsageFresh())
+        XCTAssertFalse(vm.isUsageFresh(ttl: .infinity))
+
+        // Populate usageLoadedAt via a refresh so we have a Date().
+        await vm.refreshUsage()
+        XCTAssertNotNil(vm.usageLoadedAt)
+
+        // ttl: 0 => not fresh.
+        XCTAssertFalse(vm.isUsageFresh(ttl: 0))
+
+        // ttl: .infinity => fresh.
+        XCTAssertTrue(vm.isUsageFresh(ttl: .infinity))
+    }
 }

@@ -392,7 +392,7 @@ swiftlint                   # 代码风格检查
 - [x] Docker / Podman 镜像与实例管理
 - [ ] Dashboard 支持自定义卡片顺序
 - [ ] 环境快照导入导出（一键迁移到新机器）
-- [ ] Runtime Usage 引入 TTL 缓存 & 持久化折叠状态
+- [x] Runtime Usage 引入 TTL 缓存 & 持久化折叠状态
 - [ ] Universal Binary（Apple Silicon + Intel）发布产物
 - [ ] Homebrew tap 分发
 

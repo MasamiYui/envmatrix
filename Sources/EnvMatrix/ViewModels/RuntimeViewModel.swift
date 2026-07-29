@@ -3,6 +3,8 @@ import SwiftUI
 
 @MainActor
 public final class RuntimeViewModel: ObservableObject {
+    public nonisolated static let usageTTL: TimeInterval = 5 * 60
+
     public let kind: RuntimeKind
 
     @Published public var installed: [RuntimeVersion] = []
@@ -15,6 +17,7 @@ public final class RuntimeViewModel: ObservableObject {
     @Published public var installingVersionIDs: Set<String> = []
 
     @Published public var usageByVersionID: [String: Int64] = [:]
+    @Published public private(set) var usageLoadedAt: Date? = nil
     @Published public var isLoadingUsage: Bool = false
 
     private let service: RuntimeService
@@ -28,7 +31,13 @@ public final class RuntimeViewModel: ObservableObject {
         usageByVersionID.values.reduce(0, +)
     }
 
-    public func refreshUsage() async {
+    public func isUsageFresh(ttl: TimeInterval = RuntimeViewModel.usageTTL) -> Bool {
+        guard let t = usageLoadedAt else { return false }
+        return Date().timeIntervalSince(t) < ttl
+    }
+
+    public func refreshUsage(force: Bool = false) async {
+        if !force && isUsageFresh() { return }
         let items = installed
         isLoadingUsage = true
         defer { isLoadingUsage = false }
@@ -45,6 +54,7 @@ public final class RuntimeViewModel: ObservableObject {
         var map: [String: Int64] = [:]
         for (id, size) in sizes { map[id] = size }
         self.usageByVersionID = map
+        self.usageLoadedAt = Date()
     }
 
     public func refreshInstalled() async {
@@ -101,6 +111,7 @@ public final class RuntimeViewModel: ObservableObject {
             }
             installProgress[version.id] = 1.0
             await refreshInstalled()
+            self.usageLoadedAt = nil
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -110,6 +121,7 @@ public final class RuntimeViewModel: ObservableObject {
         do {
             try service.activate(version: version)
             await refreshInstalled()
+            self.usageLoadedAt = nil
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -119,6 +131,7 @@ public final class RuntimeViewModel: ObservableObject {
         do {
             try service.uninstall(version: version)
             await refreshInstalled()
+            self.usageLoadedAt = nil
         } catch {
             self.errorMessage = error.localizedDescription
         }

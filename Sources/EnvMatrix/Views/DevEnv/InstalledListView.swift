@@ -4,11 +4,13 @@ import AppKit
 public struct InstalledListView: View {
     @ObservedObject var vm: RuntimeViewModel
     @State private var confirmUninstall: RuntimeVersion? = nil
-    @State private var managedExpanded: Bool = true
-    @State private var systemExpanded: Bool = true
+    @AppStorage private var managedExpanded: Bool
+    @AppStorage private var systemExpanded: Bool
 
     public init(vm: RuntimeViewModel) {
         self.vm = vm
+        _managedExpanded = AppStorage(wrappedValue: true, "envmatrix.runtime.installed.managedExpanded.\(vm.kind.rawValue)")
+        _systemExpanded = AppStorage(wrappedValue: true, "envmatrix.runtime.installed.systemExpanded.\(vm.kind.rawValue)")
     }
 
     public var body: some View {

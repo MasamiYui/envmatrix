@@ -47,7 +47,7 @@ public struct UsageListView: View {
                     .controlSize(.small)
             }
             Button {
-                Task { await vm.refreshUsage() }
+                Task { await vm.refreshUsage(force: true) }
             } label: {
                 Label(L("runtime.usage.recompute"), systemImage: "arrow.clockwise")
             }

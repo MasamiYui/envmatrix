@@ -51,8 +51,8 @@ public struct RuntimeDetailView: View {
             await viewModel.loadAvailable()
         }
         .onChange(of: selectedTab) { newValue in
-            if newValue == 2 && viewModel.usageByVersionID.isEmpty && !viewModel.isLoadingUsage {
-                Task { await viewModel.refreshUsage() }
+            if newValue == 2 && !viewModel.isUsageFresh() && !viewModel.isLoadingUsage {
+                Task { await viewModel.refreshUsage(force: false) }
             }
         }
     }
@@ -83,6 +83,7 @@ public struct RuntimeDetailView: View {
                 Task {
                     await viewModel.loadAvailable()
                     await viewModel.refreshInstalled()
+                    await viewModel.refreshUsage(force: true)
                 }
             }
         }
