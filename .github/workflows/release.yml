@@ -52,42 +52,41 @@ jobs:
           swift build -c release --arch arm64 --arch x86_64
 
       - name: Assemble EnvMatrix.app bundle
-        id: bundle
+        id: assemble
         run: |
           set -euxo pipefail
           VERSION="${{ steps.version.outputs.version }}"
           BIN_PATH=$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)
-          APP="EnvMatrix.app"
-          rm -rf "$APP"
-          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-          cp "$BIN_PATH/EnvMatrix" "$APP/Contents/MacOS/EnvMatrix"
-          chmod +x "$APP/Contents/MacOS/EnvMatrix"
+          chmod +x scripts/assemble_app.sh
+          scripts/assemble_app.sh \
+            --bin "$BIN_PATH/EnvMatrix" \
+            --out . \
+            --version "$VERSION" \
+            --icon Sources/EnvMatrix/Resources/AppIcon.icns \
+            --sign adhoc
 
-          cat > "$APP/Contents/Info.plist" <<PLIST
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>CFBundleName</key>            <string>EnvMatrix</string>
-            <key>CFBundleDisplayName</key>     <string>EnvMatrix</string>
-            <key>CFBundleIdentifier</key>      <string>dev.envmatrix.app</string>
-            <key>CFBundleExecutable</key>      <string>EnvMatrix</string>
-            <key>CFBundlePackageType</key>     <string>APPL</string>
-            <key>CFBundleShortVersionString</key><string>${VERSION}</string>
-            <key>CFBundleVersion</key>         <string>${VERSION}</string>
-            <key>LSMinimumSystemVersion</key>  <string>13.0</string>
-            <key>NSHighResolutionCapable</key> <true/>
-            <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
-          </dict>
-          </plist>
-          PLIST
+      - name: Verify universal architectures
+        id: verify
+        run: |
+          set -euxo pipefail
+          ARCHS=$(lipo -archs EnvMatrix.app/Contents/MacOS/EnvMatrix)
+          echo "$ARCHS"
+          echo "$ARCHS" | grep -qw arm64
+          echo "$ARCHS" | grep -qw x86_64
+          echo "archs=$ARCHS" >> "$GITHUB_OUTPUT"
 
+      - name: Package zip and compute SHA-256
+        id: bundle
+        run: |
+          set -euxo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
           ZIP="EnvMatrix-${VERSION}-macOS-universal.zip"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent EnvMatrix.app "$ZIP"
           shasum -a 256 "$ZIP" | tee "$ZIP.sha256"
-
-          echo "zip=$ZIP"           >> "$GITHUB_OUTPUT"
-          echo "sha=$ZIP.sha256"    >> "$GITHUB_OUTPUT"
+          SHA256=$(awk '{print $1}' "$ZIP.sha256")
+          echo "zip=$ZIP"          >> "$GITHUB_OUTPUT"
+          echo "sha=$ZIP.sha256"   >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256"    >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -105,6 +104,11 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          body: |
+            ## Build info
+
+            - Architectures: ${{ steps.verify.outputs.archs }}
+            - SHA-256: `${{ steps.bundle.outputs.sha256 }}`  (${{ steps.bundle.outputs.zip }})
           files: |
             ${{ steps.bundle.outputs.zip }}
             ${{ steps.bundle.outputs.sha }}

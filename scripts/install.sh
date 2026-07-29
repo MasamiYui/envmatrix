@@ -120,64 +120,23 @@ ok "Built: $BIN_FILE"
 STAGE_DIR="$(mktemp -d -t envmatrix-install)"
 trap 'rm -rf "$STAGE_DIR"' EXIT
 
-APP_STAGE="$STAGE_DIR/$APP_NAME.app"
-mkdir -p "$APP_STAGE/Contents/MacOS" "$APP_STAGE/Contents/Resources"
-
-cp "$BIN_FILE" "$APP_STAGE/Contents/MacOS/$APP_NAME"
-chmod +x "$APP_STAGE/Contents/MacOS/$APP_NAME"
-
-# SwiftPM emits a per-target resource bundle next to the binary (e.g.
-# `EnvMatrix_EnvMatrix.bundle`). `Bundle.module` searches the executable's
-# directory *and* the standard `.app/Contents/Resources` location, so we place
-# it under Contents/Resources — this keeps codesign happy (nested bundles under
-# Contents/MacOS confuse `codesign --deep`) while still being discoverable.
-shopt -s nullglob
-RESOURCE_BUNDLES=("$BIN_PATH"/*.bundle)
-shopt -u nullglob
-if (( ${#RESOURCE_BUNDLES[@]} > 0 )); then
-    for bundle in "${RESOURCE_BUNDLES[@]}"; do
-        cp -R "$bundle" "$APP_STAGE/Contents/Resources/"
-        ok "Included SwiftPM resource bundle: $(basename "$bundle")"
-    done
-else
-    warn "No SwiftPM resource bundle found in $BIN_PATH; Bundle.module lookups may fail."
-fi
-
+ASSEMBLE_ARGS=(
+    --bin "$BIN_FILE"
+    --out "$STAGE_DIR"
+    --version "$VERSION"
+    --sign adhoc
+    --bundle-id "$BUNDLE_ID"
+)
 if [[ -f "$ICON_SRC" ]]; then
-    cp "$ICON_SRC" "$APP_STAGE/Contents/Resources/AppIcon.icns"
-    ICON_KEY="<key>CFBundleIconFile</key><string>AppIcon</string>"
+    ASSEMBLE_ARGS+=(--icon "$ICON_SRC")
 else
     warn "AppIcon.icns not found at $ICON_SRC, skipping icon."
-    ICON_KEY=""
 fi
 
-cat > "$APP_STAGE/Contents/Info.plist" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleName</key>              <string>$APP_NAME</string>
-    <key>CFBundleDisplayName</key>       <string>$APP_NAME</string>
-    <key>CFBundleIdentifier</key>        <string>$BUNDLE_ID</string>
-    <key>CFBundleExecutable</key>        <string>$APP_NAME</string>
-    <key>CFBundlePackageType</key>       <string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>$VERSION</string>
-    <key>CFBundleVersion</key>           <string>$VERSION</string>
-    <key>LSMinimumSystemVersion</key>    <string>$MIN_MACOS</string>
-    <key>NSHighResolutionCapable</key>   <true/>
-    <key>LSApplicationCategoryType</key> <string>public.app-category.developer-tools</string>
-    $ICON_KEY
-</dict>
-</plist>
-PLIST
+"$SCRIPT_DIR/assemble_app.sh" "${ASSEMBLE_ARGS[@]}"
 
-# Ad-hoc codesign so Gatekeeper / launchd accepts the fresh bundle on modern macOS.
-if command -v codesign >/dev/null; then
-    codesign --force --deep --sign - "$APP_STAGE" >/dev/null 2>&1 || \
-        warn "codesign (ad-hoc) failed; the app should still run for local use."
-fi
-
-ok "Assembled bundle at $APP_STAGE"
+APP_STAGE="$STAGE_DIR/$APP_NAME.app"
+[[ -d "$APP_STAGE" ]] || die "Assemble step did not produce $APP_STAGE"
 
 # ------------------------- install --------------------------------------------
 NEEDS_SUDO=0

@@ -231,6 +231,21 @@
 - **Swift 5.9+**（Xcode 15 或独立 Swift toolchain）
 - 可选：`brew`、`npm`、`pip3`、`go`、`mvn`、`cargo`、`gem`、`composer` 等 CLI（EnvMatrix 会在缺失时优雅降级并给出提示）
 
+### 下载预编译产物
+
+从 [GitHub Releases](https://github.com/MasamiYui/envmatrix/releases) 下载 **Universal Binary**（同时支持 Apple Silicon 与 Intel，无需 Rosetta）：
+
+```bash
+# 将 <version> 替换为最新版本号（如 1.0.0）
+curl -LO https://github.com/MasamiYui/envmatrix/releases/latest/download/EnvMatrix-<version>-macOS-universal.zip
+unzip EnvMatrix-<version>-macOS-universal.zip
+xattr -dr com.apple.quarantine EnvMatrix.app
+mv EnvMatrix.app /Applications/
+open /Applications/EnvMatrix.app
+```
+
+产物为 ad-hoc 签名的 `.app`，包含 `arm64` 与 `x86_64` 两个 Mach-O slice；首次运行时若被 Gatekeeper 拦截，右键"打开"或执行上述 `xattr -dr` 即可放行。
+
 ### 从源码构建
 
 ```bash
@@ -393,7 +408,7 @@ swiftlint                   # 代码风格检查
 - [ ] Dashboard 支持自定义卡片顺序
 - [ ] 环境快照导入导出（一键迁移到新机器）
 - [x] Runtime Usage 引入 TTL 缓存 & 持久化折叠状态
-- [ ] Universal Binary（Apple Silicon + Intel）发布产物
+- [x] Universal Binary（Apple Silicon + Intel）发布产物
 - [ ] Homebrew tap 分发
 
 ## ❓ FAQ
