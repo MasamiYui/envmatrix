@@ -17,6 +17,7 @@ public extension RuntimeKind {
         case .bun: return "B"
         case .dotnet: return "."
         case .erlang: return "E"
+        case .kotlin: return "K"
         }
     }
 
@@ -34,6 +35,7 @@ public extension RuntimeKind {
         case .bun: return "leaf.fill"
         case .dotnet: return "square.stack.3d.up.fill"
         case .erlang: return "antenna.radiowaves.left.and.right"
+        case .kotlin: return "k.square"
         }
     }
 
@@ -51,6 +53,7 @@ public extension RuntimeKind {
         case .bun: return Color(red: 0.97, green: 0.75, blue: 0.29)    // Bun cream yellow
         case .dotnet: return Color(red: 0.32, green: 0.30, blue: 0.75) // .NET violet
         case .erlang: return Color(red: 0.61, green: 0.16, blue: 0.35) // Erlang burgundy
+        case .kotlin: return Color(red: 0.44, green: 0.32, blue: 0.98) // Kotlin purple
         }
     }
 

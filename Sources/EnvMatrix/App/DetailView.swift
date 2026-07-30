@@ -41,6 +41,10 @@ public struct DetailView: View {
             PhpRepositoryView()
         case .packagesDotnet:
             DotnetRepositoryView()
+        case .packagesUv:
+            UvRepositoryView()
+        case .packagesPnpm:
+            PnpmRepositoryView()
         case .packagesProjectEnv:
             ProjectEnvView()
         case .aiSkills:

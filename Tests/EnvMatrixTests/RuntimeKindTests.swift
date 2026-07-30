@@ -3,7 +3,7 @@ import XCTest
 
 final class RuntimeKindTests: XCTestCase {
     func testAllCasesCountIsEleven() {
-        XCTAssertEqual(RuntimeKind.allCases.count, 11)
+        XCTAssertEqual(RuntimeKind.allCases.count, 12)
     }
 
     func testNewRuntimesHaveNonEmptyDisplayName() {

@@ -32,6 +32,8 @@ extension L10n {
         "nav.rustRepo": "Rust Global",
         "nav.phpRepo": "PHP Global",
         "nav.dotnetRepo": ".NET Global",
+        "nav.uvRepo": "uv Global",
+        "nav.pnpmRepo": "pnpm Global",
         "nav.projectEnv": "Project Environments",
 
         "common.refresh": "Refresh",
@@ -80,6 +82,8 @@ extension L10n {
         "nav.rustRepo": "Rust 全局环境",
         "nav.phpRepo": "PHP 全局环境",
         "nav.dotnetRepo": ".NET 全局环境",
+        "nav.uvRepo": "uv 全局环境",
+        "nav.pnpmRepo": "pnpm 全局环境",
         "nav.projectEnv": "项目本地环境",
 
         "common.refresh": "刷新",

@@ -12,6 +12,7 @@ public enum RuntimeKind: String, CaseIterable, Codable, Identifiable {
     case bun
     case dotnet
     case erlang
+    case kotlin
 
     public var id: String { rawValue }
 
@@ -28,6 +29,7 @@ public enum RuntimeKind: String, CaseIterable, Codable, Identifiable {
         case .bun: return "Bun"
         case .dotnet: return ".NET"
         case .erlang: return "Erlang"
+        case .kotlin: return "Kotlin"
         }
     }
 
@@ -44,6 +46,7 @@ public enum RuntimeKind: String, CaseIterable, Codable, Identifiable {
         case .bun: return "bun"
         case .dotnet: return "dotnet"
         case .erlang: return "erl"
+        case .kotlin: return "kotlinc"
         }
     }
 }

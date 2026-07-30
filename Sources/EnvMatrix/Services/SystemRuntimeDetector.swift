@@ -238,6 +238,8 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
             dirs.append(home.appendingPathComponent(".dotnet"))
         case .erlang:
             dirs.append(contentsOf: expandGlob("\(home.path)/.kerl/installations/*/bin"))
+        case .kotlin:
+            dirs.append(contentsOf: expandGlob("\(home.path)/.sdkman/candidates/kotlin/*/bin"))
         }
 
         // Dedupe preserving order
@@ -329,6 +331,7 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
         case .bun: return ["--version"]
         case .dotnet: return ["--version"]
         case .erlang: return ["--version"]
+        case .kotlin: return ["-version"]
         }
     }
 
@@ -382,6 +385,9 @@ public final class DefaultSystemRuntimeDetector: SystemRuntimeDetector {
                 return m
             }
             return firstMatch(in: trimmed, pattern: #"(\d+(?:\.\d+){1,2})"#, group: 1)
+        case .kotlin:
+            // "Kotlin version 1.9.22-release-704 (JRE 17.0.9+0)"
+            return firstMatch(in: trimmed, pattern: #"Kotlin version\s+(\d+\.\d+\.\d+)"#, group: 1)
         }
     }
 

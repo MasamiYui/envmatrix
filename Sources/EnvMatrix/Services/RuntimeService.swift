@@ -73,6 +73,7 @@ public final class DefaultRuntimeService: NSObject, RuntimeService {
             defaults[.bun] = BunProvider()
             defaults[.dotnet] = DotnetProvider()
             defaults[.erlang] = ErlangProvider()
+            defaults[.kotlin] = KotlinProvider()
             self.providers = defaults
         }
         super.init()

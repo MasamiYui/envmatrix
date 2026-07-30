@@ -3,7 +3,7 @@ import XCTest
 
 final class ModelsTests: XCTestCase {
     func testRuntimeKindCount() {
-        XCTAssertEqual(RuntimeKind.allCases.count, 11)
+        XCTAssertEqual(RuntimeKind.allCases.count, 12)
     }
 
     func testBinaryNameMapping() {
