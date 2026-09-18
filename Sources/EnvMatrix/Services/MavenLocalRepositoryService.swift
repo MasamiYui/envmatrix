@@ -30,18 +30,38 @@ public final class DefaultMavenLocalRepositoryService: MavenLocalRepositoryServi
     public let repositoryURL: URL
     private let fileManager: FileManager
 
+    private let cacheLock = NSLock()
+    private var cachedArtifacts: [MavenArtifact]?
+    private var cachedAt: Date?
+    private let cacheTTL: TimeInterval = 300
+    private var scanCounter: Int = 0
+    private var watchHandle: WatchHandle?
+    private let fileSystemWatcher: FileSystemWatcher?
+
     public init(
         repositoryURL: URL? = nil,
         fileManager: FileManager = .default
     ) {
-        if let repositoryURL = repositoryURL {
-            self.repositoryURL = repositoryURL
-        } else {
-            self.repositoryURL = URL(fileURLWithPath: NSHomeDirectory())
-                .appendingPathComponent(".m2", isDirectory: true)
-                .appendingPathComponent("repository", isDirectory: true)
-        }
+        self.repositoryURL = Self.resolveURL(repositoryURL)
         self.fileManager = fileManager
+        self.fileSystemWatcher = nil
+    }
+
+    public init(
+        repositoryURL: URL? = nil,
+        fileManager: FileManager = .default,
+        fileSystemWatcher: FileSystemWatcher?
+    ) {
+        self.repositoryURL = Self.resolveURL(repositoryURL)
+        self.fileManager = fileManager
+        self.fileSystemWatcher = fileSystemWatcher
+    }
+
+    private static func resolveURL(_ requested: URL?) -> URL {
+        if let requested = requested { return requested }
+        return URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent(".m2", isDirectory: true)
+            .appendingPathComponent("repository", isDirectory: true)
     }
 
     public var repositoryExists: Bool {
@@ -51,12 +71,52 @@ public final class DefaultMavenLocalRepositoryService: MavenLocalRepositoryServi
     }
 
     public func scan() throws -> [MavenArtifact] {
+        cacheLock.lock()
+        if let cached = cachedArtifacts, let at = cachedAt, Date().timeIntervalSince(at) < cacheTTL {
+            cacheLock.unlock()
+            return cached
+        }
+        cacheLock.unlock()
         guard repositoryExists else {
             throw MavenLocalRepositoryError.repositoryNotFound(repositoryURL.path)
         }
         var artifacts: [MavenArtifact] = []
         try scanArtifactDirs(under: repositoryURL, into: &artifacts)
-        return artifacts.sorted { $0.id.localizedCaseInsensitiveCompare($1.id) == .orderedAscending }
+        let sorted = artifacts.sorted { $0.id.localizedCaseInsensitiveCompare($1.id) == .orderedAscending }
+        cacheLock.lock()
+        cachedArtifacts = sorted
+        cachedAt = Date()
+        scanCounter += 1
+        cacheLock.unlock()
+        startWatchingIfNeeded()
+        return sorted
+    }
+
+    public func invalidateCache() {
+        cacheLock.lock()
+        cachedArtifacts = nil
+        cachedAt = nil
+        cacheLock.unlock()
+        NotificationCenter.default.post(name: .envMatrixSearchCorpusInvalidated, object: "maven")
+    }
+
+    public var scanCount: Int {
+        cacheLock.lock(); defer { cacheLock.unlock() }
+        return scanCounter
+    }
+
+    private func startWatchingIfNeeded() {
+        cacheLock.lock()
+        guard watchHandle == nil, let watcher = fileSystemWatcher, repositoryExists else {
+            cacheLock.unlock(); return
+        }
+        cacheLock.unlock()
+        let handle = watcher.watch(paths: [repositoryURL.path], latency: 0.5, debounceInterval: 0.5) { [weak self] _ in
+            self?.invalidateCache()
+        }
+        cacheLock.lock()
+        watchHandle = handle
+        cacheLock.unlock()
     }
 
     public func totalSize() throws -> Int64 {
@@ -78,6 +138,7 @@ public final class DefaultMavenLocalRepositoryService: MavenLocalRepositoryServi
         } catch {
             throw MavenLocalRepositoryError.deleteFailed(error.localizedDescription)
         }
+        invalidateCache()
     }
 
     public func deleteVersion(_ version: MavenArtifactVersion) throws {
@@ -89,6 +150,7 @@ public final class DefaultMavenLocalRepositoryService: MavenLocalRepositoryServi
         } catch {
             throw MavenLocalRepositoryError.deleteFailed(error.localizedDescription)
         }
+        invalidateCache()
     }
 
     // MARK: - Scanning

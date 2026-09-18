@@ -21,7 +21,7 @@ public final class MavenLocalRepositoryViewModel: ObservableObject {
 
     private let service: MavenLocalRepositoryService
 
-    public init(service: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService()) {
+    public init(service: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(fileSystemWatcher: AppServices.shared.fileSystemWatcher)) {
         self.service = service
         self.repositoryPath = service.repositoryURL.path
         self.repositoryExists = service.repositoryExists

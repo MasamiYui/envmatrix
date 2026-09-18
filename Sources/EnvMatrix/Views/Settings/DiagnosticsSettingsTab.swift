@@ -13,12 +13,18 @@ struct DiagnosticsSettingsTab: View {
     private let service = DiagnosticReportService()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            header
-            preview
-            footer
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                header
+                preview
+                footer
+                Divider()
+                Text(L("settings.performance"))
+                    .font(.headline)
+                PerformanceStatusBlock()
+            }
+            .padding()
         }
-        .padding()
     }
 
     private var header: some View {

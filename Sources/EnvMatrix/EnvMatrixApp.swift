@@ -33,6 +33,7 @@ struct EnvMatrixApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        _ = AppServices.shared
         if let image = Self.loadAppIconImage() {
             NSApplication.shared.applicationIconImage = image
         }
@@ -57,6 +58,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             window.center()
         }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        AppServices.shared.shutdown()
     }
 
     /// Loads the bundled AppIcon in a way that never fatals at launch.

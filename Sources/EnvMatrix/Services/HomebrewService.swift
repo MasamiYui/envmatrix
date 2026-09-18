@@ -24,8 +24,10 @@ public final class DefaultHomebrewService: HomebrewService {
     private var brewVersion: String = ""
     private let cacheLock = NSLock()
     private var cachedInventory: BrewInventory?
+    private let processPool: ProcessPool
 
-    public init(explicitPath: String? = nil) {
+    public init(explicitPath: String? = nil, processPool: ProcessPool = AppServices.shared.processPool) {
+        self.processPool = processPool
         if let p = explicitPath, FileManager.default.isExecutableFile(atPath: p) {
             self.brewPath = p
             return
@@ -33,6 +35,12 @@ public final class DefaultHomebrewService: HomebrewService {
         // Homebrew canonically lives at one of these two locations.
         let candidates = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
         self.brewPath = candidates.first { FileManager.default.isExecutableFile(atPath: $0) } ?? ""
+    }
+
+    /// Test-friendly initializer that bypasses executable-file validation.
+    public init(brewPath: String, processPool: ProcessPool) {
+        self.brewPath = brewPath
+        self.processPool = processPool
     }
 
     // MARK: - Public API
@@ -44,9 +52,10 @@ public final class DefaultHomebrewService: HomebrewService {
         guard isAvailable else { throw BrewError.notInstalled }
 
         // Run info + outdated concurrently; outdated is cheap once info's cache is warm.
-        async let infoTask = runBrewJSON(["info", "--installed", "--json=v2"])
-        async let outdatedTask = runBrewJSON(["outdated", "--json=v2", "--greedy"])
-        async let versionTask = runBrew(["--version"])
+        let key: (String) -> String? = { forceRefresh ? nil : $0 }
+        async let infoTask = runBrewJSON(["info", "--installed", "--json=v2"], dedupeKey: key("brew:info:v2"))
+        async let outdatedTask = runBrewJSON(["outdated", "--json=v2", "--greedy"], dedupeKey: key("brew:outdated:v2"))
+        async let versionTask = runBrewPooled(["--version"], dedupeKey: key("brew:version"))
 
         let infoData = try await infoTask
         let outdatedData = try await outdatedTask
@@ -149,8 +158,12 @@ public final class DefaultHomebrewService: HomebrewService {
         try await Shell.run(brewPath, args, env: minimalEnv())
     }
 
-    private func runBrewJSON(_ args: [String]) async throws -> Data {
-        let res = try await runBrew(args)
+    private func runBrewPooled(_ args: [String], dedupeKey: String?) async throws -> ProcessResult {
+        try await processPool.run(command: brewPath, arguments: args, environment: minimalEnv(), dedupeKey: dedupeKey)
+    }
+
+    private func runBrewJSON(_ args: [String], dedupeKey: String?) async throws -> Data {
+        let res = try await runBrewPooled(args, dedupeKey: dedupeKey)
         if res.exitCode != 0 {
             throw BrewError.commandFailed(
                 command: args.joined(separator: " "),

@@ -73,7 +73,7 @@ public final class SearchAggregator: ObservableObject {
 
     public init(
         brewService: HomebrewService = DefaultHomebrewService(),
-        mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(),
+        mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(fileSystemWatcher: AppServices.shared.fileSystemWatcher),
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
         npmService: NpmService = DefaultNpmService(),
         pipService: PipService = DefaultPipService(),

@@ -19,7 +19,7 @@ public struct DiagnosticReportService {
 
     public init(
         brewService: HomebrewService = DefaultHomebrewService(),
-        mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(),
+        mavenService: MavenLocalRepositoryService = DefaultMavenLocalRepositoryService(fileSystemWatcher: AppServices.shared.fileSystemWatcher),
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
         npmService: NpmService = DefaultNpmService(),
         npmrcService: NpmrcService = DefaultNpmrcService(),
