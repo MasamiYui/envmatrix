@@ -29,6 +29,11 @@ public final class NodeCacheViewModel: ObservableObject {
         }
     }
 
+    static func freedText(_ bytes: Int64?) -> String? {
+        guard let bytes else { return nil }
+        return ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+    }
+
     public func requestClean() {
         self.showCleanConfirm = true
     }
@@ -44,7 +49,9 @@ public final class NodeCacheViewModel: ObservableObject {
         self.infoMessage = nil
         defer { self.isCleaning = false }
         do {
+            let before = stats?.sizeBytes
             try await service.cacheClean()
+            OperationLog.shared.record(.cache, title: L("history.op.cache.npm"), detail: Self.freedText(before))
             self.infoMessage = L("nodeRepo.cache.cleaned")
             await load()
             scheduleInfoClear()

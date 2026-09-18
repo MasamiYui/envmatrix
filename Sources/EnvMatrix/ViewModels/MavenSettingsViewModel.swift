@@ -63,6 +63,13 @@ public final class MavenSettingsViewModel: ObservableObject {
                 settings.localRepository = localRepository
             }
             try service.write(settings)
+            let m2 = FileSystem.homeURL.appendingPathComponent(".m2", isDirectory: true)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.maven"),
+                detail: mirrors.filter { $0.isEnabled }.map { $0.url }.joined(separator: ", "),
+                target: m2.appendingPathComponent("settings.xml"),
+                backup: OperationLog.latestBackup(in: m2, prefix: "settings.xml.", suffix: ".bak")
+            )
             self.errorMessage = nil
         } catch {
             self.errorMessage = error.localizedDescription

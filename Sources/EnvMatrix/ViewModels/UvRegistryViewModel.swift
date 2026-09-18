@@ -53,6 +53,12 @@ public final class UvRegistryViewModel: ObservableObject {
         self.infoMessage = nil
         do {
             try configService.setRegistry(url: value)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.uv"), detail: value,
+                target: configService.uvConfigURL,
+                backup: OperationLog.latestBackup(in: configService.uvConfigURL.deletingLastPathComponent(),
+                                                  prefix: "uv.toml.", suffix: ".bak")
+            )
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("uvRepo.msg.saved")

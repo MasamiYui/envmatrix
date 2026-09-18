@@ -43,6 +43,7 @@ public final class DotnetRegistryViewModel: ObservableObject {
         self.errorMessage = nil; self.infoMessage = nil
         do {
             try await service.setPrimarySource(name: name, url: url)
+            OperationLog.shared.record(.registry, title: L("history.op.registry.nuget"), detail: "\(name) · \(url)")
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")
             await load()

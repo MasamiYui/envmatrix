@@ -44,7 +44,9 @@ public final class PythonCacheViewModel: ObservableObject {
         self.infoMessage = nil
         defer { self.isCleaning = false }
         do {
+            let before = stats?.sizeBytes
             try await service.cachePurge()
+            OperationLog.shared.record(.cache, title: L("history.op.cache.pip"), detail: NodeCacheViewModel.freedText(before))
             self.infoMessage = L("pythonRepo.cache.cleaned")
             await load()
             scheduleInfoClear()

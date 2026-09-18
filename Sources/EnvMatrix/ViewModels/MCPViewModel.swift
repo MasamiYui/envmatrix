@@ -41,8 +41,10 @@ public final class MCPViewModel: ObservableObject {
         do {
             if servers.contains(where: { $0.id == server.id }) {
                 try service.update(server)
+                OperationLog.shared.record(.mcp, title: String(format: L("history.op.mcp.update"), server.name), detail: server.command)
             } else {
                 try service.add(server)
+                OperationLog.shared.record(.mcp, title: String(format: L("history.op.mcp.add"), server.name), detail: server.command)
             }
             self.isPresentingEditor = false
             self.editing = nil
@@ -55,6 +57,7 @@ public final class MCPViewModel: ObservableObject {
     public func delete(_ server: MCPServer) {
         do {
             try service.delete(server.id)
+            OperationLog.shared.record(.mcp, title: String(format: L("history.op.mcp.delete"), server.name), detail: server.command)
             refresh()
         } catch {
             self.errorMessage = error.localizedDescription

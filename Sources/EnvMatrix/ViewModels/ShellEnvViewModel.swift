@@ -88,6 +88,10 @@ public final class ShellEnvViewModel: ObservableObject {
                 switch result {
                 case .success(let backup):
                     self.lastBackupURL = backup
+                    OperationLog.shared.record(
+                        .shell, title: String(format: L("history.op.shell.save"), file.kind.displayName),
+                        detail: file.url.path, target: file.url, backup: backup
+                    )
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }

@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 public enum SettingsTab: String, Hashable {
-    case general, backups, diagnostics, logs, about
+    case general, backups, history, diagnostics, logs, about
 }
 
 public struct SettingsView: View {
@@ -35,6 +35,10 @@ public struct SettingsView: View {
             BackupsSettingsTab()
                 .tabItem { Label(L("settings.backups"), systemImage: "clock.arrow.circlepath") }
                 .tag(SettingsTab.backups)
+
+            HistorySettingsTab()
+                .tabItem { Label(L("settings.history"), systemImage: "list.bullet.rectangle") }
+                .tag(SettingsTab.history)
 
             DiagnosticsSettingsTab()
                 .tabItem { Label(L("settings.diagnostics"), systemImage: "stethoscope") }

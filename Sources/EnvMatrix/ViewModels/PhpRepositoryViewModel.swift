@@ -40,6 +40,7 @@ public final class PhpRegistryViewModel: ObservableObject {
         self.errorMessage = nil; self.infoMessage = nil
         do {
             try await service.writeRepository(value)
+            OperationLog.shared.record(.registry, title: L("history.op.registry.composer"), detail: value)
             self.currentRepository = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

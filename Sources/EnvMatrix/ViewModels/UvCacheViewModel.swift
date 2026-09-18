@@ -48,7 +48,9 @@ public final class UvCacheViewModel: ObservableObject {
         self.infoMessage = nil
         defer { self.isCleaning = false }
         do {
+            let before = stats?.sizeBytes
             try await service.cacheClean()
+            OperationLog.shared.record(.cache, title: L("history.op.cache.uv"), detail: NodeCacheViewModel.freedText(before))
             self.infoMessage = L("uvRepo.cache.cleaned")
             await load()
             scheduleInfoClear()

@@ -112,8 +112,13 @@ public final class RuntimeViewModel: ObservableObject {
             installProgress[version.id] = 1.0
             await refreshInstalled()
             self.usageLoadedAt = nil
+            OperationLog.shared.record(.runtime,
+                title: String(format: L("history.op.runtime.install"), kind.displayName, version.version))
         } catch {
             self.errorMessage = error.localizedDescription
+            OperationLog.shared.record(.runtime,
+                title: String(format: L("history.op.runtime.install"), kind.displayName, version.version),
+                detail: error.localizedDescription, succeeded: false)
         }
     }
 
@@ -122,6 +127,9 @@ public final class RuntimeViewModel: ObservableObject {
             try service.activate(version: version)
             await refreshInstalled()
             self.usageLoadedAt = nil
+            OperationLog.shared.record(.runtime,
+                title: String(format: L("history.op.runtime.activate"), kind.displayName, version.version),
+                detail: version.installPath?.path)
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -132,6 +140,9 @@ public final class RuntimeViewModel: ObservableObject {
             try service.uninstall(version: version)
             await refreshInstalled()
             self.usageLoadedAt = nil
+            OperationLog.shared.record(.runtime,
+                title: String(format: L("history.op.runtime.uninstall"), kind.displayName, version.version),
+                detail: version.installPath?.path)
         } catch {
             self.errorMessage = error.localizedDescription
         }

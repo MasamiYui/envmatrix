@@ -48,6 +48,7 @@ public final class GoProxyViewModel: ObservableObject {
         defer { self.isSaving = false }
         do {
             try await service.writeProxy(value)
+            OperationLog.shared.record(.registry, title: L("history.op.registry.goproxy"), detail: value)
             self.currentProxy = value
             self.customValue = value
             self.successMessage = L("goRepo.proxy.saved")

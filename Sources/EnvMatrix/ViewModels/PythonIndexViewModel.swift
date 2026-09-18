@@ -53,6 +53,11 @@ public final class PythonIndexViewModel: ObservableObject {
         self.infoMessage = nil
         do {
             try service.writeIndexURL(value)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.pip"), detail: value,
+                target: service.pipConfURL,
+                backup: service.pipConfURL.deletingLastPathComponent().appendingPathComponent("pip.conf.envmatrix.bak")
+            )
             self.currentIndex = value
             self.customURL = ""
             self.infoMessage = L("pythonRepo.msg.saved")

@@ -41,6 +41,11 @@ public final class RustRegistryViewModel: ObservableObject {
         self.errorMessage = nil; self.infoMessage = nil
         do {
             try confService.writeRegistry(value)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.cargo"), detail: value,
+                target: confService.configURL,
+                backup: confService.configURL.deletingLastPathComponent().appendingPathComponent("config.toml.envmatrix.bak")
+            )
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

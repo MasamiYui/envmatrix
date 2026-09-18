@@ -52,6 +52,11 @@ public final class RubyRegistryViewModel: ObservableObject {
         self.infoMessage = nil
         do {
             try confService.writeSource(value)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.gem"), detail: value,
+                target: confService.gemrcURL,
+                backup: confService.gemrcURL.deletingLastPathComponent().appendingPathComponent(".gemrc.envmatrix.bak")
+            )
             self.currentSource = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

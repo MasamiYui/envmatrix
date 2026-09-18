@@ -53,6 +53,11 @@ public final class NodeRegistryViewModel: ObservableObject {
         self.infoMessage = nil
         do {
             try service.writeRegistry(value)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.npm"), detail: value,
+                target: service.npmrcURL,
+                backup: service.npmrcURL.deletingLastPathComponent().appendingPathComponent(".npmrc.envmatrix.bak")
+            )
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

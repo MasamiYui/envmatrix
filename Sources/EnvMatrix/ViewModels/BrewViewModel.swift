@@ -131,6 +131,7 @@ public final class BrewViewModel: ObservableObject {
         do {
             let output = try await service.run(operation)
             self.lastOperationOutput = output
+            OperationLog.shared.record(.homebrew, title: "brew \(operation.displayLabel)")
             await refresh(force: true)
             NotificationCenter.default.post(
                 name: .envMatrixSearchCorpusInvalidated,
@@ -143,6 +144,7 @@ public final class BrewViewModel: ObservableObject {
         } catch {
             let message = (error as? BrewError)?.errorDescription ?? error.localizedDescription
             self.errorMessage = message
+            OperationLog.shared.record(.homebrew, title: "brew \(operation.displayLabel)", detail: message, succeeded: false)
             SystemNotifier.shared.notify(
                 title: L("notify.brew.failure.title"),
                 body: String(format: L("notify.brew.failure.body"), operation.displayLabel)

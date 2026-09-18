@@ -160,6 +160,7 @@ public final class LocalAppsViewModel: ObservableObject {
             await MainActor.run {
                 switch outcome {
                 case .success(let (bundleId, leftovers)):
+                    OperationLog.shared.record(.apps, title: String(format: L("history.op.apps.trash"), app.name), detail: app.bundlePath.path)
                     self.apps.removeAll { $0.bundlePath == app.bundlePath }
                     self.pendingLeftovers = leftovers
                     self.lastUninstalledBundleId = bundleId

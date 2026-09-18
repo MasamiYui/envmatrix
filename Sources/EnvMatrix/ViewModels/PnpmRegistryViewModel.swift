@@ -53,6 +53,12 @@ public final class PnpmRegistryViewModel: ObservableObject {
         self.infoMessage = nil
         do {
             try configService.setRegistry(url: value)
+            OperationLog.shared.record(
+                .registry, title: L("history.op.registry.pnpm"), detail: value,
+                target: configService.npmrcURL,
+                backup: OperationLog.latestBackup(in: configService.npmrcURL.deletingLastPathComponent(),
+                                                  prefix: ".npmrc.", suffix: ".pnpm.bak")
+            )
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("pnpmRepo.msg.saved")

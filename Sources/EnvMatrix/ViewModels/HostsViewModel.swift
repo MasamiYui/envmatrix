@@ -262,6 +262,11 @@ public final class HostsViewModel: ObservableObject {
                 case .success(let backup):
                     self.lastBackupURL = backup
                     self.systemHostsText = text
+                    OperationLog.shared.record(
+                        .hosts, title: L("history.op.hosts.apply"),
+                        detail: self.selection?.name,
+                        target: URL(fileURLWithPath: service.systemHostsPath), backup: backup
+                    )
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }
