@@ -23,11 +23,11 @@ public struct DotnetRepositoryView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            PackageRepoHeader(
+            PageHeader(
                 title: L("dotnetRepo.title"),
                 subtitle: L("dotnetRepo.subtitle"),
-                icon: "n.circle.fill",
-                color: .indigo
+                systemImage: NavigationItem.packagesDotnet.systemImage,
+                tint: NavigationItem.packagesDotnet.tint
             )
             HStack(spacing: 0) {
                 Picker("", selection: $selectedTab) {

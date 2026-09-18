@@ -14,23 +14,22 @@ public struct LocalAppsView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
+            PageHeader(
+                title: L("localApps.title"),
+                subtitle: L("localApps.subtitle"),
+                systemImage: NavigationItem.systemLocalApps.systemImage,
+                tint: NavigationItem.systemLocalApps.tint,
+                isRefreshing: vm.isBusy,
+                onRefresh: { vm.refresh() }
+            )
             toolbarBar
                 .padding(.horizontal)
-                .padding(.vertical, 8)
+                .padding(.bottom, 8)
             Divider()
             mainArea
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle(L("localApps.title"))
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    vm.refresh()
-                } label: {
-                    Label(L("localApps.refresh"), systemImage: "arrow.clockwise")
-                }
-            }
-        }
         .task { vm.refresh() }
         .alert(
             L("localApps.uninstall.title"),
@@ -101,11 +100,6 @@ public struct LocalAppsView: View {
             }
             .pickerStyle(.menu)
             .frame(width: 160)
-
-            if vm.isBusy {
-                ProgressView()
-                    .controlSize(.small)
-            }
 
             Spacer()
         }

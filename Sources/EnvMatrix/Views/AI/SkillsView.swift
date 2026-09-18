@@ -86,13 +86,13 @@ public struct SkillsView: View {
     }
 
     private var header: some View {
-        HStack {
-            Text(L("skills.title"))
-                .font(.title.bold())
-            Spacer()
-            Button(L("skills.refresh")) { vm.refresh() }
-        }
-        .padding()
+        PageHeader(
+            title: L("skills.title"),
+            subtitle: L("skills.subtitle"),
+            systemImage: NavigationItem.aiSkills.systemImage,
+            tint: NavigationItem.aiSkills.tint,
+            onRefresh: { vm.refresh() }
+        )
     }
 
     private var emptyView: some View {

@@ -17,8 +17,6 @@ public struct RuntimeDetailView: View {
         _viewModel = StateObject(wrappedValue: RuntimeViewModel(kind: kind))
     }
 
-    private var kindIcon: String { kind.systemImage }
-
     public var body: some View {
         VStack(spacing: 0) {
             header
@@ -59,35 +57,28 @@ public struct RuntimeDetailView: View {
     }
 
     private var header: some View {
-        HStack {
-            Image(systemName: kindIcon)
-                .font(.largeTitle)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(kind.displayName)
-                    .font(.title.bold())
-                HStack(spacing: 6) {
-                    Text("\(L("runtime.active")): \(viewModel.activeVersion ?? L("runtime.none"))")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    if viewModel.activeVersion != nil && !viewModel.isManagedActive {
-                        Text(L("runtime.systemDefault"))
-                            .font(.caption.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(Color.orange.opacity(0.25)))
-                            .foregroundStyle(.orange)
-                    }
-                }
-            }
-            Spacer()
-            Button(L("runtime.refresh")) {
+        PageHeader(
+            title: kind.displayName,
+            subtitle: "\(L("runtime.active")): \(viewModel.activeVersion ?? L("runtime.none"))",
+            systemImage: kind.iconName,
+            tint: kind.brandColor,
+            isRefreshing: viewModel.isLoadingAvailable,
+            onRefresh: {
                 Task {
                     await viewModel.loadAvailable()
                     await viewModel.refreshInstalled()
                     await viewModel.refreshUsage(force: true)
                 }
             }
+        ) {
+            if viewModel.activeVersion != nil && !viewModel.isManagedActive {
+                Text(L("runtime.systemDefault"))
+                    .font(.caption.bold())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Color.orange.opacity(0.18)))
+                    .foregroundStyle(.orange)
+            }
         }
-        .padding()
     }
 }

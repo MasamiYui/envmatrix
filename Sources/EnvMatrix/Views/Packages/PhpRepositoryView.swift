@@ -23,11 +23,11 @@ public struct PhpRepositoryView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            PackageRepoHeader(
+            PageHeader(
                 title: L("phpRepo.title"),
                 subtitle: L("phpRepo.subtitle"),
-                icon: "chevron.left.forwardslash.chevron.right",
-                color: .purple
+                systemImage: NavigationItem.packagesPhp.systemImage,
+                tint: NavigationItem.packagesPhp.tint
             )
             HStack(spacing: 0) {
                 Picker("", selection: $selectedTab) {

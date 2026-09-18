@@ -12,6 +12,21 @@ public struct SettingsView: View {
     public init() {}
 
     public var body: some View {
+        VStack(spacing: 0) {
+            PageHeader(
+                title: L("nav.settings"),
+                subtitle: L("settings.subtitle"),
+                systemImage: NavigationItem.settings.systemImage,
+                tint: NavigationItem.settings.tint
+            )
+            tabs
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .envMatrixOpenDiagnostics)) { _ in
+            selectedTab = .diagnostics
+        }
+    }
+
+    private var tabs: some View {
         TabView(selection: $selectedTab) {
             GeneralSettingsTab()
                 .tabItem { Label(L("settings.general"), systemImage: "gearshape") }
@@ -34,10 +49,7 @@ public struct SettingsView: View {
                 .tag(SettingsTab.about)
         }
         .frame(minWidth: 640, minHeight: 500)
-        .padding()
-        .onReceive(NotificationCenter.default.publisher(for: .envMatrixOpenDiagnostics)) { _ in
-            selectedTab = .diagnostics
-        }
+        .padding([.horizontal, .bottom])
     }
 }
 

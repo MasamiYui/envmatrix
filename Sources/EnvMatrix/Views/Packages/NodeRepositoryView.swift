@@ -41,20 +41,12 @@ public struct NodeRepositoryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.circle")
-                .font(.title)
-                .foregroundStyle(.blue)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("nodeRepo.title"))
-                    .font(.title2.bold())
-                Text(L("nodeRepo.subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-        .padding()
+        PageHeader(
+            title: L("nodeRepo.title"),
+            subtitle: L("nodeRepo.subtitle"),
+            systemImage: NavigationItem.packagesNode.systemImage,
+            tint: NavigationItem.packagesNode.tint
+        )
     }
 
     private var tabPicker: some View {

@@ -43,28 +43,18 @@ public struct GoRepositoryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.circle")
-                .font(.title)
-                .foregroundStyle(.blue)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("goRepo.title"))
-                    .font(.title2.bold())
-                Text(L("goRepo.subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button {
+        PageHeader(
+            title: L("goRepo.title"),
+            subtitle: L("goRepo.subtitle"),
+            systemImage: NavigationItem.packagesGo.systemImage,
+            tint: NavigationItem.packagesGo.tint,
+            onRefresh: {
                 switch selectedTab {
                 case .proxy: proxyVM.refresh()
                 case .localCache: cacheVM.refresh()
                 }
-            } label: {
-                Label(L("mavenRepo.refresh"), systemImage: "arrow.clockwise")
             }
-        }
-        .padding()
+        )
     }
 
     private var tabPicker: some View {

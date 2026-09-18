@@ -49,29 +49,19 @@ public struct MavenRepositoryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.fill")
-                .font(.title)
-                .foregroundStyle(.orange)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("mavenRepo.title"))
-                    .font(.title2.bold())
-                Text(L("mavenRepo.subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button {
+        PageHeader(
+            title: L("mavenRepo.title"),
+            subtitle: L("mavenRepo.subtitle"),
+            systemImage: NavigationItem.packagesMaven.systemImage,
+            tint: NavigationItem.packagesMaven.tint,
+            onRefresh: {
                 switch selectedTab {
                 case .mirrors: settingsVM.refresh()
                 case .localArtifacts: localVM.refresh()
                 case .gradleCache: Task { await gradleVM.refresh() }
                 }
-            } label: {
-                Label(L("mavenRepo.refresh"), systemImage: "arrow.clockwise")
             }
-        }
-        .padding()
+        )
     }
 
     private var tabPicker: some View {

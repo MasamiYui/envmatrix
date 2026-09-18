@@ -34,15 +34,6 @@ public struct MCPServersView: View {
             }
         }
         .navigationTitle(L("mcp.title"))
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    vm.startAdd()
-                } label: {
-                    Label(L("mcp.add"), systemImage: "plus")
-                }
-            }
-        }
         .task { vm.refresh() }
         .sheet(isPresented: $vm.isPresentingEditor) {
             MCPServerEditorSheet(vm: vm)
@@ -116,13 +107,20 @@ public struct MCPServersView: View {
     }
 
     private var header: some View {
-        HStack {
-            Text(L("mcp.title"))
-                .font(.title.bold())
-            Spacer()
-            Button(L("mcp.refresh")) { vm.refresh() }
+        PageHeader(
+            title: L("mcp.title"),
+            subtitle: L("mcp.subtitle"),
+            systemImage: NavigationItem.aiMCP.systemImage,
+            tint: NavigationItem.aiMCP.tint,
+            onRefresh: { vm.refresh() }
+        ) {
+            Button {
+                vm.startAdd()
+            } label: {
+                Label(L("mcp.add"), systemImage: "plus")
+            }
+            .buttonStyle(.borderedProminent)
         }
-        .padding()
     }
 
     private var emptyView: some View {

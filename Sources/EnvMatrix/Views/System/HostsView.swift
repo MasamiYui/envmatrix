@@ -12,39 +12,40 @@ public struct HostsView: View {
     public init() {}
 
     public var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-                .frame(minWidth: 220, maxWidth: 280)
-            Divider()
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .navigationTitle(L("hosts.title"))
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showApplyConfirm = true
-                } label: {
-                    Label(L("hosts.applyToSystem"), systemImage: "bolt.badge.checkmark.fill")
-                }
-                .disabled(vm.selection == nil)
-            }
-            ToolbarItem(placement: .automatic) {
+        VStack(spacing: 0) {
+            PageHeader(
+                title: L("hosts.title"),
+                subtitle: L("hosts.subtitle"),
+                systemImage: NavigationItem.systemHosts.systemImage,
+                tint: NavigationItem.systemHosts.tint,
+                isRefreshing: vm.isBusy,
+                onRefresh: { vm.refresh() }
+            ) {
                 Button {
                     vm.saveProfile()
                 } label: {
                     Label(L("hosts.saveProfile"), systemImage: "square.and.arrow.down")
                 }
                 .disabled(vm.selection == nil)
-            }
-            ToolbarItem(placement: .automatic) {
+                .keyboardShortcut("s", modifiers: .command)
                 Button {
-                    vm.refresh()
+                    showApplyConfirm = true
                 } label: {
-                    Label(L("hosts.refresh"), systemImage: "arrow.clockwise")
+                    Label(L("hosts.applyToSystem"), systemImage: "bolt.badge.checkmark.fill")
                 }
+                .buttonStyle(.borderedProminent)
+                .disabled(vm.selection == nil)
+            }
+            Divider()
+            HStack(spacing: 0) {
+                sidebar
+                    .frame(minWidth: 220, maxWidth: 280)
+                Divider()
+                detail
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .navigationTitle(L("hosts.title"))
         .task { vm.refresh() }
         .confirmationDialog(
             L("hosts.applyConfirm.title"),

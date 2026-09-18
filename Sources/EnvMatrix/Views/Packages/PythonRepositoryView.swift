@@ -41,20 +41,12 @@ public struct PythonRepositoryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.and.arrow.backward")
-                .font(.title)
-                .foregroundStyle(.yellow)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("pythonRepo.title"))
-                    .font(.title2.bold())
-                Text(L("pythonRepo.subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-        .padding()
+        PageHeader(
+            title: L("pythonRepo.title"),
+            subtitle: L("pythonRepo.subtitle"),
+            systemImage: NavigationItem.packagesPython.systemImage,
+            tint: NavigationItem.packagesPython.tint
+        )
     }
 
     private var tabPicker: some View {

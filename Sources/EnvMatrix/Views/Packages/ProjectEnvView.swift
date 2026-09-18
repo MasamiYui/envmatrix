@@ -52,26 +52,15 @@ public struct ProjectEnvView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.and.arrow.backward.fill")
-                .font(.title)
-                .foregroundStyle(.indigo)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("projenv.title"))
-                    .font(.title2.bold())
-                HStack(spacing: 6) {
-                    Text(String(format: L("projenv.subtitle"), vm.roots.count))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if vm.scanDuration > 0 {
-                        Text(String(format: L("projenv.scannedIn"), vm.scanDuration))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            Spacer()
-
+        PageHeader(
+            title: L("projenv.title"),
+            subtitle: String(format: L("projenv.subtitle"), vm.roots.count)
+                + (vm.scanDuration > 0 ? "  ·  " + String(format: L("projenv.scannedIn"), vm.scanDuration) : ""),
+            systemImage: NavigationItem.packagesProjectEnv.systemImage,
+            tint: NavigationItem.packagesProjectEnv.tint,
+            isRefreshing: vm.isScanning,
+            onRefresh: { Task { await vm.rescan() } }
+        ) {
             statChip(
                 value: vm.environments.count,
                 label: L("projenv.total"),
@@ -83,8 +72,6 @@ public struct ProjectEnvView: View {
                 systemImage: "internaldrive"
             )
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
     }
 
     // MARK: - Toolbar

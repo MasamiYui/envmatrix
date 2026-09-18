@@ -12,7 +12,18 @@ extension L10n {
         "shims.banner.reveal": "Reveal",
         "banner.diagnostics": "Diagnostics",
         "banner.diagnostics.help": "Open Settings › Diagnostics to export a report about this environment",
-        "banner.dismiss": "Dismiss"
+        "banner.dismiss": "Dismiss",
+        "page.refresh.help": "Refresh (⌘R)",
+        "menu.settings": "Settings…",
+        "menu.findInPackages": "Find in Packages…",
+        "menu.refresh": "Refresh",
+        "skills.subtitle": "Skill folders discovered for your AI assistants",
+        "mcp.subtitle": "Model Context Protocol servers, grouped by transport",
+        "cli.subtitle": "Model, API base URL and key for each AI command-line tool",
+        "shellEnv.subtitle": "Edit rc files with structured or raw views; backups are automatic",
+        "hosts.subtitle": "Profiles for /etc/hosts; applying asks for administrator rights",
+        "localApps.subtitle": "Applications in /Applications and ~/Applications with their leftovers",
+        "settings.subtitle": "Appearance, language, mirrors, backups, diagnostics and logs"
     ]
 
     static let zhShims: [String: String] = [
@@ -26,6 +37,17 @@ extension L10n {
         "shims.banner.reveal": "在访达中显示",
         "banner.diagnostics": "诊断报告",
         "banner.diagnostics.help": "打开 设置 › 诊断，导出当前环境的诊断报告",
-        "banner.dismiss": "关闭"
+        "banner.dismiss": "关闭",
+        "page.refresh.help": "刷新（⌘R）",
+        "menu.settings": "设置…",
+        "menu.findInPackages": "在包中查找…",
+        "menu.refresh": "刷新",
+        "skills.subtitle": "为 AI 助手发现的技能目录",
+        "mcp.subtitle": "Model Context Protocol 服务器，按传输方式分组",
+        "cli.subtitle": "各 AI 命令行工具的模型、API 地址与密钥",
+        "shellEnv.subtitle": "以结构化或原文视图编辑 rc 文件，保存前自动备份",
+        "hosts.subtitle": "/etc/hosts 的多份 Profile，应用到系统时会请求管理员权限",
+        "localApps.subtitle": "/Applications 与 ~/Applications 中的应用及其残留文件",
+        "settings.subtitle": "外观、语言、镜像、备份、诊断与日志"
     ]
 }

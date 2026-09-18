@@ -41,20 +41,12 @@ public struct UvRepositoryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.circle")
-                .font(.title)
-                .foregroundStyle(.blue)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("uvRepo.title"))
-                    .font(.title2.bold())
-                Text(L("uvRepo.subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-        .padding()
+        PageHeader(
+            title: L("uvRepo.title"),
+            subtitle: L("uvRepo.subtitle"),
+            systemImage: NavigationItem.packagesUv.systemImage,
+            tint: NavigationItem.packagesUv.tint
+        )
     }
 
     private var tabPicker: some View {

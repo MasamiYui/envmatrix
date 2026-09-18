@@ -16,16 +16,29 @@ public struct DashboardView: View {
     ]
 
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                header
-                ShimsPathBanner()
-                    .padding(.horizontal, -16)
-                runtimesSection
-                packagesSection
-                overviewSection
+        VStack(spacing: 0) {
+            PageHeader(
+                title: L("dashboard.title"),
+                subtitle: L("dashboard.subtitle"),
+                systemImage: NavigationItem.dashboard.systemImage,
+                tint: NavigationItem.dashboard.tint,
+                isRefreshing: viewModel.isLoading,
+                onRefresh: { Task { await viewModel.hardRefresh() } }
+            ) {
+                summaryChips
             }
-            .padding(24)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    ShimsPathBanner()
+                        .padding(.horizontal, -16)
+                    runtimesSection
+                    packagesSection
+                    overviewSection
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+                .padding(.top, 8)
+            }
         }
         .background(backgroundLayer.ignoresSafeArea())
         .navigationTitle(L("dashboard.title"))
@@ -35,52 +48,32 @@ public struct DashboardView: View {
 
     // MARK: - Header
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(L("dashboard.title"))
-                        .font(.largeTitle.bold())
-                    Text(L("dashboard.subtitle"))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button {
-                    Task { await viewModel.hardRefresh() }
-                } label: {
-                    Label(L("dashboard.refresh"), systemImage: "arrow.clockwise")
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            }
-
-            HStack(spacing: 12) {
-                SummaryChip(
-                    icon: "circle.grid.3x3.fill",
-                    tint: .accentColor,
-                    label: L("dashboard.activeRuntimes"),
-                    value: "\(activeRuntimeCount)/\(viewModel.runtimes.count)"
-                )
-                SummaryChip(
-                    icon: "sparkles",
-                    tint: .purple,
-                    label: L("dashboard.skills"),
-                    value: "\(viewModel.skillsCount)"
-                )
-                SummaryChip(
-                    icon: "bolt.horizontal.fill",
-                    tint: .orange,
-                    label: L("dashboard.mcpServers"),
-                    value: "\(viewModel.mcpCount)"
-                )
-                SummaryChip(
-                    icon: "internaldrive.fill",
-                    tint: .teal,
-                    label: L("dashboard.storage"),
-                    value: Self.formatBytes(viewModel.storageBytes)
-                )
-            }
+    private var summaryChips: some View {
+        HStack(spacing: 12) {
+            SummaryChip(
+                icon: "circle.grid.3x3.fill",
+                tint: .accentColor,
+                label: L("dashboard.activeRuntimes"),
+                value: "\(activeRuntimeCount)/\(viewModel.runtimes.count)"
+            )
+            SummaryChip(
+                icon: "sparkles",
+                tint: .purple,
+                label: L("dashboard.skills"),
+                value: "\(viewModel.skillsCount)"
+            )
+            SummaryChip(
+                icon: "bolt.horizontal.fill",
+                tint: .orange,
+                label: L("dashboard.mcpServers"),
+                value: "\(viewModel.mcpCount)"
+            )
+            SummaryChip(
+                icon: "internaldrive.fill",
+                tint: .teal,
+                label: L("dashboard.storage"),
+                value: Self.formatBytes(viewModel.storageBytes)
+            )
         }
     }
 

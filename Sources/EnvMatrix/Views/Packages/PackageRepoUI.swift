@@ -19,24 +19,6 @@ struct PackageRepoMissingView: View {
     }
 }
 
-struct PackageRepoHeader: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let color: Color
-    var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: icon).font(.title).foregroundStyle(color)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.title2.bold())
-                Text(subtitle).font(.caption).foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-        .padding()
-    }
-}
-
 struct PackageCacheCard<Stats>: View where Stats: Any {
     let path: String
     let size: Int64?

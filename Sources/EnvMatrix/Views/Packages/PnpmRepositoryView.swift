@@ -41,20 +41,12 @@ public struct PnpmRepositoryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "shippingbox.circle")
-                .font(.title)
-                .foregroundStyle(.blue)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("pnpmRepo.title"))
-                    .font(.title2.bold())
-                Text(L("pnpmRepo.subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-        .padding()
+        PageHeader(
+            title: L("pnpmRepo.title"),
+            subtitle: L("pnpmRepo.subtitle"),
+            systemImage: NavigationItem.packagesPnpm.systemImage,
+            tint: NavigationItem.packagesPnpm.tint
+        )
     }
 
     private var tabPicker: some View {

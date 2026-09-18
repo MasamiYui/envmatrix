@@ -97,22 +97,22 @@ public enum NavigationItem: Hashable, Identifiable {
             case .kotlin: return "k.square"
             }
         case .packagesBrew: return "cube.box.fill"
-        case .packagesMaven: return "shippingbox.fill"
-        case .packagesGo: return "shippingbox.fill"
-        case .packagesNode: return "shippingbox.fill"
-        case .packagesPython: return "shippingbox.fill"
-        case .packagesRuby: return "shippingbox.fill"
-        case .packagesRust: return "shippingbox.fill"
-        case .packagesPhp: return "shippingbox.fill"
-        case .packagesDotnet: return "shippingbox.fill"
-        case .packagesUv: return "shippingbox.fill"
-        case .packagesPnpm: return "shippingbox.fill"
+        case .packagesMaven: return RuntimeKind.java.iconName
+        case .packagesGo: return RuntimeKind.go.iconName
+        case .packagesNode: return RuntimeKind.node.iconName
+        case .packagesPython: return RuntimeKind.python.iconName
+        case .packagesRuby: return RuntimeKind.ruby.iconName
+        case .packagesRust: return RuntimeKind.rust.iconName
+        case .packagesPhp: return RuntimeKind.php.iconName
+        case .packagesDotnet: return RuntimeKind.dotnet.iconName
+        case .packagesUv: return "hare.fill"
+        case .packagesPnpm: return "square.stack.3d.down.right.fill"
         case .packagesProjectEnv: return "folder.badge.gearshape"
         case .aiSkills: return "sparkles"
         case .aiCLI: return "terminal"
-        case .aiMCP: return "bolt.horizontal"
+        case .aiMCP: return "bolt.horizontal.fill"
         case .systemShellEnv: return "terminal.fill"
-        case .systemHosts: return "externaldrive.connected.to.line.below"
+        case .systemHosts: return "network"
         case .systemLocalApps: return "app.badge.checkmark"
         case .systemContainerContexts: return "shippingbox.and.arrow.backward.fill"
         case .settings: return "gearshape"

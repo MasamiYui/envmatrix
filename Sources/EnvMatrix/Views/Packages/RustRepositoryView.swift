@@ -23,11 +23,11 @@ public struct RustRepositoryView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            PackageRepoHeader(
+            PageHeader(
                 title: L("rustRepo.title"),
                 subtitle: L("rustRepo.subtitle"),
-                icon: "shippingbox.circle",
-                color: .orange
+                systemImage: NavigationItem.packagesRust.systemImage,
+                tint: NavigationItem.packagesRust.tint
             )
             HStack(spacing: 0) {
                 Picker("", selection: $selectedTab) {

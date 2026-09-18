@@ -7,24 +7,33 @@ public struct CLIConfigView: View {
     public init() {}
 
     public var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-                .frame(minWidth: 200, maxWidth: 260)
-            Divider()
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .navigationTitle(L("cli.title"))
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+        VStack(spacing: 0) {
+            PageHeader(
+                title: L("cli.title"),
+                subtitle: L("cli.subtitle"),
+                systemImage: NavigationItem.aiCLI.systemImage,
+                tint: NavigationItem.aiCLI.tint,
+                onRefresh: { vm.refresh() }
+            ) {
                 Button {
                     vm.save()
                 } label: {
                     Label(L("cli.save"), systemImage: "square.and.arrow.down")
                 }
+                .buttonStyle(.borderedProminent)
                 .disabled(vm.selection == nil)
+                .keyboardShortcut("s", modifiers: .command)
+            }
+            Divider()
+            HStack(spacing: 0) {
+                sidebar
+                    .frame(minWidth: 200, maxWidth: 260)
+                Divider()
+                detail
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .navigationTitle(L("cli.title"))
         .task { vm.refresh() }
         .onChange(of: vm.selection) { newValue in
             if let s = newValue { vm.select(s) }

@@ -8,31 +8,34 @@ public struct ShellEnvView: View {
     public init() {}
 
     public var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-                .frame(minWidth: 170, idealWidth: 190, maxWidth: 210)
-            Divider()
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .navigationTitle(L("shellEnv.title"))
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+        VStack(spacing: 0) {
+            PageHeader(
+                title: L("shellEnv.title"),
+                subtitle: L("shellEnv.subtitle"),
+                systemImage: NavigationItem.systemShellEnv.systemImage,
+                tint: NavigationItem.systemShellEnv.tint,
+                isRefreshing: vm.isBusy,
+                onRefresh: { vm.refresh() }
+            ) {
                 Button {
                     vm.save()
                 } label: {
                     Label(L("shellEnv.save"), systemImage: "square.and.arrow.down")
                 }
+                .buttonStyle(.borderedProminent)
                 .disabled(vm.selection == nil)
+                .keyboardShortcut("s", modifiers: .command)
             }
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    vm.refresh()
-                } label: {
-                    Label(L("shellEnv.refresh"), systemImage: "arrow.clockwise")
-                }
+            Divider()
+            HStack(spacing: 0) {
+                sidebar
+                    .frame(minWidth: 170, idealWidth: 190, maxWidth: 210)
+                Divider()
+                detail
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .navigationTitle(L("shellEnv.title"))
         .task { vm.refresh() }
         .onChange(of: vm.selection) { newValue in
             if let s = newValue { vm.select(s) }

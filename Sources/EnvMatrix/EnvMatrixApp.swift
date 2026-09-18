@@ -3,6 +3,7 @@ import AppKit
 
 extension Notification.Name {
     static let envMatrixOpenGlobalSearch = Notification.Name("envmatrix.openGlobalSearch")
+    static let envMatrixOpenSettings = Notification.Name("envmatrix.openSettings")
 }
 
 @main
@@ -17,11 +18,23 @@ struct EnvMatrixApp: App {
         .windowToolbarStyle(.unified(showsTitle: false))
         .defaultSize(width: 1100, height: 720)
         .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button(L("menu.settings")) {
+                    NotificationCenter.default.post(name: .envMatrixOpenSettings, object: nil)
+                }
+                .keyboardShortcut(",", modifiers: [.command])
+            }
             CommandGroup(after: .textEditing) {
-                Button("Find in Packages…") {
+                Button(L("menu.findInPackages")) {
                     NotificationCenter.default.post(name: .envMatrixOpenGlobalSearch, object: nil)
                 }
                 .keyboardShortcut("f", modifiers: [.command])
+            }
+            CommandGroup(after: .toolbar) {
+                Button(L("menu.refresh")) {
+                    NotificationCenter.default.post(name: .envMatrixRefreshRequested, object: nil)
+                }
+                .keyboardShortcut("r", modifiers: [.command])
             }
         }
         // NOTE: We intentionally do NOT declare a `Settings { ... }` scene.

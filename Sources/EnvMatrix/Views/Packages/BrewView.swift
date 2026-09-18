@@ -82,31 +82,22 @@ public struct BrewView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "cube.box.fill")
-                .font(.title)
+        PageHeader(
+            title: L("brew.title"),
+            subtitle: vm.brewVersion,
+            systemImage: NavigationItem.packagesBrew.systemImage,
+            tint: NavigationItem.packagesBrew.tint,
+            isRefreshing: vm.isLoading || vm.runningOperation != nil,
+            onRefresh: { Task { await vm.refresh(force: true) } }
+        ) {
+            if vm.outdatedCount > 0 {
+                Label(
+                    String(format: L("brew.outdatedCount"), vm.outdatedCount),
+                    systemImage: "arrow.up.circle.fill"
+                )
+                .font(.caption.bold())
                 .foregroundStyle(.orange)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("brew.title"))
-                    .font(.title2.bold())
-                HStack(spacing: 6) {
-                    if !vm.brewVersion.isEmpty {
-                        Text(vm.brewVersion)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    if vm.outdatedCount > 0 {
-                        Label(
-                            String(format: L("brew.outdatedCount"), vm.outdatedCount),
-                            systemImage: "arrow.up.circle.fill"
-                        )
-                        .font(.caption.bold())
-                        .foregroundStyle(.orange)
-                    }
-                }
             }
-            Spacer()
-
             statChip(
                 value: vm.formulaeCount,
                 label: L("brew.formulae"),
@@ -117,21 +108,7 @@ public struct BrewView: View {
                 label: L("brew.casks"),
                 systemImage: "app.gift"
             )
-
-            if vm.runningOperation != nil {
-                ProgressView()
-                    .controlSize(.small)
-            } else {
-                Button {
-                    Task { await vm.refresh(force: true) }
-                } label: {
-                    Label(L("brew.refresh"), systemImage: "arrow.clockwise")
-                }
-                .disabled(vm.isLoading)
-            }
         }
-        .padding(.horizontal)
-        .padding(.vertical, 12)
     }
 
     private func statChip(value: Int, label: String, systemImage: String) -> some View {

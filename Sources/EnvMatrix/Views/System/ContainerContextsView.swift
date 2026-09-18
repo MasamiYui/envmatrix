@@ -10,9 +10,10 @@ public struct ContainerContextsView: View {
     public init() {}
 
     public var body: some View {
-        ScrollView {
+        VStack(spacing: 0) {
+            header
+            ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                header
                 tabPicker
                 switch viewModel.selectedTab {
                 case .contexts:
@@ -35,6 +36,7 @@ public struct ContainerContextsView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            }
         }
         .navigationTitle(L("container.title"))
         .task { await viewModel.refresh() }
@@ -73,13 +75,14 @@ public struct ContainerContextsView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(L("container.title"))
-                .font(.title.bold())
-            Text(L("container.subtitle"))
-                .font(.callout)
-                .foregroundStyle(.secondary)
-        }
+        PageHeader(
+            title: L("container.title"),
+            subtitle: L("container.subtitle"),
+            systemImage: NavigationItem.systemContainerContexts.systemImage,
+            tint: NavigationItem.systemContainerContexts.tint,
+            isRefreshing: viewModel.isDockerBusy || viewModel.isPodmanBusy,
+            onRefresh: { Task { await viewModel.refresh() } }
+        )
     }
 
     private var dockerSection: some View {

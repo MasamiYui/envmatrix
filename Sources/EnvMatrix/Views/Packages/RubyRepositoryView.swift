@@ -24,11 +24,11 @@ public struct RubyRepositoryView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            PackageRepoHeader(
+            PageHeader(
                 title: L("rubyRepo.title"),
                 subtitle: L("rubyRepo.subtitle"),
-                icon: "diamond.fill",
-                color: .red
+                systemImage: NavigationItem.packagesRuby.systemImage,
+                tint: NavigationItem.packagesRuby.tint
             )
             HStack(spacing: 0) {
                 Picker("", selection: $selectedTab) {
