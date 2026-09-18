@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 public struct BrewView: View {
     @StateObject private var vm = BrewViewModel()
@@ -41,22 +42,14 @@ public struct BrewView: View {
     // MARK: - Not installed placeholder
 
     private var notInstalledView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "cube.transparent")
-                .font(.system(size: 56))
-                .foregroundStyle(.secondary)
-            Text(L("brew.notInstalled.title"))
-                .font(.title2.bold())
-            Text(L("brew.notInstalled.subtitle"))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            Link(destination: URL(string: "https://brew.sh")!) {
-                Label("brew.sh", systemImage: "arrow.up.right.square")
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+        EmptyStateView(
+            systemImage: "cube.transparent",
+            title: L("brew.notInstalled.title"),
+            subtitle: L("brew.notInstalled.subtitle"),
+            command: "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"",
+            actionTitle: "brew.sh",
+            action: { NSWorkspace.shared.open(URL(string: "https://brew.sh")!) }
+        )
     }
 
     // MARK: - Main layout

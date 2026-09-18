@@ -96,17 +96,11 @@ public struct SkillsView: View {
     }
 
     private var emptyView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text(L("skills.empty.title"))
-                .font(.title2.bold())
-            Text(L("skills.empty.subtitle"))
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+        EmptyStateView(
+            systemImage: "sparkles",
+            title: L("skills.empty.title"),
+            subtitle: L("skills.empty.subtitle")
+        )
     }
 
     @ViewBuilder

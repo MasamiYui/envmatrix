@@ -3,19 +3,14 @@ import SwiftUI
 struct PackageRepoMissingView: View {
     let title: String
     let subtitle: String
+    var command: String? = nil
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text(title).font(.title2.bold())
-            Text(subtitle)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+        EmptyStateView(
+            systemImage: "exclamationmark.triangle",
+            title: title,
+            subtitle: subtitle,
+            command: command
+        )
     }
 }
 

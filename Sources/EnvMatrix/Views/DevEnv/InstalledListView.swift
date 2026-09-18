@@ -132,16 +132,12 @@ public struct InstalledListView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "shippingbox")
-                .font(.system(size: 36))
-                .foregroundStyle(.secondary)
-            Text(L("runtime.noInstalled"))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+        EmptyStateView(
+            systemImage: "shippingbox",
+            title: L("runtime.noInstalled"),
+            command: vm.kind.manualInstallCommand,
+            compact: true
+        )
     }
 
     @ViewBuilder

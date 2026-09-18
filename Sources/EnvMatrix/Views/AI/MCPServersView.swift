@@ -124,17 +124,13 @@ public struct MCPServersView: View {
     }
 
     private var emptyView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bolt.horizontal")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text(L("mcp.empty.title"))
-                .font(.title2.bold())
-            Text(L("mcp.empty.subtitle"))
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+        EmptyStateView(
+            systemImage: "bolt.horizontal",
+            title: L("mcp.empty.title"),
+            subtitle: L("mcp.empty.subtitle"),
+            actionTitle: L("mcp.add"),
+            action: { vm.startAdd() }
+        )
     }
 
     @ViewBuilder

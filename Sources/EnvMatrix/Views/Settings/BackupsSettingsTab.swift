@@ -99,15 +99,11 @@ struct BackupsSettingsTab: View {
         }
     }
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 32))
-                .foregroundStyle(.secondary)
-            Text(L("settings.backups.empty"))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        EmptyStateView(
+            systemImage: "clock.arrow.circlepath",
+            title: L("settings.backups.empty"),
+            compact: true
+        )
     }
 
     private var list: some View {

@@ -62,7 +62,8 @@ struct RustRegistryTabView: View {
             if !vm.cargoAvailable {
                 PackageRepoMissingView(
                     title: L("rustRepo.cargoMissing.title"),
-                    subtitle: L("rustRepo.cargoMissing.subtitle")
+                    subtitle: L("rustRepo.cargoMissing.subtitle"),
+                    command: RuntimeKind.rust.manualInstallCommand
                 )
             } else { mainContent }
         }
@@ -174,7 +175,8 @@ struct RustGlobalCratesView: View {
             if !vm.cargoAvailable {
                 PackageRepoMissingView(
                     title: L("rustRepo.cargoMissing.title"),
-                    subtitle: L("rustRepo.cargoMissing.subtitle")
+                    subtitle: L("rustRepo.cargoMissing.subtitle"),
+                    command: RuntimeKind.rust.manualInstallCommand
                 )
             } else { mainContent }
         }
@@ -264,7 +266,8 @@ struct RustCacheTabView: View {
             if !vm.cargoAvailable {
                 PackageRepoMissingView(
                     title: L("rustRepo.cargoMissing.title"),
-                    subtitle: L("rustRepo.cargoMissing.subtitle")
+                    subtitle: L("rustRepo.cargoMissing.subtitle"),
+                    command: RuntimeKind.rust.manualInstallCommand
                 )
             } else { mainContent }
         }

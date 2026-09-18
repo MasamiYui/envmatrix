@@ -62,7 +62,8 @@ struct PhpRepositoryTabView: View {
             if !vm.composerAvailable {
                 PackageRepoMissingView(
                     title: L("phpRepo.composerMissing.title"),
-                    subtitle: L("phpRepo.composerMissing.subtitle")
+                    subtitle: L("phpRepo.composerMissing.subtitle"),
+                    command: "brew install composer"
                 )
             } else { mainContent }
         }
@@ -177,7 +178,8 @@ struct PhpGlobalPackagesTabView: View {
             if !vm.composerAvailable {
                 PackageRepoMissingView(
                     title: L("phpRepo.composerMissing.title"),
-                    subtitle: L("phpRepo.composerMissing.subtitle")
+                    subtitle: L("phpRepo.composerMissing.subtitle"),
+                    command: "brew install composer"
                 )
             } else { mainContent }
         }
@@ -265,7 +267,8 @@ struct PhpCacheTabView: View {
             if !vm.composerAvailable {
                 PackageRepoMissingView(
                     title: L("phpRepo.composerMissing.title"),
-                    subtitle: L("phpRepo.composerMissing.subtitle")
+                    subtitle: L("phpRepo.composerMissing.subtitle"),
+                    command: "brew install composer"
                 )
             } else { mainContent }
         }

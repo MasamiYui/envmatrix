@@ -66,7 +66,8 @@ struct RubyGemSourceView: View {
             if !vm.gemAvailable {
                 PackageRepoMissingView(
                     title: L("rubyRepo.gemMissing.title"),
-                    subtitle: L("rubyRepo.gemMissing.subtitle")
+                    subtitle: L("rubyRepo.gemMissing.subtitle"),
+                    command: RuntimeKind.ruby.manualInstallCommand
                 )
             } else {
                 mainContent
@@ -194,7 +195,8 @@ struct RubyGlobalGemsView: View {
             if !vm.gemAvailable {
                 PackageRepoMissingView(
                     title: L("rubyRepo.gemMissing.title"),
-                    subtitle: L("rubyRepo.gemMissing.subtitle")
+                    subtitle: L("rubyRepo.gemMissing.subtitle"),
+                    command: RuntimeKind.ruby.manualInstallCommand
                 )
             } else {
                 mainContent
@@ -299,7 +301,8 @@ struct RubyCacheTabView: View {
             if !vm.gemAvailable {
                 PackageRepoMissingView(
                     title: L("rubyRepo.gemMissing.title"),
-                    subtitle: L("rubyRepo.gemMissing.subtitle")
+                    subtitle: L("rubyRepo.gemMissing.subtitle"),
+                    command: RuntimeKind.ruby.manualInstallCommand
                 )
             } else {
                 mainContent

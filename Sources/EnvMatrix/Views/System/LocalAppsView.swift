@@ -127,14 +127,9 @@ public struct LocalAppsView: View {
     }
 
     private var emptyPlaceholder: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "app.badge.checkmark.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text(L("localApps.empty"))
-                .font(.title2.bold())
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+        EmptyStateView(
+            systemImage: "app.badge.checkmark.fill",
+            title: L("localApps.empty")
+        )
     }
 }

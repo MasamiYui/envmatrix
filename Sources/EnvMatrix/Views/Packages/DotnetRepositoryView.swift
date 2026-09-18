@@ -62,7 +62,8 @@ struct DotnetSourceView: View {
             if !vm.dotnetAvailable {
                 PackageRepoMissingView(
                     title: L("dotnetRepo.dotnetMissing.title"),
-                    subtitle: L("dotnetRepo.dotnetMissing.subtitle")
+                    subtitle: L("dotnetRepo.dotnetMissing.subtitle"),
+                    command: RuntimeKind.dotnet.manualInstallCommand
                 )
             } else { mainContent }
         }
@@ -193,7 +194,8 @@ struct DotnetGlobalToolsView: View {
             if !vm.dotnetAvailable {
                 PackageRepoMissingView(
                     title: L("dotnetRepo.dotnetMissing.title"),
-                    subtitle: L("dotnetRepo.dotnetMissing.subtitle")
+                    subtitle: L("dotnetRepo.dotnetMissing.subtitle"),
+                    command: RuntimeKind.dotnet.manualInstallCommand
                 )
             } else { mainContent }
         }
@@ -286,7 +288,8 @@ struct DotnetCacheTabView: View {
             if !vm.dotnetAvailable {
                 PackageRepoMissingView(
                     title: L("dotnetRepo.dotnetMissing.title"),
-                    subtitle: L("dotnetRepo.dotnetMissing.subtitle")
+                    subtitle: L("dotnetRepo.dotnetMissing.subtitle"),
+                    command: RuntimeKind.dotnet.manualInstallCommand
                 )
             } else { mainContent }
         }

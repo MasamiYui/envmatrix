@@ -39,6 +39,8 @@ extension L10n {
         "common.refresh": "Refresh",
         "common.cancel": "Cancel",
         "common.confirm": "Confirm",
+        "common.copyCommand": "Copy",
+        "common.copied": "Copied",
 
         "globalSearch.placeholder": "Search across package managers…",
         "globalSearch.hint.title": "Search everything",
@@ -89,6 +91,8 @@ extension L10n {
         "common.refresh": "刷新",
         "common.cancel": "取消",
         "common.confirm": "确定",
+        "common.copyCommand": "复制",
+        "common.copied": "已复制",
 
         "globalSearch.placeholder": "在包管理器中搜索…",
         "globalSearch.hint.title": "跨模块搜索",
