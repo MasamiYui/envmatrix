@@ -28,7 +28,23 @@
 
 ## 🆕 最近亮点 | What's New
 
-以下功能在 v0.3（Phase 1–3）中陆续落地：
+### UI / 产品改进（最新）
+
+- 🧭 **shims PATH 引导**：「设为活动」只是把 `~/.envmatrix/shims` 指向所选版本，过去没有任何地方说明这个目录必须在 PATH 中。现在仪表盘与每个运行时页面都会检测并提示，可一键写入当前 shell 的 rc 文件（写入前自动备份）
+- 🚫 **不可安装的版本不再显示「安装」按钮**：.NET / Erlang / rustup 没有可下载的二进制包，Ruby / PHP 只有源码包，这些版本现在改为显示可复制的 `brew` / `rustup` 安装命令
+- ⚠️ **破坏性操作全部二次确认**：Homebrew 卸载与 MCP 服务删除此前是一键直接执行
+- 🧱 **统一组件**：`PageHeader`（页头 + ⌘R 刷新）、`StatusBanner`（四种状态，替换 19 份各写各的横幅）、`EmptyStateView`（空态附可复制安装命令）
+- 🗂️ **侧边栏可折叠 + 过滤**：分组折叠状态持久化；未安装的运行时收进「未安装 (n)」；搜索框支持别名（输入 `npm` 命中 Node 全局环境）
+- 🎯 **仪表盘「需要关注」**：PATH 未配置、缓存超阈值、有新版本，每条都带一个可执行的按钮；包管理卡片覆盖全部 10 个生态
+- 🌏 **一键镜像预设**：「中国大陆加速」/「恢复官方源」一次切换 npm、pnpm、pip、uv、GOPROXY、cargo、gem、Composer、NuGet、Maven 与下载镜像
+- 🕘 **操作历史与回滚**：每次写入都记录在 设置 › 历史，带备份的条目可一键回滚（回滚本身也会被记录）
+- ⬆️ **应用内更新检查**：对比 GitHub Releases，横幅提示可跳过版本
+- 🧑‍🏫 **首次启动引导**：三步完成语言、PATH、镜像与偏好设置
+- 🍫 **菜单栏快捷切换**：不打开主窗口即可切换任意运行时的活动版本
+- 🌓 **深色模式配色**：`Color.subtleFill` / `chipFill` / `hairline` 语义色替换 11 种硬编码灰度
+- ⌨️ **快捷键**：⌘F 全局搜索、⌘R 刷新当前页、⌘, 打开设置、⌘S 保存
+
+### v0.3（Phase 1–3）
 
 - 容器镜像与实例管理：Docker/Podman 镜像 list/pull/tag/rm/prune/inspect，实例 list/start/stop/restart/rm/logs/inspect
 - 📦 **Cargo / Gem / Composer 镜像管理**（新增）：为 Rust / Ruby / PHP 三大生态补齐镜像切换 + 全局包卸载 + 缓存统计清理三件套，全部沿用「镜像源 / 全局包 / 缓存」三 Tab 结构与二次确认 + 备份策略
@@ -37,10 +53,10 @@
 - 🌐 **/etc/hosts 管理**：结构化 + 原文双视图编辑，支持条目启用/禁用、Profile 分组切换、通过 AppleScript `with administrator privileges` 提权写入并自动生成备份，与 Shell 环境模块共享同一交互范式
 - 🐚 **Shell 本地环境管理**：可视化编辑 `~/.zshrc` / `~/.zprofile` / `~/.zshenv` / `~/.bashrc` / `~/.bash_profile` / `~/.profile`，支持**结构化视图**（`export KEY=VALUE`、`PATH` 追加分组、引号策略）与**原文视图**（等宽编辑器）之间无损切换，保存前自动生成 `.envmatrix.bak` 备份，识别并高亮当前 shell 对应的 rc 文件
 - 🐍 **Python (pip) 包管理**：`pip.conf` `index-url` 一键切换（清华 / 阿里 / 腾讯 / USTC / 官方）、`pip list --user` 可视化 + 二次确认卸载、`~/Library/Caches/pip` 尺寸统计 + `pip cache purge`
-- 🔍 **全局搜索 (⌘F)**：跨 Brew / Maven / Go / npm / **pip** 聚合搜索，按 Source 分组、每组显示条数徽标，5 分钟 TTL 缓存 + 主动失效
+- 🔍 **全局搜索 (⌘F)**：跨 Brew / Maven / Go / npm / pip / cargo / gem / Composer / NuGet / uv / pnpm 与容器聚合搜索，按 Source 分组、每组显示条数徽标，5 分钟 TTL 缓存 + 主动失效
 - 📊 **诊断报告**：一键导出 Markdown 报告，包含 OS / brew / mvn / go / npm / **pip** 系统信息
 - 💾 **备份历史面板**：集中管理所有 `.envmatrix.bak` 文件，支持在线恢复 / 删除
-- 🔔 **系统通知**：长耗时任务完成后触发原生通知（可在 Settings 关闭）
+- 🔔 **系统通知**：运行时安装 / 卸载、hosts 写入、镜像切换、缓存清理等任务完成后触发原生通知（可在 Settings 关闭）
 - 🧱 **性能优化**：Brew 列表虚拟化 (`LazyVStack` + 200ms debounce)、Dashboard 5 分钟 TTL + 骨架屏、`SearchAggregator` TTL 缓存
 - 🗂️ **视图分组**：Runtime Installed 按 Managed / System 分组、Skills 按 source 分组、MCP Servers 按 transport (`npx / uvx / node / python / other`) 分组，全部可折叠 + 计数徽标
 - 📐 **Runtime Usage 分栏**：Runtime Detail 新增第三分栏，展示每个已安装版本的磁盘占用与 Managed / System 标签
