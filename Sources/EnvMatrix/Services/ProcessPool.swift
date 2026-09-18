@@ -88,23 +88,24 @@ public final class DefaultProcessPool: ProcessPool, @unchecked Sendable {
     }
 
     public func run(command: String, arguments: [String], environment: [String: String]?, dedupeKey: String?) async throws -> ProcessResult {
-        if let key = dedupeKey {
-            lock.lock()
-            if let existing = inflight[key] {
-                lock.unlock()
-                return try await existing.value
-            }
+        // Looking up the key and registering the new task must happen in ONE
+        // critical section. Releasing the lock in between let two callers with
+        // the same key both miss the lookup and both spawn a process, which is
+        // exactly what dedupe exists to prevent. The task is created while the
+        // lock is held; that only schedules the closure, and its first act is
+        // an `await`, so it cannot contend for this lock before we release it.
+        lock.lock()
+        if let key = dedupeKey, let existing = inflight[key] {
             lock.unlock()
+            return try await existing.value
         }
 
-        lock.lock()
         if pendingLimitCounter >= queueLimit {
             lock.unlock()
             throw ProcessPoolError.queueFull
         }
         pendingLimitCounter += 1
         waitingCount += 1
-        lock.unlock()
 
         let semaphore = self.semaphore
         let runner = self.runner
@@ -132,7 +133,6 @@ public final class DefaultProcessPool: ProcessPool, @unchecked Sendable {
             }
         }
 
-        lock.lock()
         if let key = dedupeKey {
             inflight[key] = task
         }
@@ -142,7 +142,10 @@ public final class DefaultProcessPool: ProcessPool, @unchecked Sendable {
         let cleanup: () -> Void = { [weak self] in
             guard let self = self else { return }
             self.lock.lock()
-            if let key = dedupeKey {
+            // Only retract our own registration: a later call with the same key
+            // may already have installed a fresh task, and clearing that would
+            // let the next caller start a duplicate process.
+            if let key = dedupeKey, self.inflight[key] == task {
                 self.inflight[key] = nil
             }
             self.pendingLimitCounter -= 1

@@ -73,6 +73,35 @@ final class DefaultProcessPoolTests: XCTestCase {
         XCTAssertEqual(result1.stdout, result2.stdout)
     }
 
+    /// Regression guard for a check-then-register race: the lookup of an
+    /// in-flight key and the registration of the new task used to happen in
+    /// two separate critical sections, so concurrent callers sharing a key
+    /// could all miss the lookup and each spawn a process. Two callers only
+    /// caught it occasionally (it turned CI red intermittently); fifty make
+    /// the window practically certain to be hit.
+    func testDedupeUnderHighConcurrencyRunsOnce() async throws {
+        let mock = MockRunner(delay: 0.1)
+        let pool = DefaultProcessPool(maxConcurrent: 8, queueLimit: 200, runner: mock)
+
+        let results = await withTaskGroup(of: String?.self) { group -> [String] in
+            for _ in 0..<50 {
+                group.addTask {
+                    try? await pool.run(command: "/bin/echo", arguments: [],
+                                        environment: nil, dedupeKey: "shared").stdout
+                }
+            }
+            var collected: [String] = []
+            for await value in group {
+                if let value { collected.append(value) }
+            }
+            return collected
+        }
+
+        XCTAssertEqual(results.count, 50, "every caller should get a result")
+        XCTAssertEqual(mock.callCount, 1, "the underlying command must run exactly once")
+        XCTAssertEqual(Set(results).count, 1, "every caller should see the same output")
+    }
+
     func testDifferentDedupeKeysNotMerged() async throws {
         let mock = MockRunner(delay: 0.05)
         let pool = DefaultProcessPool(maxConcurrent: 4, queueLimit: 100, runner: mock)
