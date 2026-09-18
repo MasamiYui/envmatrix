@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   # Must match ci.yml — see the note there about Swift 5.10.
   XCODE_VERSION: "26.2"
@@ -21,6 +25,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate tag format
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          # vX.Y.Z, optionally followed by a pre-release suffix (v1.2.3-rc.1).
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+            echo "::error::Tag '$TAG' is not a valid release tag."
+            echo "Expected vX.Y.Z or vX.Y.Z-<suffix>, e.g. v0.4.1 or v0.5.0-beta.1."
+            echo "The version published to users is the tag with its leading 'v' removed,"
+            echo "so a typo here becomes a permanent, public version number."
+            exit 1
+          fi
+          echo "Tag '$TAG' accepted."
 
       - name: Select Xcode ${{ env.XCODE_VERSION }}
         run: |
@@ -50,14 +68,27 @@ jobs:
           restore-keys: |
             spm-release-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-
 
+      - name: Run tests
+        run: swift test --parallel
+
       - name: Extract version from tag
         id: version
         run: |
+          set -euo pipefail
           TAG="${GITHUB_REF_NAME}"
           # strip leading v
           VERSION="${TAG#v}"
-          echo "tag=$TAG"       >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # A suffix after the version core (v1.2.3-beta.1) marks a pre-release.
+          # Without this every beta would be published as the stable "latest",
+          # which the in-app update check reads and would offer to every user.
+          case "$VERSION" in
+            *-*) PRERELEASE=true ;;
+            *)   PRERELEASE=false ;;
+          esac
+          echo "tag=$TAG"               >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"       >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "Publishing $TAG as prerelease=$PRERELEASE"
 
       - name: Build (release, universal)
         run: |
@@ -130,7 +161,7 @@ jobs:
           name: EnvMatrix ${{ steps.version.outputs.tag }}
           tag_name: ${{ steps.version.outputs.tag }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.version.outputs.prerelease }}
           generate_release_notes: true
           body: |
             ## Build info
