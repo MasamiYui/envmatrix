@@ -50,7 +50,13 @@ extension L10n {
         "globalSearch.source.maven": "Maven",
         "globalSearch.source.go": "Go",
         "globalSearch.source.node": "npm",
-        "globalSearch.source.python": "pip"
+        "globalSearch.source.python": "pip",
+        "globalSearch.source.rust": "cargo",
+        "globalSearch.source.ruby": "gem",
+        "globalSearch.source.php": "composer",
+        "globalSearch.source.dotnet": "dotnet tool",
+        "globalSearch.source.uv": "uv tool",
+        "globalSearch.source.pnpm": "pnpm"
     ]
 
     static let zhNavigation: [String: String] = [
@@ -102,6 +108,12 @@ extension L10n {
         "globalSearch.source.maven": "Maven",
         "globalSearch.source.go": "Go",
         "globalSearch.source.node": "npm",
-        "globalSearch.source.python": "pip"
+        "globalSearch.source.python": "pip",
+        "globalSearch.source.rust": "cargo",
+        "globalSearch.source.ruby": "gem",
+        "globalSearch.source.php": "composer",
+        "globalSearch.source.dotnet": "dotnet tool",
+        "globalSearch.source.uv": "uv tool",
+        "globalSearch.source.pnpm": "pnpm"
     ]
 }

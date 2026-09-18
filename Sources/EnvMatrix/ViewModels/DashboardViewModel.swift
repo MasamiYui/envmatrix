@@ -11,8 +11,24 @@ public final class DashboardViewModel: ObservableObject {
     }
 
     public struct PackageSnapshot: Identifiable {
-        public enum Kind: String {
-            case brew, maven, go, node
+        public enum Kind: String, CaseIterable {
+            case brew, maven, go, node, python, rust, ruby, php, dotnet, uv, pnpm
+
+            public var navigationItem: NavigationItem {
+                switch self {
+                case .brew: return .packagesBrew
+                case .maven: return .packagesMaven
+                case .go: return .packagesGo
+                case .node: return .packagesNode
+                case .python: return .packagesPython
+                case .rust: return .packagesRust
+                case .ruby: return .packagesRuby
+                case .php: return .packagesPhp
+                case .dotnet: return .packagesDotnet
+                case .uv: return .packagesUv
+                case .pnpm: return .packagesPnpm
+                }
+            }
         }
         public let kind: Kind
         public let cacheBytes: Int64
@@ -45,6 +61,13 @@ public final class DashboardViewModel: ObservableObject {
     private let runtimeService: RuntimeService
     private let skillsService: SkillsService
     private let mcpService: MCPService
+    private let pipService: PipService
+    private let cargoService: CargoService
+    private let gemService: GemService
+    private let composerService: ComposerService
+    private let nugetService: NuGetService
+    private let uvService: UvService
+    private let pnpmService: PnpmService
     private let versionsDir: URL
     private let shimsDir: URL
     private let fileManager: FileManager
@@ -60,6 +83,13 @@ public final class DashboardViewModel: ObservableObject {
         runtimeService: RuntimeService = DefaultRuntimeService(),
         skillsService: SkillsService = DefaultSkillsService(),
         mcpService: MCPService = DefaultMCPService(),
+        pipService: PipService = DefaultPipService(),
+        cargoService: CargoService = DefaultCargoService(),
+        gemService: GemService = DefaultGemService(),
+        composerService: ComposerService = DefaultComposerService(),
+        nugetService: NuGetService = DefaultNuGetService(),
+        uvService: UvService = DefaultUvService(),
+        pnpmService: PnpmService = DefaultPnpmService(),
         versionsDir: URL = FileSystem.versionsDir,
         shimsDir: URL = FileSystem.envmatrixRoot.appendingPathComponent("shims", isDirectory: true),
         fileManager: FileManager = .default
@@ -67,6 +97,13 @@ public final class DashboardViewModel: ObservableObject {
         self.runtimeService = runtimeService
         self.skillsService = skillsService
         self.mcpService = mcpService
+        self.pipService = pipService
+        self.cargoService = cargoService
+        self.gemService = gemService
+        self.composerService = composerService
+        self.nugetService = nugetService
+        self.uvService = uvService
+        self.pnpmService = pnpmService
         self.versionsDir = versionsDir
         self.shimsDir = shimsDir
         self.fileManager = fileManager
@@ -207,7 +244,9 @@ public final class DashboardViewModel: ObservableObject {
         defer { isRefreshingPackages = false }
 
         let threshold = Self.cleanupThresholdBytes
-        let pkgs = await Task.detached(priority: .utility) {
+        // Folder-only ecosystems first (fast, no subprocess), published as
+        // soon as they are ready so the grid fills in progressively.
+        let folderBased = await Task.detached(priority: .utility) {
             () -> [PackageSnapshot] in
             let home = URL(fileURLWithPath: NSHomeDirectory())
             let brew = FolderSizeCalculator.compute(
@@ -229,8 +268,45 @@ public final class DashboardViewModel: ObservableObject {
                                 needsAttention: npm > threshold)
             ]
         }.value
-        self.packages = pkgs
+        self.packages = folderBased
+
+        // Tool-backed ecosystems: only shown when the tool is on PATH, so
+        // the grid reflects what the user actually has. Probed one after
+        // another (see the note in performRefresh about task groups).
+        let toolBased = await scanToolBackedPackages(threshold: threshold)
+        self.packages = folderBased + toolBased
         self.packagesLoadedAt = Date()
+    }
+
+    private func scanToolBackedPackages(threshold: Int64) async -> [PackageSnapshot] {
+        var result: [PackageSnapshot] = []
+        func add(_ kind: PackageSnapshot.Kind, _ bytes: Int64?) {
+            guard let bytes else { return }
+            result.append(PackageSnapshot(kind: kind, cacheBytes: bytes, itemCount: nil,
+                                          needsAttention: bytes > threshold))
+        }
+        if await pipService.isPipAvailable() {
+            add(.python, try? await pipService.cacheStats().sizeBytes)
+        }
+        if await cargoService.isCargoAvailable() {
+            add(.rust, try? await cargoService.cacheStats().sizeBytes)
+        }
+        if await gemService.isGemAvailable() {
+            add(.ruby, try? await gemService.cacheStats().sizeBytes)
+        }
+        if await composerService.isComposerAvailable() {
+            add(.php, try? await composerService.cacheStats().sizeBytes)
+        }
+        if await nugetService.isDotnetAvailable() {
+            add(.dotnet, try? await nugetService.cacheStats().sizeBytes)
+        }
+        if await uvService.isAvailable() {
+            add(.uv, try? await uvService.cacheStats().sizeBytes)
+        }
+        if await pnpmService.isAvailable() {
+            add(.pnpm, try? await pnpmService.storeStats().sizeBytes)
+        }
+        return result
     }
 
     public static func folderSize(at url: URL) async -> Int64 {

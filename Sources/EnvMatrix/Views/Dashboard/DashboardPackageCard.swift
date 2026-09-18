@@ -10,32 +10,9 @@ struct DashboardPackageCard: View {
     let action: () -> Void
     @State private var isHovering = false
 
-    private var tint: Color {
-        switch snapshot.kind {
-        case .brew:  return .orange
-        case .maven: return .blue
-        case .go:    return .cyan
-        case .node:  return .green
-        }
-    }
-
-    private var iconName: String {
-        switch snapshot.kind {
-        case .brew:  return "cube.box.fill"
-        case .maven: return "shippingbox.fill"
-        case .go:    return "shippingbox.circle"
-        case .node:  return "leaf.circle.fill"
-        }
-    }
-
-    private var title: String {
-        switch snapshot.kind {
-        case .brew:  return L("nav.homebrew")
-        case .maven: return L("nav.mavenRepo")
-        case .go:    return L("nav.goRepo")
-        case .node:  return L("nav.nodeRepo")
-        }
-    }
+    private var tint: Color { snapshot.kind.navigationItem.tint }
+    private var iconName: String { snapshot.kind.navigationItem.systemImage }
+    private var title: String { snapshot.kind.navigationItem.displayName }
 
     private var sizeText: String {
         let f = ByteCountFormatter()

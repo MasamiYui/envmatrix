@@ -29,8 +29,7 @@ public struct DashboardView: View {
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    ShimsPathBanner()
-                        .padding(.horizontal, -16)
+                    DashboardAttentionSection(viewModel: viewModel)
                     runtimesSection
                     packagesSection
                     overviewSection
@@ -60,13 +59,15 @@ public struct DashboardView: View {
                 icon: "sparkles",
                 tint: .purple,
                 label: L("dashboard.skills"),
-                value: "\(viewModel.skillsCount)"
+                value: "\(viewModel.skillsCount)",
+                action: { navigator.select(.aiSkills) }
             )
             SummaryChip(
                 icon: "bolt.horizontal.fill",
                 tint: .orange,
                 label: L("dashboard.mcpServers"),
-                value: "\(viewModel.mcpCount)"
+                value: "\(viewModel.mcpCount)",
+                action: { navigator.select(.aiMCP) }
             )
             SummaryChip(
                 icon: "internaldrive.fill",
@@ -138,12 +139,7 @@ public struct DashboardView: View {
     }
 
     private func navItem(for kind: DashboardViewModel.PackageSnapshot.Kind) -> NavigationItem {
-        switch kind {
-        case .brew:  return .packagesBrew
-        case .maven: return .packagesMaven
-        case .go:    return .packagesGo
-        case .node:  return .packagesNode
-        }
+        kind.navigationItem
     }
 
     private var overviewSection: some View {
@@ -201,8 +197,23 @@ private struct SummaryChip: View {
     let tint: Color
     let label: String
     let value: String
+    var action: (() -> Void)? = nil
+    @State private var isHovering = false
 
     var body: some View {
+        Group {
+            if let action {
+                Button(action: action) { chip }
+                    .buttonStyle(.plain)
+                    .onHover { isHovering = $0 }
+                    .help(L("dashboard.card.openHint"))
+            } else {
+                chip
+            }
+        }
+    }
+
+    private var chip: some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.callout.weight(.semibold))
@@ -224,8 +235,9 @@ private struct SummaryChip: View {
         .background(.regularMaterial, in: Capsule(style: .continuous))
         .overlay(
             Capsule(style: .continuous)
-                .strokeBorder(Color.subtleFill, lineWidth: 0.5)
+                .strokeBorder(isHovering ? tint.opacity(0.5) : Color.hairline, lineWidth: 0.5)
         )
+        .animation(.easeOut(duration: 0.15), value: isHovering)
     }
 }
 

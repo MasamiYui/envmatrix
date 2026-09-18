@@ -8,6 +8,12 @@ public struct SearchHit: Identifiable, Hashable {
         case go
         case node
         case python
+        case rust
+        case ruby
+        case php
+        case dotnet
+        case uv
+        case pnpm
         case containerContext
         case containerImage
         case containerInstance
@@ -60,6 +66,12 @@ public final class SearchAggregator: ObservableObject {
     private let goService: GoLocalCacheService
     private let npmService: NpmService
     private let pipService: PipService
+    private let cargoService: CargoService
+    private let gemService: GemService
+    private let composerService: ComposerService
+    private let nugetService: NuGetService
+    private let uvService: UvService
+    private let pnpmService: PnpmService
     private let dockerService: DockerContextService
     private let podmanService: PodmanContextService
     private let dockerImageService: DockerImageService
@@ -77,6 +89,12 @@ public final class SearchAggregator: ObservableObject {
         goService: GoLocalCacheService = DefaultGoLocalCacheService(),
         npmService: NpmService = DefaultNpmService(),
         pipService: PipService = DefaultPipService(),
+        cargoService: CargoService = DefaultCargoService(),
+        gemService: GemService = DefaultGemService(),
+        composerService: ComposerService = DefaultComposerService(),
+        nugetService: NuGetService = DefaultNuGetService(),
+        uvService: UvService = DefaultUvService(),
+        pnpmService: PnpmService = DefaultPnpmService(),
         dockerService: DockerContextService = DefaultDockerContextService(),
         podmanService: PodmanContextService = DefaultPodmanContextService(),
         dockerImageService: DockerImageService = DefaultDockerImageService(),
@@ -90,6 +108,12 @@ public final class SearchAggregator: ObservableObject {
         self.goService = goService
         self.npmService = npmService
         self.pipService = pipService
+        self.cargoService = cargoService
+        self.gemService = gemService
+        self.composerService = composerService
+        self.nugetService = nugetService
+        self.uvService = uvService
+        self.pnpmService = pnpmService
         self.dockerService = dockerService
         self.podmanService = podmanService
         self.dockerImageService = dockerImageService
@@ -128,11 +152,18 @@ public final class SearchAggregator: ObservableObject {
         async let go = corpus(.go)
         async let npm = corpus(.node)
         async let pip = corpus(.python)
+        async let rust = corpus(.rust)
+        async let ruby = corpus(.ruby)
+        async let php = corpus(.php)
+        async let dotnet = corpus(.dotnet)
+        async let uv = corpus(.uv)
+        async let pnpm = corpus(.pnpm)
         async let containers = corpus(.containerContext)
         async let images = corpus(.containerImage)
         async let instances = corpus(.containerInstance)
 
-        let all = await [brew, maven, go, npm, pip, containers, images, instances]
+        let all = await [brew, maven, go, npm, pip, rust, ruby, php, dotnet, uv, pnpm,
+                         containers, images, instances]
         let needle = trimmed.lowercased()
 
         var results: [SearchHit] = []
@@ -164,6 +195,12 @@ public final class SearchAggregator: ObservableObject {
         case .go:     hits = await loadGo()
         case .node:   hits = await loadNpm()
         case .python: hits = await loadPip()
+        case .rust:   hits = await loadCargo()
+        case .ruby:   hits = await loadGems()
+        case .php:    hits = await loadComposer()
+        case .dotnet: hits = await loadDotnetTools()
+        case .uv:     hits = await loadUvTools()
+        case .pnpm:   hits = await loadPnpm()
         case .containerContext: hits = await loadContainers()
         case .containerImage: hits = await loadContainerImages()
         case .containerInstance: hits = await loadContainerInstances()
@@ -236,6 +273,42 @@ public final class SearchAggregator: ObservableObject {
         } catch {
             return []
         }
+    }
+
+    private func loadCargo() async -> [SearchHit] {
+        guard await cargoService.isCargoAvailable() else { return [] }
+        let crates = (try? await cargoService.listGlobalCrates()) ?? []
+        return crates.map { SearchHit(source: .rust, title: $0.name, subtitle: $0.version) }
+    }
+
+    private func loadGems() async -> [SearchHit] {
+        guard await gemService.isGemAvailable() else { return [] }
+        let gems = (try? await gemService.listGlobalGems()) ?? []
+        return gems.map { SearchHit(source: .ruby, title: $0.name, subtitle: $0.version) }
+    }
+
+    private func loadComposer() async -> [SearchHit] {
+        guard await composerService.isComposerAvailable() else { return [] }
+        let packages = (try? await composerService.listGlobalPackages()) ?? []
+        return packages.map { SearchHit(source: .php, title: $0.name, subtitle: $0.version) }
+    }
+
+    private func loadDotnetTools() async -> [SearchHit] {
+        guard await nugetService.isDotnetAvailable() else { return [] }
+        let tools = (try? await nugetService.listGlobalTools()) ?? []
+        return tools.map { SearchHit(source: .dotnet, title: $0.name, subtitle: $0.version, keywords: $0.commands) }
+    }
+
+    private func loadUvTools() async -> [SearchHit] {
+        guard await uvService.isAvailable() else { return [] }
+        let tools = (try? await uvService.listGlobalTools()) ?? []
+        return tools.map { SearchHit(source: .uv, title: $0.name, subtitle: $0.version) }
+    }
+
+    private func loadPnpm() async -> [SearchHit] {
+        guard await pnpmService.isAvailable() else { return [] }
+        let packages = (try? await pnpmService.listGlobalPackages()) ?? []
+        return packages.map { SearchHit(source: .pnpm, title: $0.name, subtitle: $0.version) }
     }
 
     private func loadContainers() async -> [SearchHit] {

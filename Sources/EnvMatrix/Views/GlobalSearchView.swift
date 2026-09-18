@@ -194,6 +194,12 @@ public struct GlobalSearchView: View {
         case .go:     target = .packagesGo
         case .node:   target = .packagesNode
         case .python: target = .packagesPython
+        case .rust:   target = .packagesRust
+        case .ruby:   target = .packagesRuby
+        case .php:    target = .packagesPhp
+        case .dotnet: target = .packagesDotnet
+        case .uv:     target = .packagesUv
+        case .pnpm:   target = .packagesPnpm
         case .containerContext: target = .systemContainerContexts
         case .containerImage:
             target = .systemContainerContexts
@@ -214,29 +220,40 @@ public struct GlobalSearchView: View {
         dismiss()
     }
 
-    private func icon(for source: SearchHit.Source) -> String {
+    /// Package sources borrow the module's sidebar identity so the palette
+    /// matches the page it opens.
+    private func navigationItem(for source: SearchHit.Source) -> NavigationItem? {
         switch source {
-        case .brew:   return "mug"
-        case .maven:  return "cube.box"
-        case .go:     return "chevron.left.forwardslash.chevron.right"
-        case .node:   return "leaf.circle.fill"
-        case .python: return "shippingbox.and.arrow.backward"
-        case .containerContext: return "shippingbox.and.arrow.backward.fill"
+        case .brew:   return .packagesBrew
+        case .maven:  return .packagesMaven
+        case .go:     return .packagesGo
+        case .node:   return .packagesNode
+        case .python: return .packagesPython
+        case .rust:   return .packagesRust
+        case .ruby:   return .packagesRuby
+        case .php:    return .packagesPhp
+        case .dotnet: return .packagesDotnet
+        case .uv:     return .packagesUv
+        case .pnpm:   return .packagesPnpm
+        case .containerContext, .containerImage, .containerInstance: return nil
+        }
+    }
+
+    private func icon(for source: SearchHit.Source) -> String {
+        if let nav = navigationItem(for: source) { return nav.systemImage }
+        switch source {
         case .containerImage: return "photo.on.rectangle"
         case .containerInstance: return "shippingbox"
+        default: return "shippingbox.and.arrow.backward.fill"
         }
     }
 
     private func color(for source: SearchHit.Source) -> Color {
+        if let nav = navigationItem(for: source) { return nav.tint }
         switch source {
-        case .brew:   return .orange
-        case .maven:  return .indigo
-        case .go:     return .cyan
-        case .node:   return .green
-        case .python: return .yellow
-        case .containerContext: return .teal
         case .containerImage: return .blue
         case .containerInstance: return .purple
+        default: return .teal
         }
     }
 
@@ -247,6 +264,12 @@ public struct GlobalSearchView: View {
         case .go:     return L("globalSearch.source.go")
         case .node:   return L("globalSearch.source.node")
         case .python: return L("globalSearch.source.python")
+        case .rust:   return L("globalSearch.source.rust")
+        case .ruby:   return L("globalSearch.source.ruby")
+        case .php:    return L("globalSearch.source.php")
+        case .dotnet: return L("globalSearch.source.dotnet")
+        case .uv:     return L("globalSearch.source.uv")
+        case .pnpm:   return L("globalSearch.source.pnpm")
         case .containerContext: return L("globalSearch.source.containerContext")
         case .containerImage: return L("search.source.containerImage")
         case .containerInstance: return L("search.source.containerInstance")

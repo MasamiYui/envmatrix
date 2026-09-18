@@ -24,7 +24,20 @@ extension L10n {
         "dashboard.package.needsCleanup": "Consider cleaning up",
         "dashboard.attention": "Needs attention",
         "dashboard.storage.subtitle": "Used by managed versions",
-        "dashboard.card.openHint": "Open details"
+        "dashboard.card.openHint": "Open details",
+        "dashboard.section.containers": "Containers",
+        "dashboard.section.attention": "Needs attention",
+        "dashboard.attention.allClear": "Everything looks good",
+        "dashboard.attention.allClear.detail": "PATH is configured, caches are under %@ and you are on the latest version.",
+        "dashboard.attention.shims.title": "Terminal won't see switched runtimes",
+        "dashboard.attention.shims.detail": "~/.envmatrix/shims is not on PATH. Add it to %@ to make \"Set Active\" take effect.",
+        "dashboard.attention.shims.action": "Add to %@",
+        "dashboard.attention.cache.title": "%@ cache is %@",
+        "dashboard.attention.cache.detail": "Above the %@ cleanup threshold. Review and clean it from the %@ page.",
+        "dashboard.attention.cache.action": "Open",
+        "dashboard.attention.update.title": "EnvMatrix %@ is available",
+        "dashboard.attention.update.detail": "You are running %@. Release notes and downloads are on GitHub.",
+        "dashboard.attention.update.action": "View release"
     ]
 
     static let zhDashboard: [String: String] = [
@@ -50,6 +63,19 @@ extension L10n {
         "dashboard.package.needsCleanup": "建议清理",
         "dashboard.attention": "需要关注",
         "dashboard.storage.subtitle": "托管版本占用",
-        "dashboard.card.openHint": "打开详情"
+        "dashboard.card.openHint": "打开详情",
+        "dashboard.section.containers": "容器",
+        "dashboard.section.attention": "需要关注",
+        "dashboard.attention.allClear": "一切正常",
+        "dashboard.attention.allClear.detail": "PATH 已配置，各缓存均低于 %@，并且已是最新版本。",
+        "dashboard.attention.shims.title": "终端还看不到切换后的运行时",
+        "dashboard.attention.shims.detail": "~/.envmatrix/shims 不在 PATH 中。把它写入 %@ 后，“设为活动”才会生效。",
+        "dashboard.attention.shims.action": "写入 %@",
+        "dashboard.attention.cache.title": "%@ 缓存已达 %@",
+        "dashboard.attention.cache.detail": "超过 %@ 的清理阈值，建议到 %@ 页面查看并清理。",
+        "dashboard.attention.cache.action": "打开",
+        "dashboard.attention.update.title": "EnvMatrix %@ 已发布",
+        "dashboard.attention.update.detail": "当前版本 %@。更新日志与下载见 GitHub。",
+        "dashboard.attention.update.action": "查看发布页"
     ]
 }
