@@ -19,6 +19,8 @@ public struct DashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header
+                ShimsPathBanner()
+                    .padding(.horizontal, -16)
                 runtimesSection
                 packagesSection
                 overviewSection

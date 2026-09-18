@@ -22,6 +22,7 @@ public struct RuntimeDetailView: View {
     public var body: some View {
         VStack(spacing: 0) {
             header
+            ShimsPathBanner()
             Picker("", selection: $selectedTab) {
                 Text(L("runtime.installed")).tag(0)
                 Text(L("runtime.available")).tag(1)
