@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/MasamiYui/envmatrix/actions/workflows/ci.yml"><img src="https://github.com/MasamiYui/envmatrix/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://github.com/MasamiYui/envmatrix/actions/workflows/lint.yml"><img src="https://github.com/MasamiYui/envmatrix/actions/workflows/lint.yml/badge.svg" alt="Lint" /></a>
-  <a href="#"><img src="https://img.shields.io/badge/swift-5.9-orange.svg" alt="Swift 5.9" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/swift-6.2-orange.svg" alt="Swift 6.2" /></a>
   <a href="#"><img src="https://img.shields.io/badge/macOS-13%2B-blue.svg" alt="macOS 13+" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-green.svg" alt="License" /></a>
   <a href="#"><img src="https://img.shields.io/badge/i18n-EN%20%7C%20中文-purple.svg" alt="i18n" /></a>
@@ -243,8 +243,8 @@
 
 ### 系统要求
 
-- **macOS 13 Ventura** 及以上
-- **Swift 5.9+**（Xcode 15 或独立 Swift toolchain）
+- **运行**：macOS 13 Ventura 及以上（发行版为 Universal Binary，部署目标仍是 13.0）
+- **构建**：Xcode 26 / Swift 6.2 工具链。源码使用的并发写法会被 Swift 5.10 判为错误（并会让其前端崩溃），CI 与 Release 流水线都固定在 Xcode 26.2
 - 可选：`brew`、`npm`、`pip3`、`go`、`mvn`、`cargo`、`gem`、`composer` 等 CLI（EnvMatrix 会在缺失时优雅降级并给出提示）
 
 ### 下载预编译产物
