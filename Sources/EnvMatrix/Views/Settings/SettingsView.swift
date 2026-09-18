@@ -60,19 +60,16 @@ public struct SettingsView: View {
 // MARK: - General
 
 public enum MirrorDefaults {
-    public static let node = "https://nodejs.org/dist/"
-    public static let python = "https://www.python.org/ftp/python/"
-    public static let go = "https://go.dev/dl/"
-    public static let java = "https://download.oracle.com/java/"
+    public static let node = DownloadMirrors.nodeDefault
+    public static let go = DownloadMirrors.goDefault
 }
 
 struct GeneralSettingsTab: View {
     @EnvironmentObject private var localization: LocalizationManager
     @AppStorage("colorSchemePreference") private var colorSchemePreference: String = "system"
-    @AppStorage("nodeMirror") private var nodeMirror: String = MirrorDefaults.node
-    @AppStorage("pythonMirror") private var pythonMirror: String = MirrorDefaults.python
-    @AppStorage("goMirror") private var goMirror: String = MirrorDefaults.go
-    @AppStorage("javaMirror") private var javaMirror: String = MirrorDefaults.java
+    @AppStorage(DownloadMirrors.nodeKey) private var nodeMirror: String = MirrorDefaults.node
+    @AppStorage(DownloadMirrors.goKey) private var goMirror: String = MirrorDefaults.go
+    @State private var presetToApply: MirrorPresetProfile? = nil
     @AppStorage("notificationsEnabled") private var notificationsEnabled: Bool = true
     @AppStorage(UpdateChecker.autoCheckKey) private var autoCheckUpdates: Bool = true
 
@@ -113,11 +110,31 @@ struct GeneralSettingsTab: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section(L("settings.mirrorPresets")) {
+                HStack(spacing: 10) {
+                    Button {
+                        presetToApply = .chinaMainland
+                    } label: {
+                        Label(L("mirrorPreset.chinaMainland.title"), systemImage: "bolt.horizontal.circle.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button {
+                        presetToApply = .official
+                    } label: {
+                        Label(L("mirrorPreset.official.title"), systemImage: "globe")
+                    }
+                }
+                Text(L("settings.mirrorPresets.hint"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section(L("settings.mirrors")) {
                 TextField(L("settings.nodeMirror"), text: $nodeMirror)
-                TextField(L("settings.pythonMirror"), text: $pythonMirror)
                 TextField(L("settings.goMirror"), text: $goMirror)
-                TextField(L("settings.javaMirror"), text: $javaMirror)
+                Text(L("settings.mirrors.hint"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
                 HStack {
                     Spacer()
@@ -128,13 +145,15 @@ struct GeneralSettingsTab: View {
             }
         }
         .formStyle(.grouped)
+        .sheet(item: $presetToApply) { profile in
+            MirrorPresetSheet(profile: profile, onDone: { presetToApply = nil })
+                .environmentObject(localization)
+        }
     }
 
     private func resetDefaults() {
         nodeMirror = MirrorDefaults.node
-        pythonMirror = MirrorDefaults.python
         goMirror = MirrorDefaults.go
-        javaMirror = MirrorDefaults.java
     }
 }
 

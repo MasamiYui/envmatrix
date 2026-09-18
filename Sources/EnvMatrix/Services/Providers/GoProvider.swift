@@ -42,7 +42,7 @@ public struct GoProvider: VersionProvider {
                 let versionString = entry.version.hasPrefix("go")
                     ? String(entry.version.dropFirst(2))
                     : entry.version
-                let urlString = "https://go.dev/dl/\(match.filename)"
+                let urlString = "\(DownloadMirrors.goBase())\(match.filename)"
                 let url = URL(string: urlString)
                 results.append(
                     RuntimeVersion(

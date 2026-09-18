@@ -40,7 +40,7 @@ public struct NodeProvider: VersionProvider {
                 let versionString = entry.version.hasPrefix("v")
                     ? String(entry.version.dropFirst())
                     : entry.version
-                let urlString = "https://nodejs.org/dist/\(entry.version)/node-\(entry.version)-darwin-\(arch).tar.gz"
+                let urlString = "\(DownloadMirrors.nodeBase())\(entry.version)/node-\(entry.version)-darwin-\(arch).tar.gz"
                 let url = URL(string: urlString)
                 let isLTS: Bool
                 switch entry.lts {
