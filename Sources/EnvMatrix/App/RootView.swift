@@ -18,8 +18,11 @@ public struct RootView: View {
             SidebarView(selection: $navigator.selection)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 320)
         } detail: {
-            DetailView(selection: navigator.selection)
-                .navigationSplitViewColumnWidth(min: 500, ideal: 820)
+            VStack(spacing: 0) {
+                UpdateAvailableBanner()
+                DetailView(selection: navigator.selection)
+            }
+            .navigationSplitViewColumnWidth(min: 500, ideal: 820)
         }
         .navigationSplitViewStyle(.balanced)
         // Total floor: 220 (sidebar) + 500 (detail) + splitter = ~740pt
@@ -50,6 +53,7 @@ public struct RootView: View {
             if columnVisibility == .detailOnly {
                 columnVisibility = .all
             }
+            UpdateChecker.shared.checkOnLaunchIfNeeded()
         }
     }
 

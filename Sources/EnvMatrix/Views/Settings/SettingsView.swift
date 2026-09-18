@@ -70,6 +70,7 @@ struct GeneralSettingsTab: View {
     @AppStorage("goMirror") private var goMirror: String = MirrorDefaults.go
     @AppStorage("javaMirror") private var javaMirror: String = MirrorDefaults.java
     @AppStorage("notificationsEnabled") private var notificationsEnabled: Bool = true
+    @AppStorage(UpdateChecker.autoCheckKey) private var autoCheckUpdates: Bool = true
 
     var body: some View {
         Form {
@@ -97,6 +98,13 @@ struct GeneralSettingsTab: View {
             Section(L("settings.notifications")) {
                 Toggle(L("settings.notifications.toggle"), isOn: $notificationsEnabled)
                 Text(L("settings.notifications.hint"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section(L("settings.updates")) {
+                Toggle(L("settings.updates.autoCheck"), isOn: $autoCheckUpdates)
+                Text(L("settings.updates.hint"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -206,14 +214,11 @@ struct LogsSettingsTab: View {
 // MARK: - About
 
 struct AboutSettingsTab: View {
-    private var appVersion: String {
-        if let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, !v.isEmpty {
-            return v
-        }
-        return "1.0.0"
-    }
+    @ObservedObject private var checker = UpdateChecker.shared
+    @EnvironmentObject private var localization: LocalizationManager
 
-    private let githubURL = URL(string: "https://github.com/EnvMatrix/EnvMatrix")!
+    private let githubURL = URL(string: "https://github.com/\(GitHubUpdateCheckService.repository)")!
+    private let issuesURL = URL(string: "https://github.com/\(GitHubUpdateCheckService.repository)/issues/new/choose")!
 
     var body: some View {
         VStack(spacing: 16) {
@@ -225,7 +230,7 @@ struct AboutSettingsTab: View {
             Text("EnvMatrix")
                 .font(.largeTitle.bold())
 
-            Text(String(format: L("settings.version"), appVersion))
+            Text(String(format: L("settings.version"), checker.currentVersion))
                 .foregroundStyle(.secondary)
 
             Text(L("settings.aboutDescription"))
@@ -233,16 +238,88 @@ struct AboutSettingsTab: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: 420)
 
-            Button {
-                NSWorkspace.shared.open(githubURL)
-            } label: {
-                Label(L("settings.viewGitHub"), systemImage: "link")
+            updateBlock
+
+            HStack(spacing: 12) {
+                Button {
+                    NSWorkspace.shared.open(githubURL)
+                } label: {
+                    Label(L("settings.viewGitHub"), systemImage: "link")
+                }
+                .buttonStyle(.borderedProminent)
+                Button {
+                    NSWorkspace.shared.open(issuesURL)
+                } label: {
+                    Label(L("settings.reportIssue"), systemImage: "ladybug")
+                }
+                Button {
+                    NSWorkspace.shared.open(GitHubUpdateCheckService.releasesPage)
+                } label: {
+                    Label(L("settings.releaseNotes"), systemImage: "doc.text")
+                }
             }
-            .buttonStyle(.borderedProminent)
 
             Spacer()
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var updateBlock: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                switch checker.state {
+                case .idle:
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .foregroundStyle(.secondary)
+                    Text(L("update.state.idle"))
+                        .foregroundStyle(.secondary)
+                case .checking:
+                    ProgressView().controlSize(.small)
+                    Text(L("update.state.checking"))
+                        .foregroundStyle(.secondary)
+                case .upToDate(let latest):
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text(String(format: L("update.state.upToDate"), latest))
+                case .available(let release):
+                    Image(systemName: "arrow.down.circle.fill")
+                        .foregroundStyle(.blue)
+                    Text(String(format: L("update.state.available"), release.version))
+                    Button {
+                        NSWorkspace.shared.open(release.url)
+                    } label: {
+                        Label(L("update.banner.open"), systemImage: "arrow.up.right.square")
+                    }
+                    .controlSize(.small)
+                case .failed(let msg):
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Text(msg)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            }
+            .font(.callout)
+
+            HStack(spacing: 12) {
+                Button {
+                    checker.clearSkipped()
+                    Task { await checker.check() }
+                } label: {
+                    Label(L("update.checkNow"), systemImage: "arrow.clockwise")
+                }
+                .disabled(checker.state == .checking)
+                if let last = checker.lastCheckedAt {
+                    Text(String(format: L("update.lastChecked"),
+                                last.formatted(date: .abbreviated, time: .shortened)))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: 480)
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
