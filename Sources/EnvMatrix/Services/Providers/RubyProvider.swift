@@ -48,12 +48,15 @@ public struct RubyProvider: VersionProvider {
                 let minor = "\(components[0]).\(components[1])"
                 let urlString = "https://cache.ruby-lang.org/pub/ruby/\(minor)/ruby-\(version).tar.gz"
                 let url = URL(string: urlString)
+                // Source tarball: kept for reference, but it must be built
+                // before it is usable, so in-app install is disabled.
                 return RuntimeVersion(
                     kind: .ruby,
                     version: version,
                     downloadURL: url,
                     isLTS: false,
-                    arch: nil
+                    arch: nil,
+                    isInstallable: false
                 )
             }
         } catch let err as RuntimeServiceError {

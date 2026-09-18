@@ -10,6 +10,11 @@ public struct RuntimeVersion: Identifiable, Codable, Hashable {
     public let arch: String?
     public let installPath: URL?
     public let isSystem: Bool
+    /// True when EnvMatrix can download and unpack a ready-to-run binary for
+    /// this version. False for source-only distributions (Ruby, PHP) and for
+    /// runtimes whose provider only lists versions (rustup, .NET, Erlang…),
+    /// in which case the UI shows a manual install command instead.
+    public let isInstallable: Bool
 
     public init(
         kind: RuntimeKind,
@@ -19,7 +24,8 @@ public struct RuntimeVersion: Identifiable, Codable, Hashable {
         isLTS: Bool = false,
         arch: String? = nil,
         installPath: URL? = nil,
-        isSystem: Bool = false
+        isSystem: Bool = false,
+        isInstallable: Bool? = nil
     ) {
         if isSystem {
             self.id = "\(kind.rawValue)-system-\(version)"
@@ -34,5 +40,6 @@ public struct RuntimeVersion: Identifiable, Codable, Hashable {
         self.arch = arch
         self.installPath = installPath
         self.isSystem = isSystem
+        self.isInstallable = isInstallable ?? (downloadURL != nil)
     }
 }

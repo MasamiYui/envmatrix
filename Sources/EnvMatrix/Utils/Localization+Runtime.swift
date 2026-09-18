@@ -33,7 +33,10 @@ extension L10n {
         "runtime.usage.recompute": "Recompute",
         "runtime.group.managed": "Managed",
         "runtime.group.system": "System",
-        "runtime.group.count": "%d"
+        "runtime.group.count": "%d",
+        "runtime.manualOnly.notice": "EnvMatrix cannot download %@ builds directly. Use the command shown next to each version, then hit Refresh to pick it up.",
+        "runtime.manualOnly.hint": "Manual install only",
+        "runtime.manualOnly.copy": "Copy install command"
     ]
 
     static let zhRuntime: [String: String] = [
@@ -68,6 +71,9 @@ extension L10n {
         "runtime.usage.recompute": "重新计算",
         "runtime.group.managed": "托管版本",
         "runtime.group.system": "系统版本",
-        "runtime.group.count": "%d"
+        "runtime.group.count": "%d",
+        "runtime.manualOnly.notice": "EnvMatrix 无法直接下载 %@ 的可执行包。请使用每个版本旁边的命令安装，完成后点击刷新即可识别。",
+        "runtime.manualOnly.hint": "仅支持手动安装",
+        "runtime.manualOnly.copy": "复制安装命令"
     ]
 }

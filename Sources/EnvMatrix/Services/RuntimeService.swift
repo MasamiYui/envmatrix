@@ -8,6 +8,7 @@ public enum RuntimeServiceError: Error, LocalizedError {
     case notInstalled(String)
     case systemManaged(String)
     case permissionDenied(path: String, suggestion: String)
+    case notInstallable(kind: RuntimeKind, version: String, suggestion: String)
 
     public var errorDescription: String? {
         switch self {
@@ -21,6 +22,9 @@ public enum RuntimeServiceError: Error, LocalizedError {
                  + "Remove it via the installer that placed it (brew, pkg, asdf, ...)"
         case .permissionDenied(let path, let suggestion):
             return "Permission denied removing \(path). Suggested command:\n\(suggestion)"
+        case .notInstallable(let kind, let version, let suggestion):
+            return "\(kind.displayName) \(version) cannot be installed by EnvMatrix. "
+                 + "Install it with:\n\(suggestion)"
         }
     }
 }
@@ -149,8 +153,12 @@ public final class DefaultRuntimeService: NSObject, RuntimeService {
     // MARK: - install
 
     public func install(version: RuntimeVersion, progress: @escaping (Double) -> Void) async throws {
-        guard let url = version.downloadURL else {
-            throw RuntimeServiceError.notFound
+        guard version.isInstallable, let url = version.downloadURL else {
+            throw RuntimeServiceError.notInstallable(
+                kind: version.kind,
+                version: version.version,
+                suggestion: version.kind.manualInstallCommand(version: version.version)
+            )
         }
         try ensureDirectories()
 

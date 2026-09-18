@@ -28,12 +28,15 @@ public struct PhpProvider: VersionProvider {
             let top = Array(sorted.prefix(30))
             return top.map { version in
                 let urlString = "https://www.php.net/distributions/php-\(version).tar.gz"
+                // Source tarball: kept for reference, but it must be built
+                // before it is usable, so in-app install is disabled.
                 return RuntimeVersion(
                     kind: .php,
                     version: version,
                     downloadURL: URL(string: urlString),
                     isLTS: false,
-                    arch: nil
+                    arch: nil,
+                    isInstallable: false
                 )
             }
         } catch let err as RuntimeServiceError {
