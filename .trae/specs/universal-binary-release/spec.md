@@ -15,7 +15,7 @@
 ## Non-Goals (Out of Scope)
 - 不引入 Apple Developer 账号签名 / notarization 流程（保持 ad-hoc codesign 现状）。
 - 不改造 [ci.yml](file:///Users/yinyijun/OpenSourceProjects/EnvMatrix/.github/workflows/ci.yml)（CI 里的 `swift build` 冒烟仍只跑主机架构；本项只加固 release.yml）。
-- 不发布 DMG / pkg 格式；沿用 zip。
+- ~~不发布 DMG / pkg 格式；沿用 zip。~~ **已于 v0.4.0 推翻**：Release 现同时产出 `.dmg`（拖拽到 Applications 的常规布局）与 `.zip`，两者内含同一份 .app。仍不发布 `.pkg`。
 - 不做 rosetta 兜底逻辑（Universal Binary 本身覆盖了这一场景）。
 - 不引入 Homebrew tap 相关变更（那是 [README.md#L397](file:///Users/yinyijun/OpenSourceProjects/EnvMatrix/README.md#L397) 的另一个 TODO 项，独立追踪）。
 

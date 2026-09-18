@@ -249,10 +249,21 @@
 
 ### 下载预编译产物
 
-从 [GitHub Releases](https://github.com/MasamiYui/envmatrix/releases) 下载 **Universal Binary**（同时支持 Apple Silicon 与 Intel，无需 Rosetta）：
+从 [GitHub Releases](https://github.com/MasamiYui/envmatrix/releases) 下载 **Universal Binary**（同时支持 Apple Silicon 与 Intel，无需 Rosetta）。每个版本提供 `.dmg` 与 `.zip` 两种产物，内含同一份 `.app`，任选其一即可。
+
+**方式 1：DMG（推荐）**
+
+下载 `EnvMatrix-<version>-macOS-universal.dmg`，双击挂载后把 `EnvMatrix.app` 拖到 `Applications` 快捷方式上，然后：
 
 ```bash
-# 将 <version> 替换为最新版本号（如 1.0.0）
+xattr -dr com.apple.quarantine /Applications/EnvMatrix.app
+open /Applications/EnvMatrix.app
+```
+
+**方式 2：ZIP**
+
+```bash
+# 将 <version> 替换为最新版本号（如 0.4.0）
 curl -LO https://github.com/MasamiYui/envmatrix/releases/latest/download/EnvMatrix-<version>-macOS-universal.zip
 unzip EnvMatrix-<version>-macOS-universal.zip
 xattr -dr com.apple.quarantine EnvMatrix.app
@@ -260,7 +271,9 @@ mv EnvMatrix.app /Applications/
 open /Applications/EnvMatrix.app
 ```
 
-产物为 ad-hoc 签名的 `.app`，包含 `arm64` 与 `x86_64` 两个 Mach-O slice；首次运行时若被 Gatekeeper 拦截，右键"打开"或执行上述 `xattr -dr` 即可放行。
+产物为 ad-hoc 签名的 `.app`，包含 `arm64` 与 `x86_64` 两个 Mach-O slice。由于**未经过 Apple 公证**，首次运行时会被 Gatekeeper 拦截，右键"打开"或执行上述 `xattr -dr` 即可放行 —— DMG 与 ZIP 在这一点上没有区别。
+
+每个产物都附带 `.sha256` 校验文件，可用 `shasum -a 256 -c <文件>.sha256` 验证完整性。
 
 ### 从源码构建
 

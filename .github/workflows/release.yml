@@ -101,6 +101,19 @@ jobs:
           echo "sha=$ZIP.sha256"   >> "$GITHUB_OUTPUT"
           echo "sha256=$SHA256"    >> "$GITHUB_OUTPUT"
 
+      - name: Package dmg and compute SHA-256
+        id: dmg
+        run: |
+          set -euxo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          chmod +x scripts/make_dmg.sh
+          scripts/make_dmg.sh --app EnvMatrix.app --out . --version "$VERSION"
+          DMG="EnvMatrix-${VERSION}-macOS-universal.dmg"
+          shasum -a 256 "$DMG" | tee "$DMG.sha256"
+          echo "dmg=$DMG"        >> "$GITHUB_OUTPUT"
+          echo "sha=$DMG.sha256" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(awk '{print $1}' "$DMG.sha256")" >> "$GITHUB_OUTPUT"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -108,6 +121,8 @@ jobs:
           path: |
             ${{ steps.bundle.outputs.zip }}
             ${{ steps.bundle.outputs.sha }}
+            ${{ steps.dmg.outputs.dmg }}
+            ${{ steps.dmg.outputs.sha }}
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -121,7 +136,10 @@ jobs:
             ## Build info
 
             - Architectures: ${{ steps.verify.outputs.archs }}
+            - SHA-256: `${{ steps.dmg.outputs.sha256 }}`  (${{ steps.dmg.outputs.dmg }})
             - SHA-256: `${{ steps.bundle.outputs.sha256 }}`  (${{ steps.bundle.outputs.zip }})
           files: |
+            ${{ steps.dmg.outputs.dmg }}
+            ${{ steps.dmg.outputs.sha }}
             ${{ steps.bundle.outputs.zip }}
             ${{ steps.bundle.outputs.sha }}

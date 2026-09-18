@@ -9,6 +9,8 @@ DerivedData/
 # Release artifacts
 *.zip
 *.zip.sha256
+*.dmg
+*.dmg.sha256
 EnvMatrix.app/
 
 # Coverage
