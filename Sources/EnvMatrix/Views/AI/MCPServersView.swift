@@ -4,6 +4,7 @@ public struct MCPServersView: View {
     @StateObject private var vm = MCPViewModel()
     @EnvironmentObject private var localization: LocalizationManager
     @State private var collapsedTransports: Set<MCPTransport> = []
+    @State private var pendingDelete: MCPServer? = nil
 
     public init() {}
 
@@ -46,6 +47,24 @@ public struct MCPServersView: View {
         .sheet(isPresented: $vm.isPresentingEditor) {
             MCPServerEditorSheet(vm: vm)
                 .environmentObject(localization)
+        }
+        .alert(
+            String(format: L("mcp.delete.confirmTitle"), pendingDelete?.name ?? ""),
+            isPresented: Binding(
+                get: { pendingDelete != nil },
+                set: { if !$0 { pendingDelete = nil } }
+            ),
+            presenting: pendingDelete
+        ) { server in
+            Button(L("mcp.delete"), role: .destructive) {
+                pendingDelete = nil
+                vm.delete(server)
+            }
+            Button(L("common.cancel"), role: .cancel) {
+                pendingDelete = nil
+            }
+        } message: { server in
+            Text(String(format: L("mcp.delete.confirmMessage"), server.command))
         }
     }
 
@@ -139,10 +158,10 @@ public struct MCPServersView: View {
         .contextMenu {
             Button(L("mcp.edit")) { vm.startEdit(server) }
             Divider()
-            Button(L("mcp.delete"), role: .destructive) { vm.delete(server) }
+            Button(L("mcp.delete"), role: .destructive) { pendingDelete = server }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button(L("mcp.delete"), role: .destructive) { vm.delete(server) }
+            Button(L("mcp.delete"), role: .destructive) { pendingDelete = server }
             Button(L("mcp.edit")) { vm.startEdit(server) }
         }
     }

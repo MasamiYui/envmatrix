@@ -29,6 +29,10 @@ public final class BrewViewModel: ObservableObject {
     @Published public private(set) var lastOperationOutput: String = ""
     @Published public var errorMessage: String?
     @Published public private(set) var isAvailable: Bool = true
+    /// Package awaiting the user's confirmation before `brew uninstall`.
+    /// Set from the row context menu or the detail pane; BrewView renders
+    /// a single alert bound to it.
+    @Published public var pendingUninstall: BrewPackage?
 
     private let service: HomebrewService
     private var hasLoadedOnce = false
@@ -152,6 +156,17 @@ public final class BrewViewModel: ObservableObject {
 
     public func uninstall(_ pkg: BrewPackage) async {
         await run(.uninstall(pkg.name, pkg.kind))
+    }
+
+    /// Ask for confirmation; the actual uninstall runs from `confirmPendingUninstall`.
+    public func requestUninstall(_ pkg: BrewPackage) {
+        pendingUninstall = pkg
+    }
+
+    public func confirmPendingUninstall() async {
+        guard let pkg = pendingUninstall else { return }
+        pendingUninstall = nil
+        await uninstall(pkg)
     }
 
     public func togglePin(_ pkg: BrewPackage) async {

@@ -113,7 +113,7 @@ struct BrewPackageDetail: View {
             }
             Spacer()
             Button(role: .destructive) {
-                Task { await vm.uninstall(pkg) }
+                vm.requestUninstall(pkg)
             } label: {
                 Label(L("brew.action.uninstall"), systemImage: "trash")
             }

@@ -16,6 +16,26 @@ public struct BrewView: View {
         }
         .navigationTitle(L("brew.title"))
         .task { await vm.refreshIfNeeded() }
+        .alert(
+            String(format: L("brew.uninstall.confirmTitle"), vm.pendingUninstall?.name ?? ""),
+            isPresented: Binding(
+                get: { vm.pendingUninstall != nil },
+                set: { if !$0 { vm.pendingUninstall = nil } }
+            ),
+            presenting: vm.pendingUninstall
+        ) { _ in
+            Button(L("brew.action.uninstall"), role: .destructive) {
+                Task { await vm.confirmPendingUninstall() }
+            }
+            Button(L("common.cancel"), role: .cancel) {
+                vm.pendingUninstall = nil
+            }
+        } message: { pkg in
+            Text(String(
+                format: L(pkg.kind == .cask ? "brew.uninstall.confirmMessage.cask" : "brew.uninstall.confirmMessage.formula"),
+                pkg.fullName
+            ))
+        }
     }
 
     // MARK: - Not installed placeholder
@@ -253,7 +273,7 @@ public struct BrewView: View {
         }
         Divider()
         Button(L("brew.action.uninstall"), role: .destructive) {
-            Task { await vm.uninstall(pkg) }
+            vm.requestUninstall(pkg)
         }
     }
 
