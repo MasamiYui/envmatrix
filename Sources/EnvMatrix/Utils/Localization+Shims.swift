@@ -23,7 +23,12 @@ extension L10n {
         "shellEnv.subtitle": "Edit rc files with structured or raw views; backups are automatic",
         "hosts.subtitle": "Profiles for /etc/hosts; applying asks for administrator rights",
         "localApps.subtitle": "Applications in /Applications and ~/Applications with their leftovers",
-        "settings.subtitle": "Appearance, language, mirrors, backups, diagnostics and logs"
+        "settings.subtitle": "Appearance, language, mirrors, backups, diagnostics and logs",
+        "sidebar.filter": "Filter modules",
+        "sidebar.notInstalled": "Not installed (%d)",
+        "sidebar.noMatches": "No matching module",
+        "sidebar.expand": "Expand section",
+        "sidebar.collapse": "Collapse section"
     ]
 
     static let zhShims: [String: String] = [
@@ -48,6 +53,11 @@ extension L10n {
         "shellEnv.subtitle": "以结构化或原文视图编辑 rc 文件，保存前自动备份",
         "hosts.subtitle": "/etc/hosts 的多份 Profile，应用到系统时会请求管理员权限",
         "localApps.subtitle": "/Applications 与 ~/Applications 中的应用及其残留文件",
-        "settings.subtitle": "外观、语言、镜像、备份、诊断与日志"
+        "settings.subtitle": "外观、语言、镜像、备份、诊断与日志",
+        "sidebar.filter": "筛选模块",
+        "sidebar.notInstalled": "未安装（%d）",
+        "sidebar.noMatches": "没有匹配的模块",
+        "sidebar.expand": "展开分组",
+        "sidebar.collapse": "折叠分组"
     ]
 }

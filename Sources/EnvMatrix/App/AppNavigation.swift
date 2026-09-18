@@ -129,11 +129,21 @@ extension NavigationItem: CaseIterable {
     }
 }
 
+/// A titled group of sidebar destinations. `id` is stable (not localized)
+/// so collapse state can be persisted.
+public struct NavigationSection: Identifiable {
+    public static let devEnvironmentsID = "devEnvironments"
+
+    public let id: String
+    public let title: String
+    public let items: [NavigationItem]
+}
+
 public extension NavigationItem {
-    static var allSections: [(title: String, items: [NavigationItem])] {
+    static var allSections: [NavigationSection] {
         [
-            (title: L("nav.overview"), items: [.dashboard]),
-            (title: L("nav.devEnvironments"), items: [
+            NavigationSection(id: "overview", title: L("nav.overview"), items: [.dashboard]),
+            NavigationSection(id: NavigationSection.devEnvironmentsID, title: L("nav.devEnvironments"), items: [
                 .devEnv(.node),
                 .devEnv(.python),
                 .devEnv(.java),
@@ -147,11 +157,16 @@ public extension NavigationItem {
                 .devEnv(.erlang),
                 .devEnv(.kotlin)
             ]),
-            (title: L("nav.packagesSystem"), items: [.packagesBrew]),
-            (title: L("nav.packagesLangs"), items: [.packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby, .packagesRust, .packagesPhp, .packagesDotnet, .packagesUv, .packagesPnpm]),
-            (title: L("nav.projectEnvGroup"), items: [.packagesProjectEnv]),
-            (title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
-            (title: L("nav.system"), items: [.systemShellEnv, .systemHosts, .systemLocalApps, .systemContainerContexts, .settings])
+            NavigationSection(id: "packages", title: L("nav.packages"), items: [
+                .packagesBrew,
+                .packagesMaven, .packagesGo, .packagesNode, .packagesPython, .packagesRuby,
+                .packagesRust, .packagesPhp, .packagesDotnet, .packagesUv, .packagesPnpm,
+                .packagesProjectEnv
+            ]),
+            NavigationSection(id: "ai", title: L("nav.aiEnvironments"), items: [.aiSkills, .aiCLI, .aiMCP]),
+            NavigationSection(id: "system", title: L("nav.system"), items: [
+                .systemShellEnv, .systemHosts, .systemLocalApps, .systemContainerContexts, .settings
+            ])
         ]
     }
 }

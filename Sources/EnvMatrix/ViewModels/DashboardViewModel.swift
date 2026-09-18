@@ -170,6 +170,9 @@ public final class DashboardViewModel: ObservableObject {
         }.value
 
         self.runtimes = phase1.snapshots
+        InstalledRuntimesStore.shared.update(
+            activeKinds: Set(phase1.snapshots.filter { $0.activeVersion != nil }.map { $0.kind })
+        )
         self.skillsCount = phase1.skills
         self.mcpCount = phase1.mcp
         self.hasLoadedOnce = true
