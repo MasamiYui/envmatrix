@@ -108,6 +108,9 @@ struct GeneralSettingsTab: View {
                 Text(L("settings.updates.hint"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Button(L("settings.showOnboarding")) {
+                    NotificationCenter.default.post(name: .envMatrixShowOnboarding, object: nil)
+                }
             }
 
             Section(L("settings.mirrorPresets")) {

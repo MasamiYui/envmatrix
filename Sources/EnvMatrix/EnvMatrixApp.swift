@@ -4,6 +4,7 @@ import AppKit
 extension Notification.Name {
     static let envMatrixOpenGlobalSearch = Notification.Name("envmatrix.openGlobalSearch")
     static let envMatrixOpenSettings = Notification.Name("envmatrix.openSettings")
+    static let envMatrixShowOnboarding = Notification.Name("envmatrix.showOnboarding")
 }
 
 @main

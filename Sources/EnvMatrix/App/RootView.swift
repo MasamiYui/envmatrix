@@ -10,6 +10,7 @@ public struct RootView: View {
     /// "detail-only" window on next launch.
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var isSearchPresented: Bool = false
+    @State private var isOnboardingPresented: Bool = false
 
     public init() {}
 
@@ -47,6 +48,13 @@ public struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .envMatrixOpenSettings)) { _ in
             navigator.select(.settings)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .envMatrixShowOnboarding)) { _ in
+            isOnboardingPresented = true
+        }
+        .sheet(isPresented: $isOnboardingPresented) {
+            OnboardingSheet(onFinish: { isOnboardingPresented = false })
+                .environmentObject(localization)
+        }
         .onAppear {
             // Guard against SwiftUI restoring a collapsed state from a
             // previous session where the user zero-width'd the sidebar.
@@ -54,6 +62,9 @@ public struct RootView: View {
                 columnVisibility = .all
             }
             UpdateChecker.shared.checkOnLaunchIfNeeded()
+            if !UserDefaults.standard.bool(forKey: OnboardingSheet.completedKey) {
+                isOnboardingPresented = true
+            }
         }
     }
 

@@ -44,7 +44,7 @@ extension L10n {
 
         "globalSearch.placeholder": "Search across package managers…",
         "globalSearch.hint.title": "Search everything",
-        "globalSearch.hint.subtitle": "Type to search Homebrew, Maven, Go modules and global npm packages at once.",
+        "globalSearch.hint.subtitle": "Type to search Homebrew, Maven, Go, npm, pip, cargo, gem, Composer, NuGet, uv, pnpm and containers at once.",
         "globalSearch.noResults": "No matching results",
         "globalSearch.source.brew": "Homebrew",
         "globalSearch.source.maven": "Maven",
@@ -102,7 +102,7 @@ extension L10n {
 
         "globalSearch.placeholder": "在包管理器中搜索…",
         "globalSearch.hint.title": "跨模块搜索",
-        "globalSearch.hint.subtitle": "输入关键字，跨 Homebrew、Maven、Go 与 npm 快速定位。",
+        "globalSearch.hint.subtitle": "输入关键字，跨 Homebrew、Maven、Go、npm、pip、cargo、gem、Composer、NuGet、uv、pnpm 与容器快速定位。",
         "globalSearch.noResults": "没有匹配结果",
         "globalSearch.source.brew": "Homebrew",
         "globalSearch.source.maven": "Maven",

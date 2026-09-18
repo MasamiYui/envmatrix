@@ -76,7 +76,8 @@ public enum L10n {
             .merging(enSystem) { current, _ in current }
             .merging(enSettings) { current, _ in current }
             .merging(enShims) { current, _ in current }
-            .merging(enHistory) { current, _ in current },
+            .merging(enHistory) { current, _ in current }
+            .merging(enOnboarding) { current, _ in current },
         "zh": zh
             .merging(zhContainer) { current, _ in current }
             .merging(zhContainerImages) { current, _ in current }
@@ -91,5 +92,6 @@ public enum L10n {
             .merging(zhSettings) { current, _ in current }
             .merging(zhShims) { current, _ in current }
             .merging(zhHistory) { current, _ in current }
+            .merging(zhOnboarding) { current, _ in current }
     ]
 }
