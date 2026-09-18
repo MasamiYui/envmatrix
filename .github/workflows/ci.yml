@@ -13,18 +13,33 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Keep in step with the toolchain the project is actually developed on.
+  # The sources use concurrency patterns that Swift 5.10 rejects (and that
+  # crash its frontend), so pinning an old Xcode only produces red builds.
+  XCODE_VERSION: "26.2"
+
 jobs:
   build-and-test:
-    name: Build & Test (macOS 14, Xcode 15)
-    runs-on: macos-14
+    name: Build & Test (macOS 26, Xcode 26.2)
+    runs-on: macos-26
     timeout-minutes: 25
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode 15.4
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          set -euo pipefail
+          APP="/Applications/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$APP" ]; then
+            sudo xcode-select -s "$APP"
+          else
+            echo "Xcode ${XCODE_VERSION} not on this image; available:"
+            ls -d /Applications/Xcode*.app || true
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
 
       - name: Show toolchain
         run: |
@@ -38,9 +53,9 @@ jobs:
             .build
             ~/Library/Caches/org.swift.swiftpm
             ~/Library/org.swift.swiftpm
-          key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved', 'Package.swift') }}
+          key: spm-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Package.resolved', 'Package.swift') }}
           restore-keys: |
-            spm-${{ runner.os }}-
+            spm-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-
 
       - name: Resolve dependencies
         run: swift package resolve
