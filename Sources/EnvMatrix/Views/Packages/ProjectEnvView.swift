@@ -27,7 +27,7 @@ public struct ProjectEnvView: View {
                     .frame(minWidth: 260)
             }
             if let msg = vm.errorMessage {
-                errorBanner(msg)
+                StatusBanner(.error, msg, onDismiss: { vm.errorMessage = nil })
             }
         }
         .navigationTitle(L("projenv.title"))

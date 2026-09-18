@@ -51,7 +51,7 @@ struct GradleCacheView: View {
             Divider()
             content
             if let msg = vm.errorMessage {
-                errorBanner(msg)
+                StatusBanner(.error, msg, onDismiss: { vm.errorMessage = nil })
             }
         }
         .confirmationDialog(
@@ -378,29 +378,6 @@ struct GradleCacheView: View {
     }
 
     // MARK: - Error banner
-
-    @ViewBuilder
-    private func errorBanner(_ message: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-            Text(message)
-                .font(.caption)
-                .foregroundStyle(.red)
-                .lineLimit(3)
-            Spacer()
-            Button {
-                vm.errorMessage = nil
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(8)
-        .background(Color.red.opacity(0.08))
-    }
-
     // MARK: - Bindings / helpers
 
     private var currentSearchText: String {

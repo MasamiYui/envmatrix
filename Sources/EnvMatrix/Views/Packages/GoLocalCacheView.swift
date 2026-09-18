@@ -24,7 +24,7 @@ struct GoLocalCacheView: View {
             Divider()
             content
             if let msg = vm.errorMessage {
-                errorBanner(msg)
+                StatusBanner(.error, msg, onDismiss: { vm.errorMessage = nil })
             }
         }
         .alert(item: $deleteTarget) { target in
@@ -290,21 +290,6 @@ struct GoLocalCacheView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
-
-    @ViewBuilder
-    private func errorBanner(_ message: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-            Text(message)
-                .font(.caption)
-                .foregroundStyle(.red)
-            Spacer()
-        }
-        .padding(8)
-        .background(Color.red.opacity(0.08))
-    }
-
     // MARK: - Utils
 
     private var dateFormatter: DateFormatter {

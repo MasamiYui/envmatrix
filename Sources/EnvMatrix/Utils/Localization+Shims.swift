@@ -9,7 +9,10 @@ extension L10n {
         "shims.banner.addToRc": "Add to %@",
         "shims.banner.done.title": "PATH line written to %@",
         "shims.banner.done.body": "Open a new terminal window (or run `source` on the file) for the change to take effect. A .envmatrix.bak backup was saved next to it.",
-        "shims.banner.reveal": "Reveal"
+        "shims.banner.reveal": "Reveal",
+        "banner.diagnostics": "Diagnostics",
+        "banner.diagnostics.help": "Open Settings › Diagnostics to export a report about this environment",
+        "banner.dismiss": "Dismiss"
     ]
 
     static let zhShims: [String: String] = [
@@ -20,6 +23,9 @@ extension L10n {
         "shims.banner.addToRc": "写入 %@",
         "shims.banner.done.title": "已把 PATH 配置写入 %@",
         "shims.banner.done.body": "新开一个终端窗口（或对该文件执行 source）后生效。原文件已备份为 .envmatrix.bak。",
-        "shims.banner.reveal": "在访达中显示"
+        "shims.banner.reveal": "在访达中显示",
+        "banner.diagnostics": "诊断报告",
+        "banner.diagnostics.help": "打开 设置 › 诊断，导出当前环境的诊断报告",
+        "banner.dismiss": "关闭"
     ]
 }

@@ -38,6 +38,9 @@ public struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .envMatrixOpenGlobalSearch)) { _ in
             isSearchPresented = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .envMatrixOpenDiagnostics)) { _ in
+            navigator.select(.settings)
+        }
         .onAppear {
             // Guard against SwiftUI restoring a collapsed state from a
             // previous session where the user zero-width'd the sidebar.

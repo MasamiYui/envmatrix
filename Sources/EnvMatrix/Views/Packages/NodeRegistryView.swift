@@ -75,26 +75,12 @@ public struct NodeRegistryView: View {
     @ViewBuilder
     private var banners: some View {
         if let err = vm.errorMessage {
-            banner(text: err, color: .red, icon: "exclamationmark.triangle.fill")
+            StatusBanner(.error, err, onDismiss: { vm.errorMessage = nil })
         }
         if let info = vm.infoMessage {
-            banner(text: info, color: .green, icon: "checkmark.circle.fill")
+            StatusBanner(.success, info, onDismiss: { vm.infoMessage = nil })
         }
     }
-
-    private func banner(text: String, color: Color, icon: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .foregroundStyle(color)
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(color)
-            Spacer()
-        }
-        .padding(8)
-        .background(color.opacity(0.08))
-    }
-
     // MARK: - Header
 
     private var header: some View {

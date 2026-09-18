@@ -43,7 +43,7 @@ public struct RuntimeDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if let msg = viewModel.errorMessage {
-                errorBanner(msg)
+                StatusBanner(.error, msg, onDismiss: { viewModel.errorMessage = nil })
             }
         }
         .navigationTitle(kind.displayName)
@@ -89,32 +89,5 @@ public struct RuntimeDetailView: View {
             }
         }
         .padding()
-    }
-
-    private func errorBanner(_ msg: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-            Text(msg)
-                .font(.callout)
-                .foregroundStyle(.primary)
-                .lineLimit(3)
-            Spacer()
-            Button {
-                viewModel.errorMessage = nil
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(10)
-        .background(Color.orange.opacity(0.12))
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundStyle(Color.orange.opacity(0.4)),
-            alignment: .top
-        )
     }
 }

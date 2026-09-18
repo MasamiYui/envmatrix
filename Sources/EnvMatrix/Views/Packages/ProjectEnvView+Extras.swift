@@ -424,24 +424,6 @@ extension ProjectEnvView {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(40)
     }
-
-    func errorBanner(_ msg: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-            Text(msg).font(.callout)
-            Spacer()
-            Button {
-                vm.errorMessage = nil
-            } label: {
-                Image(systemName: "xmark")
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(.horizontal, 16).padding(.vertical, 10)
-        .background(.red.opacity(0.12))
-    }
-
     func statChip(value: Int, label: String, systemImage: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: systemImage)

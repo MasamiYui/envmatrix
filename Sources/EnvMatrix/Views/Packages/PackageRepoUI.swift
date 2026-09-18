@@ -1,20 +1,5 @@
 import SwiftUI
 
-struct PackageRepoBanner: View {
-    let text: String
-    let color: Color
-    let icon: String
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon).foregroundStyle(color)
-            Text(text).font(.caption).foregroundStyle(color)
-            Spacer()
-        }
-        .padding(8)
-        .background(color.opacity(0.08))
-    }
-}
-
 struct PackageRepoMissingView: View {
     let title: String
     let subtitle: String

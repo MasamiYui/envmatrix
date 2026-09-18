@@ -18,14 +18,14 @@ public struct ContainerContextsView: View {
                 case .contexts:
                     dockerSection
                     if let msg = viewModel.dockerError {
-                        errorBanner(msg) { viewModel.dockerError = nil }
+                        StatusBanner(.error, msg, onDismiss: { viewModel.dockerError = nil })
                     }
                     podmanSection
                     if let msg = viewModel.podmanError {
-                        errorBanner(msg) { viewModel.podmanError = nil }
+                        StatusBanner(.error, msg, onDismiss: { viewModel.podmanError = nil })
                     }
                     if let notice = viewModel.podmanNotice {
-                        errorBanner(notice) { viewModel.podmanNotice = nil }
+                        StatusBanner(.info, notice, onDismiss: { viewModel.podmanNotice = nil })
                     }
                 case .images:
                     ContainerImagesTab(parent: viewModel)
@@ -259,25 +259,6 @@ public struct ContainerContextsView: View {
         }
         .padding(10)
         .background(Color(NSColor.controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private func errorBanner(_ msg: String, onDismiss: @escaping () -> Void) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-            Text(msg)
-                .font(.callout)
-                .lineLimit(3)
-            Spacer()
-            Button(action: onDismiss) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(10)
-        .background(Color.orange.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

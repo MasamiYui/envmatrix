@@ -80,29 +80,9 @@ public struct CLIConfigView: View {
             .formStyle(.grouped)
 
             if let msg = vm.errorMessage {
-                errorBanner(msg)
+                StatusBanner(.error, msg, onDismiss: { vm.errorMessage = nil })
             }
             Spacer()
         }
-    }
-
-    private func errorBanner(_ msg: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-            Text(msg)
-                .font(.callout)
-                .lineLimit(3)
-            Spacer()
-            Button {
-                vm.errorMessage = nil
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(10)
-        .background(Color.orange.opacity(0.12))
     }
 }

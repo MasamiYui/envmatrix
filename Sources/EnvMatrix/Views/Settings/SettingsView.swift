@@ -1,30 +1,43 @@
 import SwiftUI
 import AppKit
 
+public enum SettingsTab: String, Hashable {
+    case general, backups, diagnostics, logs, about
+}
+
 public struct SettingsView: View {
     @EnvironmentObject private var localization: LocalizationManager
+    @State private var selectedTab: SettingsTab = .general
 
     public init() {}
 
     public var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             GeneralSettingsTab()
                 .tabItem { Label(L("settings.general"), systemImage: "gearshape") }
+                .tag(SettingsTab.general)
 
             BackupsSettingsTab()
                 .tabItem { Label(L("settings.backups"), systemImage: "clock.arrow.circlepath") }
+                .tag(SettingsTab.backups)
 
             DiagnosticsSettingsTab()
                 .tabItem { Label(L("settings.diagnostics"), systemImage: "stethoscope") }
+                .tag(SettingsTab.diagnostics)
 
             LogsSettingsTab()
                 .tabItem { Label(L("settings.logs"), systemImage: "text.alignleft") }
+                .tag(SettingsTab.logs)
 
             AboutSettingsTab()
                 .tabItem { Label(L("settings.about"), systemImage: "info.circle") }
+                .tag(SettingsTab.about)
         }
         .frame(minWidth: 640, minHeight: 500)
         .padding()
+        .onReceive(NotificationCenter.default.publisher(for: .envMatrixOpenDiagnostics)) { _ in
+            selectedTab = .diagnostics
+        }
     }
 }
 

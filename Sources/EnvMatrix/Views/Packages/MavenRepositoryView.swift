@@ -118,7 +118,7 @@ struct MavenMirrorsView: View {
                 mirrorList
             }
             if let msg = vm.errorMessage {
-                errorBanner(msg)
+                StatusBanner(.error, msg, onDismiss: { vm.errorMessage = nil })
             }
         }
     }
@@ -211,19 +211,5 @@ struct MavenMirrorsView: View {
             .buttonStyle(.borderless)
         }
         .padding(.vertical, 4)
-    }
-
-    @ViewBuilder
-    private func errorBanner(_ message: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-            Text(message)
-                .font(.caption)
-                .foregroundStyle(.red)
-            Spacer()
-        }
-        .padding(8)
-        .background(Color.red.opacity(0.08))
     }
 }

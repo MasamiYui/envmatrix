@@ -133,7 +133,7 @@ private struct ContainerImagesSectionBody: View {
             toolbar
             content
             if let error = vm.errorMessage {
-                errorBanner(error)
+                StatusBanner(.error, error, onDismiss: { vm.errorMessage = nil })
             }
         }
         .task { await autoRefresh() }
@@ -233,26 +233,6 @@ private struct ContainerImagesSectionBody: View {
         .background(Color(NSColor.controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
-
-    private func errorBanner(_ msg: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-            Text(msg)
-                .font(.callout)
-                .lineLimit(3)
-            Spacer()
-            Button(action: { vm.errorMessage = nil }) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(10)
-        .background(Color.orange.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
     private func autoRefresh() async {
         if vm.isStale || vm.images.isEmpty {
             await vm.refresh()

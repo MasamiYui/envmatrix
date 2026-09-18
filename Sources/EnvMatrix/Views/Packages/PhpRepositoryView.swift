@@ -97,10 +97,10 @@ struct PhpRepositoryTabView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             if let err = vm.errorMessage {
-                PackageRepoBanner(text: err, color: .red, icon: "exclamationmark.triangle.fill")
+                StatusBanner(.error, err, onDismiss: { vm.errorMessage = nil })
             }
             if let info = vm.infoMessage {
-                PackageRepoBanner(text: info, color: .green, icon: "checkmark.circle.fill")
+                StatusBanner(.success, info, onDismiss: { vm.infoMessage = nil })
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -201,7 +201,7 @@ struct PhpGlobalPackagesTabView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             if let err = vm.errorMessage {
-                PackageRepoBanner(text: err, color: .red, icon: "exclamationmark.triangle.fill")
+                StatusBanner(.error, err, onDismiss: { vm.errorMessage = nil })
             }
             HStack {
                 Text(String(format: L("phpRepo.pkg.total"), vm.filtered.count))
@@ -285,10 +285,10 @@ struct PhpCacheTabView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             if let err = vm.errorMessage {
-                PackageRepoBanner(text: err, color: .red, icon: "exclamationmark.triangle.fill")
+                StatusBanner(.error, err, onDismiss: { vm.errorMessage = nil })
             }
             if let info = vm.infoMessage {
-                PackageRepoBanner(text: info, color: .green, icon: "checkmark.circle.fill")
+                StatusBanner(.success, info, onDismiss: { vm.infoMessage = nil })
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {

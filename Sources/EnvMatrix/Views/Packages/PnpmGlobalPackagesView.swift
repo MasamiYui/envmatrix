@@ -38,7 +38,7 @@ public struct PnpmGlobalPackagesView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             if let err = vm.errorMessage {
-                errorBanner(err)
+                StatusBanner(.error, err, onDismiss: { vm.errorMessage = nil })
             }
             toolbar
             searchBar
@@ -141,18 +141,5 @@ public struct PnpmGlobalPackagesView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
-    }
-
-    private func errorBanner(_ message: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-            Text(message)
-                .font(.caption)
-                .foregroundStyle(.red)
-            Spacer()
-        }
-        .padding(8)
-        .background(Color.red.opacity(0.08))
     }
 }
