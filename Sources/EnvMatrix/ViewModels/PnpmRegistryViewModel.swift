@@ -59,6 +59,7 @@ public final class PnpmRegistryViewModel: ObservableObject {
                 backup: OperationLog.latestBackup(in: configService.npmrcURL.deletingLastPathComponent(),
                                                   prefix: ".npmrc.", suffix: ".pnpm.bak")
             )
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "pnpm", value: value)
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("pnpmRepo.msg.saved")

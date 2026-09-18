@@ -58,6 +58,7 @@ public final class NodeRegistryViewModel: ObservableObject {
                 target: service.npmrcURL,
                 backup: service.npmrcURL.deletingLastPathComponent().appendingPathComponent(".npmrc.envmatrix.bak")
             )
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "npm", value: value)
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

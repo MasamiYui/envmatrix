@@ -58,6 +58,7 @@ public final class PythonIndexViewModel: ObservableObject {
                 target: service.pipConfURL,
                 backup: service.pipConfURL.deletingLastPathComponent().appendingPathComponent("pip.conf.envmatrix.bak")
             )
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "pip", value: value)
             self.currentIndex = value
             self.customURL = ""
             self.infoMessage = L("pythonRepo.msg.saved")

@@ -156,7 +156,15 @@ extension L10n {
         "notify.npm.cache.title": "npm cache cleaned",
         "notify.npm.cache.body": "The local npm cache has been fully released.",
         "notify.pip.cache.title": "pip cache purged",
-        "notify.pip.cache.body": "The local pip cache has been fully released."
+        "notify.pip.cache.body": "The local pip cache has been fully released.",
+        "notify.registry.title": "%@ mirror switched",
+        "notify.runtime.installed.title": "%@ %@ installed",
+        "notify.runtime.installed.body": "Open the Installed tab to set it active.",
+        "notify.runtime.installFailed.title": "%@ %@ failed to install",
+        "notify.runtime.uninstalled.title": "%@ %@ uninstalled",
+        "notify.hosts.applied.title": "/etc/hosts updated",
+        "notify.hosts.applied.body": "Profile \"%@\" applied. Backup: %@",
+        "notify.hosts.failed.title": "Could not update /etc/hosts"
     ]
 
     static let zhSystem: [String: String] = [
@@ -314,6 +322,14 @@ extension L10n {
         "notify.npm.cache.title": "npm 缓存已清理",
         "notify.npm.cache.body": "本地 npm 缓存已经全部释放。",
         "notify.pip.cache.title": "pip 缓存已清理",
-        "notify.pip.cache.body": "本地 pip 缓存已经全部释放。"
+        "notify.pip.cache.body": "本地 pip 缓存已经全部释放。",
+        "notify.registry.title": "%@ 镜像已切换",
+        "notify.runtime.installed.title": "%@ %@ 安装完成",
+        "notify.runtime.installed.body": "到“已安装”标签页把它设为活动版本。",
+        "notify.runtime.installFailed.title": "%@ %@ 安装失败",
+        "notify.runtime.uninstalled.title": "%@ %@ 已卸载",
+        "notify.hosts.applied.title": "/etc/hosts 已更新",
+        "notify.hosts.applied.body": "已应用方案“%@”。备份：%@",
+        "notify.hosts.failed.title": "更新 /etc/hosts 失败"
     ]
 }

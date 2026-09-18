@@ -114,11 +114,19 @@ public final class RuntimeViewModel: ObservableObject {
             self.usageLoadedAt = nil
             OperationLog.shared.record(.runtime,
                 title: String(format: L("history.op.runtime.install"), kind.displayName, version.version))
+            SystemNotifier.shared.notify(
+                title: String(format: L("notify.runtime.installed.title"), kind.displayName, version.version),
+                body: L("notify.runtime.installed.body")
+            )
         } catch {
             self.errorMessage = error.localizedDescription
             OperationLog.shared.record(.runtime,
                 title: String(format: L("history.op.runtime.install"), kind.displayName, version.version),
                 detail: error.localizedDescription, succeeded: false)
+            SystemNotifier.shared.notify(
+                title: String(format: L("notify.runtime.installFailed.title"), kind.displayName, version.version),
+                body: error.localizedDescription
+            )
         }
     }
 
@@ -143,6 +151,11 @@ public final class RuntimeViewModel: ObservableObject {
             OperationLog.shared.record(.runtime,
                 title: String(format: L("history.op.runtime.uninstall"), kind.displayName, version.version),
                 detail: version.installPath?.path)
+            SystemNotifier.shared.notify(
+                title: String(format: L("notify.runtime.uninstalled.title"), kind.displayName, version.version),
+                body: version.installPath?.path ?? "",
+                onlyWhenInactive: true
+            )
         } catch {
             self.errorMessage = error.localizedDescription
         }

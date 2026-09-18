@@ -57,6 +57,7 @@ public final class RubyRegistryViewModel: ObservableObject {
                 target: confService.gemrcURL,
                 backup: confService.gemrcURL.deletingLastPathComponent().appendingPathComponent(".gemrc.envmatrix.bak")
             )
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "gem", value: value)
             self.currentSource = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

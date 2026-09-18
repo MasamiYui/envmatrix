@@ -44,6 +44,7 @@ public final class DotnetRegistryViewModel: ObservableObject {
         do {
             try await service.setPrimarySource(name: name, url: url)
             OperationLog.shared.record(.registry, title: L("history.op.registry.nuget"), detail: "\(name) · \(url)")
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "NuGet", value: url)
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")
             await load()

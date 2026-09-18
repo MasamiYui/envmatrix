@@ -49,6 +49,7 @@ public final class GoProxyViewModel: ObservableObject {
         do {
             try await service.writeProxy(value)
             OperationLog.shared.record(.registry, title: L("history.op.registry.goproxy"), detail: value)
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "GOPROXY", value: value)
             self.currentProxy = value
             self.customValue = value
             self.successMessage = L("goRepo.proxy.saved")

@@ -267,8 +267,20 @@ public final class HostsViewModel: ObservableObject {
                         detail: self.selection?.name,
                         target: URL(fileURLWithPath: service.systemHostsPath), backup: backup
                     )
+                    SystemNotifier.shared.notify(
+                        title: L("notify.hosts.applied.title"),
+                        body: String(format: L("notify.hosts.applied.body"), self.selection?.name ?? "", backup.path)
+                    )
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
+                    if case HostsServiceError.authCancelled = error {
+                        // User dismissed the admin prompt; no need to shout.
+                    } else {
+                        SystemNotifier.shared.notify(
+                            title: L("notify.hosts.failed.title"),
+                            body: error.localizedDescription
+                        )
+                    }
                 }
                 self.isBusy = false
             }

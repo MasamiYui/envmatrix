@@ -59,6 +59,7 @@ public final class UvRegistryViewModel: ObservableObject {
                 backup: OperationLog.latestBackup(in: configService.uvConfigURL.deletingLastPathComponent(),
                                                   prefix: "uv.toml.", suffix: ".bak")
             )
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "uv", value: value)
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("uvRepo.msg.saved")

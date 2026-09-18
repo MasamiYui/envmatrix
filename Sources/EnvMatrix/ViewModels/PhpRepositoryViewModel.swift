@@ -41,6 +41,7 @@ public final class PhpRegistryViewModel: ObservableObject {
         do {
             try await service.writeRepository(value)
             OperationLog.shared.record(.registry, title: L("history.op.registry.composer"), detail: value)
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "Composer", value: value)
             self.currentRepository = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

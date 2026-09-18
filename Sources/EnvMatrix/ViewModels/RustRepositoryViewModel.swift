@@ -46,6 +46,7 @@ public final class RustRegistryViewModel: ObservableObject {
                 target: confService.configURL,
                 backup: confService.configURL.deletingLastPathComponent().appendingPathComponent("config.toml.envmatrix.bak")
             )
+            SystemNotifier.shared.notifyRegistrySwitched(ecosystem: "cargo", value: value)
             self.currentRegistry = value
             self.customURL = ""
             self.infoMessage = L("nodeRepo.msg.saved")

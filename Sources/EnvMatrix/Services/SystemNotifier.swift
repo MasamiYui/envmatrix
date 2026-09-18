@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+import AppKit
 
 /// Thin wrapper around `UNUserNotificationCenter` for one-shot completion
 /// banners after long-running operations (Homebrew installs, npm cache
@@ -32,8 +33,13 @@ public final class SystemNotifier {
     }
 
     /// Fire a completion banner. Silently returns on any failure.
-    public func notify(title: String, body: String) {
+    ///
+    /// - Parameter onlyWhenInactive: for quick operations whose result is
+    ///   already visible in-app (mirror switch, uninstall), only notify when
+    ///   EnvMatrix is not the frontmost app so the user isn't told twice.
+    public func notify(title: String, body: String, onlyWhenInactive: Bool = false) {
         guard isUserEnabled else { return }
+        if onlyWhenInactive && NSApplication.shared.isActive { return }
         Task {
             guard await ensurePermission() else { return }
             let content = UNMutableNotificationContent()
@@ -47,6 +53,15 @@ public final class SystemNotifier {
             )
             try? await UNUserNotificationCenter.current().add(req)
         }
+    }
+
+    /// Convenience for the ten registry pages and the preset applier.
+    public func notifyRegistrySwitched(ecosystem: String, value: String) {
+        notify(
+            title: String(format: L("notify.registry.title"), ecosystem),
+            body: value,
+            onlyWhenInactive: true
+        )
     }
 
     private func ensurePermission() async -> Bool {
