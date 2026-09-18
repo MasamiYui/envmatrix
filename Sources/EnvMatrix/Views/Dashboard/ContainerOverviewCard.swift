@@ -90,7 +90,7 @@ public struct ContainerOverviewCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+                .strokeBorder(Color.subtleFill, lineWidth: 0.5)
         )
         .shadow(color: Color.black.opacity(isHovering ? 0.10 : 0.05), radius: isHovering ? 10 : 4, x: 0, y: isHovering ? 6 : 2)
         .scaleEffect(isHovering ? 1.01 : 1.0)

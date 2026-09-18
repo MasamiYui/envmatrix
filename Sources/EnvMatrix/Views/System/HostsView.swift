@@ -284,7 +284,7 @@ public struct HostsView: View {
             .buttonStyle(.borderless)
         }
         .padding(8)
-        .background(Color.gray.opacity(entry.isEnabled ? 0.06 : 0.14))
+        .background((entry.isEnabled ? Color.subtleFill : Color.chipFill))
         .cornerRadius(6)
         .opacity(entry.isEnabled ? 1.0 : 0.7)
     }

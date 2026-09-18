@@ -116,7 +116,7 @@ public struct BrewView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Capsule().fill(Color.gray.opacity(0.12)))
+        .background(Capsule().fill(Color.chipFill))
     }
 
     // MARK: - Toolbar (kind picker + search + filters)

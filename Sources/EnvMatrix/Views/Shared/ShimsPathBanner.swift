@@ -46,7 +46,7 @@ struct ShimsPathBanner: View {
                     .truncationMode(.middle)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .background(Color.subtleFill, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                 Button {
                     copy(status.exportLine)
                 } label: {

@@ -198,7 +198,7 @@ public struct ShellEnvView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Color.gray.opacity(0.06))
+        .background(Color.subtleFill)
         .cornerRadius(6)
     }
 
@@ -265,7 +265,7 @@ public struct ShellEnvView: View {
             }
         }
         .padding(10)
-        .background(Color.gray.opacity(0.08))
+        .background(Color.subtleFill)
         .cornerRadius(8)
     }
 

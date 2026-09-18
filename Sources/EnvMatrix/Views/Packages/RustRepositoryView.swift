@@ -141,7 +141,7 @@ struct RustRegistryTabView: View {
                                     }
                                     .padding(10)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color.secondary.opacity(0.08))
+                                    .background(Color.subtleFill)
                                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                 }
                                 .buttonStyle(.plain)
@@ -221,7 +221,7 @@ struct RustGlobalCratesView: View {
                     .onChange(of: searchText) { new in vm.updateSearch(new) }
             }
             .padding(6)
-            .background(Color.secondary.opacity(0.08))
+            .background(Color.subtleFill)
             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
             .padding(.horizontal).padding(.vertical, 8)
             Divider()

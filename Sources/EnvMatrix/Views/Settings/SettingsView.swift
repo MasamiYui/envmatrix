@@ -320,6 +320,6 @@ struct AboutSettingsTab: View {
         }
         .padding(12)
         .frame(maxWidth: 480)
-        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(Color.subtleFill, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }

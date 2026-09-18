@@ -39,7 +39,7 @@ struct BrewPackageRow: View {
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 5)
-                            .background(Capsule().fill(Color.gray.opacity(0.2)))
+                            .background(Capsule().fill(Color.chipFill))
                     }
                 }
                 if let desc = pkg.description {

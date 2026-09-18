@@ -105,7 +105,7 @@ public struct PythonCacheView: View {
             }
         }
         .padding()
-        .background(Color.secondary.opacity(0.08))
+        .background(Color.subtleFill)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 

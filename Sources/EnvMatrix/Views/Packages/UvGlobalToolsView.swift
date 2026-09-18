@@ -85,7 +85,7 @@ public struct UvGlobalToolsView: View {
             }
         }
         .padding(6)
-        .background(Color.secondary.opacity(0.08))
+        .background(Color.subtleFill)
         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .padding(.horizontal)
         .padding(.vertical, 8)

@@ -83,7 +83,7 @@ struct BrewPackageDetail: View {
                         .font(.caption.monospaced())
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Capsule().fill(Color.gray.opacity(0.18)))
+                        .background(Capsule().fill(Color.chipFill))
                 }
             }
         }

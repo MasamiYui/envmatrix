@@ -124,7 +124,7 @@ struct DockerContextRowView: View {
                 .foregroundStyle(.secondary)
         }
         .padding(8)
-        .background(Color.gray.opacity(0.08))
+        .background(Color.subtleFill)
         .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }
@@ -232,7 +232,7 @@ struct PodmanConnectionRowView: View {
                 .foregroundStyle(.secondary)
         }
         .padding(8)
-        .background(Color.gray.opacity(0.08))
+        .background(Color.subtleFill)
         .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }

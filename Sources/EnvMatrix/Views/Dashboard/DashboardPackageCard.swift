@@ -160,7 +160,7 @@ struct DashboardPackageCardSkeleton: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.secondary.opacity(0.15), lineWidth: 0.5)
+                .strokeBorder(Color.chipFill, lineWidth: 0.5)
         )
         .onAppear {
             withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {

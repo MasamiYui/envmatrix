@@ -224,7 +224,7 @@ private struct SummaryChip: View {
         .background(.regularMaterial, in: Capsule(style: .continuous))
         .overlay(
             Capsule(style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+                .strokeBorder(Color.subtleFill, lineWidth: 0.5)
         )
     }
 }
@@ -337,7 +337,7 @@ private struct RuntimeCard: View {
     private var borderColor: Color {
         isInstalled
             ? snapshot.kind.brandColor.opacity(0.28)
-            : Color.primary.opacity(0.06)
+            : Color.subtleFill
     }
 
     private var shadowColor: Color {
@@ -356,7 +356,7 @@ private struct BrandBadge: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isDimmed ? AnyShapeStyle(Color.gray.opacity(0.18)) : AnyShapeStyle(kind.brandGradient))
+                .fill(isDimmed ? AnyShapeStyle(Color.chipFill) : AnyShapeStyle(kind.brandGradient))
                 .frame(width: 40, height: 40)
                 .shadow(color: isDimmed ? .clear : kind.brandColor.opacity(0.35), radius: 4, x: 0, y: 2)
             Image(systemName: kind.iconName)

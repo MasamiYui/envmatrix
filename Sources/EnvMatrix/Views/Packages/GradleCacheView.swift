@@ -171,7 +171,7 @@ struct GradleCacheView: View {
         }
         .padding(10)
         .frame(maxWidth: .infinity)
-        .background(Color.secondary.opacity(0.08))
+        .background(Color.subtleFill)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
@@ -202,7 +202,7 @@ struct GradleCacheView: View {
                 }
             }
             .padding(6)
-            .background(Color.secondary.opacity(0.08))
+            .background(Color.subtleFill)
             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
             .frame(maxWidth: .infinity)
 

@@ -130,7 +130,7 @@ public struct AvailableListView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .background(Color.subtleFill, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 
     private func copy(_ text: String, id: String) {
