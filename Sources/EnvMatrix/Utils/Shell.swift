@@ -21,6 +21,15 @@ public enum Shell {
     /// on macOS), it blocks on `write()` and the termination handler never fires,
     /// hanging the caller forever. `brew info --installed --json=v2` emits ~340 KB
     /// on a typical developer machine and reliably deadlocked the previous version.
+    ///
+    /// Equally important: completion is driven by **EOF on both pipes plus process
+    /// termination**, not by `terminationHandler` alone. Resuming from the termination
+    /// handler loses output, because a readability callback can already have taken the
+    /// bytes out of the pipe with `availableData` and still be waiting for the lock when
+    /// the process exits. The handler's `readDataToEndOfFile()` then returns nothing (the
+    /// data is gone from the pipe) and the buffer has not been appended to yet, so the
+    /// caller receives empty stdout. It is rare and load-dependent, which is the worst
+    /// kind of bug for something every `brew` / `npm` / `pip` / `docker` call depends on.
     public static func run(
         _ launchPath: String,
         _ args: [String],
@@ -39,50 +48,62 @@ public enum Shell {
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
 
-            // Serialise mutations to the byte accumulators; readabilityHandler
-            // callbacks are invoked on a private queue and can interleave.
-            let bufferLock = NSLock()
-            var outBuffer = Data()
-            var errBuffer = Data()
+            // Every read and every append happens on this one serial queue.
+            // That is what makes the handoff safe: a readability callback can
+            // only take bytes out of the pipe while holding the queue, so by
+            // the time the finaliser runs on the same queue, any callback that
+            // started earlier has already appended what it read. Nothing can be
+            // in limbo between "read from pipe" and "stored in buffer".
+            //
+            // Completion is NOT driven by an EOF callback. An empty
+            // `availableData` is documented to signal EOF, but under load (large
+            // output, many concurrent children) this Foundation does not
+            // reliably deliver that final callback, and waiting for it hangs the
+            // caller forever.
+            let ioQueue = DispatchQueue(label: "dev.envmatrix.shell.io")
+            final class Buffers {
+                var out = Data()
+                var err = Data()
+                var resumed = false
+            }
+            let buffers = Buffers()
 
             stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
-                let chunk = handle.availableData
-                if chunk.isEmpty { return }
-                bufferLock.lock()
-                outBuffer.append(chunk)
-                bufferLock.unlock()
+                ioQueue.sync {
+                    let chunk = handle.availableData
+                    if !chunk.isEmpty { buffers.out.append(chunk) }
+                }
             }
             stderrPipe.fileHandleForReading.readabilityHandler = { handle in
-                let chunk = handle.availableData
-                if chunk.isEmpty { return }
-                bufferLock.lock()
-                errBuffer.append(chunk)
-                bufferLock.unlock()
+                ioQueue.sync {
+                    let chunk = handle.availableData
+                    if !chunk.isEmpty { buffers.err.append(chunk) }
+                }
             }
 
             process.terminationHandler = { proc in
-                // Stop reading — any remaining bytes in the pipe are still
-                // drained by the final availableData reads below.
+                // Detach first so no further callbacks are scheduled; one may
+                // still be mid-flight, and the queue below waits it out.
                 stdoutPipe.fileHandleForReading.readabilityHandler = nil
                 stderrPipe.fileHandleForReading.readabilityHandler = nil
 
-                let tailOut = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-                let tailErr = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-
-                bufferLock.lock()
-                outBuffer.append(tailOut)
-                errBuffer.append(tailErr)
-                let out = String(data: outBuffer, encoding: .utf8) ?? ""
-                let err = String(data: errBuffer, encoding: .utf8) ?? ""
-                bufferLock.unlock()
-
-                continuation.resume(
-                    returning: ShellResult(
-                        stdout: out,
-                        stderr: err,
+                var result: ShellResult?
+                ioQueue.sync {
+                    guard !buffers.resumed else { return }
+                    buffers.resumed = true
+                    // The child has exited, so its end of the pipe is closed and
+                    // these reads drain the remainder without blocking.
+                    buffers.out.append(stdoutPipe.fileHandleForReading.readDataToEndOfFile())
+                    buffers.err.append(stderrPipe.fileHandleForReading.readDataToEndOfFile())
+                    result = ShellResult(
+                        stdout: String(data: buffers.out, encoding: .utf8) ?? "",
+                        stderr: String(data: buffers.err, encoding: .utf8) ?? "",
                         exitCode: proc.terminationStatus
                     )
-                )
+                }
+                if let result {
+                    continuation.resume(returning: result)
+                }
             }
 
             do {
@@ -90,7 +111,16 @@ public enum Shell {
             } catch {
                 stdoutPipe.fileHandleForReading.readabilityHandler = nil
                 stderrPipe.fileHandleForReading.readabilityHandler = nil
-                continuation.resume(throwing: error)
+                var shouldResume = false
+                ioQueue.sync {
+                    if !buffers.resumed {
+                        buffers.resumed = true
+                        shouldResume = true
+                    }
+                }
+                if shouldResume {
+                    continuation.resume(throwing: error)
+                }
             }
         }
     }
