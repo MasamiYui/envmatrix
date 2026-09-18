@@ -51,6 +51,11 @@ public struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .envMatrixShowOnboarding)) { _ in
             isOnboardingPresented = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .envMatrixNavigate)) { note in
+            if let item = note.object as? NavigationItem {
+                navigator.select(item)
+            }
+        }
         .sheet(isPresented: $isOnboardingPresented) {
             OnboardingSheet(onFinish: { isOnboardingPresented = false })
                 .environmentObject(localization)

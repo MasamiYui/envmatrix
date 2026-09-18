@@ -22,7 +22,18 @@ extension L10n {
         "onboarding.mirrors.subtitle": "Registries default to their official sources. If you are in mainland China, one click switches all of them to fast mirrors.",
         "onboarding.mirrors.keepOfficial": "Or keep official sources — you can change this any time in Settings.",
         "onboarding.mirrors.body": "Use ⌘F to search across every package manager, ⌘R to refresh the current page, and ⌘, for Settings.",
-        "settings.showOnboarding": "Show the welcome guide again"
+        "settings.showOnboarding": "Show the welcome guide again",
+        "settings.menuBar": "Menu Bar",
+        "settings.menuBar.toggle": "Show the quick switcher in the menu bar",
+        "settings.menuBar.hint": "Switch the active version of any installed runtime without opening the main window.",
+        "menubar.empty": "No installed runtimes found yet. Open the Dashboard to scan.",
+        "menubar.pathWarning": "Shims are not on PATH — switches won't reach your terminal.",
+        "menubar.openDashboard": "Open Dashboard",
+        "menubar.search": "Search Packages…",
+        "menubar.quit": "Quit EnvMatrix",
+        "menubar.source": "Switched from the menu bar",
+        "notify.runtime.activated.title": "%@ %@ is now active",
+        "notify.runtime.activated.body": "Open a new terminal, or run `hash -r`, to pick it up."
     ]
 
     static let zhOnboarding: [String: String] = [
@@ -46,6 +57,17 @@ extension L10n {
         "onboarding.mirrors.subtitle": "各包管理源默认为官方源。如果你在中国大陆，一键即可全部切换到高速镜像。",
         "onboarding.mirrors.keepOfficial": "也可以保持官方源，之后随时在设置中更改。",
         "onboarding.mirrors.body": "⌘F 跨所有包管理器搜索，⌘R 刷新当前页面，⌘, 打开设置。",
-        "settings.showOnboarding": "再次显示欢迎引导"
+        "settings.showOnboarding": "再次显示欢迎引导",
+        "settings.menuBar": "菜单栏",
+        "settings.menuBar.toggle": "在菜单栏显示快捷切换面板",
+        "settings.menuBar.hint": "不打开主窗口也能切换任意已安装运行时的活动版本。",
+        "menubar.empty": "尚未发现已安装的运行时。打开仪表盘进行扫描。",
+        "menubar.pathWarning": "shims 不在 PATH 中，切换不会影响终端。",
+        "menubar.openDashboard": "打开仪表盘",
+        "menubar.search": "搜索包…",
+        "menubar.quit": "退出 EnvMatrix",
+        "menubar.source": "通过菜单栏切换",
+        "notify.runtime.activated.title": "%@ %@ 已设为活动版本",
+        "notify.runtime.activated.body": "新开一个终端，或执行 `hash -r` 后生效。"
     ]
 }

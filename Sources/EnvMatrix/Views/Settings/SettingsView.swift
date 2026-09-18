@@ -72,6 +72,7 @@ struct GeneralSettingsTab: View {
     @State private var presetToApply: MirrorPresetProfile? = nil
     @AppStorage("notificationsEnabled") private var notificationsEnabled: Bool = true
     @AppStorage(UpdateChecker.autoCheckKey) private var autoCheckUpdates: Bool = true
+    @AppStorage(MenuBarPreference.key) private var menuBarEnabled: Bool = true
 
     var body: some View {
         Form {
@@ -94,6 +95,13 @@ struct GeneralSettingsTab: View {
                     Text("中文").tag(AppLanguage.zh)
                 }
                 .pickerStyle(.segmented)
+            }
+
+            Section(L("settings.menuBar")) {
+                Toggle(L("settings.menuBar.toggle"), isOn: $menuBarEnabled)
+                Text(L("settings.menuBar.hint"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section(L("settings.notifications")) {

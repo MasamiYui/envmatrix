@@ -38,7 +38,7 @@ public final class SystemNotifier {
     ///   already visible in-app (mirror switch, uninstall), only notify when
     ///   EnvMatrix is not the frontmost app so the user isn't told twice.
     public func notify(title: String, body: String, onlyWhenInactive: Bool = false) {
-        guard isUserEnabled else { return }
+        guard isUserEnabled, Self.hasNotificationCapableBundle else { return }
         if onlyWhenInactive && NSApplication.shared.isActive { return }
         Task {
             guard await ensurePermission() else { return }
@@ -64,8 +64,21 @@ public final class SystemNotifier {
         )
     }
 
+    /// `UNUserNotificationCenter.current()` raises an Objective-C exception
+    /// (not a catchable Swift error) when the process has no bundle
+    /// identifier — `swift run`, unit tests, or a mis-packaged .app. The
+    /// class doc promised this was a no-op; this check makes it true.
+    static var hasNotificationCapableBundle: Bool {
+        guard let id = Bundle.main.bundleIdentifier, !id.isEmpty else { return false }
+        return Bundle.main.bundleURL.pathExtension == "app"
+    }
+
     private func ensurePermission() async -> Bool {
         if let cached = permissionGranted { return cached }
+        guard Self.hasNotificationCapableBundle else {
+            permissionGranted = false
+            return false
+        }
         let center = UNUserNotificationCenter.current()
         do {
             let granted = try await center.requestAuthorization(options: [.alert, .sound])

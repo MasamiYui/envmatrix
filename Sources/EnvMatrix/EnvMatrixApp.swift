@@ -5,11 +5,23 @@ extension Notification.Name {
     static let envMatrixOpenGlobalSearch = Notification.Name("envmatrix.openGlobalSearch")
     static let envMatrixOpenSettings = Notification.Name("envmatrix.openSettings")
     static let envMatrixShowOnboarding = Notification.Name("envmatrix.showOnboarding")
+    /// `object` is the `NavigationItem` the main window should select.
+    static let envMatrixNavigate = Notification.Name("envmatrix.navigate")
+}
+
+/// Whether the menu-bar panel is installed. Read by the scene and toggled
+/// from Settings › General.
+public enum MenuBarPreference {
+    public static let key = "menuBarExtraEnabled"
+    public static var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: key) as? Bool ?? true
+    }
 }
 
 @main
 struct EnvMatrixApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @AppStorage(MenuBarPreference.key) private var menuBarEnabled: Bool = true
 
     var body: some Scene {
         WindowGroup("EnvMatrix") {
@@ -38,6 +50,13 @@ struct EnvMatrixApp: App {
                 .keyboardShortcut("r", modifiers: [.command])
             }
         }
+        // Quick switcher in the menu bar. `.window` style so it can host a
+        // real SwiftUI view (lists, progress) rather than menu items only.
+        MenuBarExtra("EnvMatrix", systemImage: "square.grid.2x2", isInserted: $menuBarEnabled) {
+            MenuBarPanel()
+        }
+        .menuBarExtraStyle(.window)
+
         // NOTE: We intentionally do NOT declare a `Settings { ... }` scene.
         // All settings live inside the main window's sidebar section, and
         // adding a Settings scene caused SwiftUI to restore a ghost floating
